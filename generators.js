@@ -19,6 +19,23 @@ function getVal(b, name) {
     return code;
 }
 
+
+function wrapJs(block, code) {
+    const parent = block.getParent();
+    let parentIsJs = false;
+    
+    // Check if parent is a JS block or a Control block (loops/ifs) or Array Builder
+    if (parent) {
+        const type = parent.type;
+        if (type.startsWith('js_') || type.startsWith('controls_') || type === 'raw_js' || type === 'arr_builder') {
+            parentIsJs = true;
+        }
+    }
+
+    if (parentIsJs) return code + "\n";
+    return `<script>\n${code}\n</script>\n`;
+}
+
 function esc(s) { return String(s).replace(/"/g, '&quot;'); }
 
 htmlGenerator.statementToCode = (block, name) => {
@@ -38,8 +55,7 @@ htmlGenerator.forBlock['css_raw'] = (b) => `<style>${b.getFieldValue('CODE')}</s
 
 // REPORTERS
 htmlGenerator.forBlock["text_string"] = (b) => {
-    const text = htmlGenerator.valueToCode(b, "TEXT", htmlGenerator.ORDER_ATOMIC) || "''";
-    return [text, htmlGenerator.ORDER_ATOMIC];
+    return ["'" + b.getFieldValue("TEXT") + "'", htmlGenerator.ORDER_ATOMIC];
 };
 htmlGenerator.forBlock["text_join"] = (b) => {
     const a = htmlGenerator.valueToCode(b, "A", htmlGenerator.ORDER_ATOMIC) || "''";
@@ -261,9 +277,12 @@ htmlGenerator.forBlock["html_label"] = (b) => {
     return `<label for="${forVal}">${getVal(b, 'TEXT')}</label>\n`;
 };
 htmlGenerator.forBlock["html_textarea"] = (b) => {
-    const name = getVal(b, 'NAME');
-    const ph = getVal(b, 'PH');
-    return `<textarea name="${name}" placeholder="${ph}"></textarea>\n`;
+    const rows = b.getFieldValue('R');
+    const cols = b.getFieldValue('C');
+    const name = getVal(b, 'NAME'); // Helper function handles quotes
+    const ph = getVal(b, 'PH');     // Helper function handles quotes
+    
+    return `<textarea rows="${rows}" cols="${cols}" name="${name}" placeholder="${ph}"></textarea>\n`;
 };
 htmlGenerator.forBlock["html_select"] = (b) => {
     const name = getVal(b, 'NAME');
@@ -457,7 +476,44 @@ htmlGenerator.forBlock["ui_feature_card"] = (b) => {
     `;
 };
 
+// --- ARRAYS ---
+htmlGenerator.forBlock["arr_new_empty"] = () => ["[]", htmlGenerator.ORDER_ATOMIC];
+htmlGenerator.forBlock["arr_new_length"] = (b) => [`new Array(${htmlGenerator.valueToCode(b, 'LEN', 0) || 0})`, 0];
+htmlGenerator.forBlock["arr_parse"] = (b) => [`JSON.parse(${htmlGenerator.valueToCode(b, 'TXT', 0) || '[]'})`, 0];
+htmlGenerator.forBlock["arr_split"] = (b) => [`(${htmlGenerator.valueToCode(b, 'TXT', 0) || "''"}).split(${htmlGenerator.valueToCode(b, 'DELIM', 0) || "''"})`, 0];
 
+htmlGenerator.forBlock["arr_builder"] = (b) => {
+    // This wraps the internal statements in an IIFE to return the built array
+    const code = htmlGenerator.statementToCode(b, 'DO');
+    return [`(function(){ var _arr = []; ${code} return _arr; })()`, htmlGenerator.ORDER_ATOMIC];
+};
+htmlGenerator.forBlock["arr_builder_add"] = (b) => `_arr.push(${htmlGenerator.valueToCode(b, 'ITEM', 0)});`;
+htmlGenerator.forBlock["arr_builder_set"] = (b) => `_arr = ${htmlGenerator.valueToCode(b, 'ARR', 0)};`;
+
+htmlGenerator.forBlock["arr_get"] = (b) => [`${htmlGenerator.valueToCode(b, 'ARR', 0)}[${htmlGenerator.valueToCode(b, 'IDX', 0)}]`, 0];
+htmlGenerator.forBlock["arr_slice"] = (b) => [`${htmlGenerator.valueToCode(b, 'ARR', 0)}.slice(${htmlGenerator.valueToCode(b, 'START', 0)}, ${htmlGenerator.valueToCode(b, 'END', 0)})`, 0];
+htmlGenerator.forBlock["arr_indexof"] = (b) => [`${htmlGenerator.valueToCode(b, 'ARR', 0)}.indexOf(${htmlGenerator.valueToCode(b, 'ITEM', 0)})`, 0];
+htmlGenerator.forBlock["arr_includes"] = (b) => [`${htmlGenerator.valueToCode(b, 'ARR', 0)}.includes(${htmlGenerator.valueToCode(b, 'ITEM', 0)})`, 0];
+htmlGenerator.forBlock["arr_length"] = (b) => [`${htmlGenerator.valueToCode(b, 'ARR', 0)}.length`, 0];
+
+htmlGenerator.forBlock["arr_set_idx"] = (b) => wrapJs(b, `${htmlGenerator.valueToCode(b, 'ARR', 0)}[${htmlGenerator.valueToCode(b, 'IDX', 0)}] = ${htmlGenerator.valueToCode(b, 'VAL', 0)};`);
+htmlGenerator.forBlock["arr_push"] = (b) => wrapJs(b, `${htmlGenerator.valueToCode(b, 'ARR', 0)}.push(${htmlGenerator.valueToCode(b, 'VAL', 0)});`);
+htmlGenerator.forBlock["arr_concat"] = (b) => [`${htmlGenerator.valueToCode(b, 'A', 0)}.concat(${htmlGenerator.valueToCode(b, 'B', 0)})`, 0];
+htmlGenerator.forBlock["arr_reverse"] = (b) => [`[...${htmlGenerator.valueToCode(b, 'ARR', 0)}].reverse()`, 0];
+htmlGenerator.forBlock["arr_join"] = (b) => [`${htmlGenerator.valueToCode(b, 'ARR', 0)}.join(${htmlGenerator.valueToCode(b, 'DELIM', 0)})`, 0];
+
+// --- JAVASCRIPT GENERATORS FOR CUSTOM ARRAY BLOCKS ---
+const jsGen = Blockly.JavaScript || window.Blockly.JavaScript;
+
+// Define JS generators for array blocks so they can be used in expressions/variables
+Blockly.JavaScript.forBlock["arr_new_empty"] = () => ["[]", Blockly.JavaScript.ORDER_ATOMIC];
+Blockly.JavaScript.forBlock["arr_new_length"] = (b) => [`new Array(${Blockly.JavaScript.valueToCode(b, 'LEN', Blockly.JavaScript.ORDER_ATOMIC) || 0})`, Blockly.JavaScript.ORDER_ATOMIC];
+Blockly.JavaScript.forBlock["arr_parse"] = (b) => [`JSON.parse(${Blockly.JavaScript.valueToCode(b, 'TXT', Blockly.JavaScript.ORDER_ATOMIC) || '[]'})`, Blockly.JavaScript.ORDER_ATOMIC];
+Blockly.JavaScript.forBlock["arr_split"] = (b) => [`(${Blockly.JavaScript.valueToCode(b, 'TXT', Blockly.JavaScript.ORDER_ATOMIC) || "''"}).split(${Blockly.JavaScript.valueToCode(b, 'DELIM', Blockly.JavaScript.ORDER_ATOMIC) || "''"})`, Blockly.JavaScript.ORDER_ATOMIC];
+Blockly.JavaScript.forBlock["arr_length"] = (b) => [`(${Blockly.JavaScript.valueToCode(b, 'ARR', Blockly.JavaScript.ORDER_ATOMIC) || '[]'}).length`, Blockly.JavaScript.ORDER_MEMBER];
+Blockly.JavaScript.forBlock["arr_get_index"] = (b) => [`(${Blockly.JavaScript.valueToCode(b, 'ARR', Blockly.JavaScript.ORDER_MEMBER) || '[]'})[${Blockly.JavaScript.valueToCode(b, 'INDEX', Blockly.JavaScript.ORDER_ATOMIC) || 0}]`, Blockly.JavaScript.ORDER_MEMBER];
+Blockly.JavaScript.forBlock["arr_contains"] = (b) => [`(${Blockly.JavaScript.valueToCode(b, 'ARR', Blockly.JavaScript.ORDER_MEMBER) || '[]'}).includes(${Blockly.JavaScript.valueToCode(b, 'ITEM', Blockly.JavaScript.ORDER_ATOMIC) || ''})`, Blockly.JavaScript.ORDER_EQUALITY];
+Blockly.JavaScript.forBlock["arr_join"] = (b) => [`(${Blockly.JavaScript.valueToCode(b, 'ARR', Blockly.JavaScript.ORDER_MEMBER) || '[]'}).join(${Blockly.JavaScript.valueToCode(b, 'SEP', Blockly.JavaScript.ORDER_ATOMIC) || "''"})`, Blockly.JavaScript.ORDER_MEMBER];
 
 // --- BRIDGE TO STANDARD BLOCKLY JS GENERATOR ---
 const standardBlocks = [
