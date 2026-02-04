@@ -44,12 +44,17 @@
     </script>
 
     <!-- 3. LOAD PLUGINS VIA SHIM -->
-    <script>
+        <script>
         // Load Multiline Input
         loadPlugin('./node_modules/@blockly/field-multilineinput/dist/index.js', function(pkg) {
             var Field = pkg.FieldMultilineInput || pkg.default;
             if (Field) {
+                // Register standard name
                 Blockly.fieldRegistry.register('field_multilinetext', Field);
+                // Also register 'field_multilineinput' just in case definitions vary
+                if (!Blockly.fieldRegistry.registry['field_multilineinput']) {
+                    Blockly.fieldRegistry.register('field_multilineinput', Field);
+                }
                 console.log("✅ Registered field_multilinetext");
             } else {
                 console.error("❌ Could not find Multiline class in package", pkg);
@@ -60,7 +65,6 @@
         loadPlugin('./node_modules/@blockly/field-colour/dist/index.js', function(pkg) {
             var Field = pkg.FieldColour || pkg.default;
             if (Field) {
-                // Note: Standard blocks use 'field_colour', ensure it's registered
                 Blockly.fieldRegistry.register('field_colour', Field);
                 console.log("✅ Registered field_colour");
             } else {
@@ -68,25 +72,23 @@
             }
         });
 
+        // Load Continuous Toolbox
         loadPlugin('./node_modules/@blockly/continuous-toolbox/dist/index.js', function(pkg) {
-            // The continuous-toolbox package exposes a registration helper
-            // rather than a Field class. Call registerContinuousToolbox() if present.
-            if (pkg && typeof pkg.registerContinuousToolbox === 'function') {
-                try {
-                    pkg.registerContinuousToolbox();
-                    console.log("✅ Registered Continuous Toolbox (via registerContinuousToolbox)");
-                } catch (err) {
-                    console.error("❌ Error while registering Continuous Toolbox:", err);
-                }
-            } else if (pkg && pkg.default && typeof pkg.default.registerContinuousToolbox === 'function') {
-                try {
-                    pkg.default.registerContinuousToolbox();
-                    console.log("✅ Registered Continuous Toolbox (via default.registerContinuousToolbox)");
-                } catch (err) {
-                    console.error("❌ Error while registering Continuous Toolbox (default):", err);
+            var continuousToolbox = pkg.ContinuousToolbox || pkg.default;
+            if (continuousToolbox) {
+                // The continuous toolbox plugin typically needs to be registered
+                // with the Blockly registry for toolboxes.
+                // Standard registration name is usually 'continuousToolbox'
+                if (Blockly.registry) {
+                    Blockly.registry.register(
+                        Blockly.registry.Type.TOOLBOX,
+                        'continuousToolbox',
+                        continuousToolbox
+                    );
+                    console.log("✅ Registered Continuous Toolbox");
                 }
             } else {
-                console.error("❌ Could not find registerContinuousToolbox in package", pkg);
+                console.error("❌ Could not find Continuous Toolbox class in package", pkg);
             }
         });
     </script>

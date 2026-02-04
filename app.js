@@ -169,7 +169,24 @@ const toolbox = {
                 { kind: "block", type: "html_button", inputs: { TEXT: { shadow: { type: "text_string", fields: { TEXT: "Click" } } } } },
                 { kind: "block", type: "html_button_js", inputs: { TEXT: { shadow: { type: "text_string", fields: { TEXT: "Action" } } } } },
                 { kind: "block", type: "html_label", inputs: { FOR: { shadow: { type: "text_string", fields: { TEXT: "input_id" } } }, TEXT: { shadow: { type: "text_string", fields: { TEXT: "Label" } } } } },
-                { kind: "block", type: "html_textarea", inputs: { NAME: { shadow: { type: "text_string", fields: { TEXT: "message" } } }, PH: { shadow: { type: "text_string", fields: { TEXT: "Enter text" } } } } },
+                {
+    kind: "block",
+    type: "html_textarea",
+    inputs: {
+        NAME: {
+            shadow: {
+                type: "text_string",
+                fields: { TEXT: "myText" }
+            }
+        },
+        PH: {
+            shadow: {
+                type: "text_string",
+                fields: { TEXT: "Type here..." }
+            }
+        }
+    }
+},
                 { kind: "block", type: "html_select", inputs: { NAME: { shadow: { type: "text_string", fields: { TEXT: "dropdown" } } } } },
                 { kind: "block", type: "html_option", inputs: { VAL: { shadow: { type: "text_string", fields: { TEXT: "value" } } }, TEXT: { shadow: { type: "text_string", fields: { TEXT: "Option" } } } } },
                 { kind: "block", type: "js_form_submit", inputs: { ID: { shadow: { type: "text_string", fields: { TEXT: "myForm" } } } } }
@@ -208,6 +225,41 @@ const toolbox = {
                 { kind: "block", type: "js_audio_synth" }
             ]
         },
+
+                {
+            kind: "category",
+            name: "Arrays",
+            colour: "#FF6666",
+            contents: [
+                { kind: "block", type: "arr_new_empty" },
+                { 
+                    kind: "block", 
+                    type: "arr_new_length", 
+                    inputs: { LEN: { shadow: { type: "math_num", fields: { NUM: 5 } } } } 
+                },
+                { 
+                    kind: "block", 
+                    type: "arr_parse",
+                    inputs: { TXT: { shadow: { type: "text_string", fields: { TEXT: '["a","b"]' } } } }
+                },
+                { 
+                    kind: "block", 
+                    type: "arr_split",
+                    inputs: { 
+                        TXT: { shadow: { type: "text_string", fields: { TEXT: "a,b,c" } } },
+                        DELIM: { shadow: { type: "text_string", fields: { TEXT: "," } } } 
+                    }
+                },
+                { kind: "block", type: "arr_builder" },
+                { kind: "block", type: "arr_builder_add" },
+                { kind: "block", type: "arr_get" },
+                { kind: "block", type: "arr_length" },
+                { kind: "block", type: "arr_push" },
+                { kind: "block", type: "arr_reverse" },
+                { kind: "block", type: "arr_join" }
+            ]
+        },
+
         {
             kind: "category",
             name: "API/Storage",

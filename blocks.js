@@ -3,7 +3,17 @@ window.registerWebBlocks = function() {
 
     defineBlocks([
         // --- REPORTERS ---
-        { "type": "text_string", "message0": "%1", "args0": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "output": "String", "colour": "#59C059" },
+{ 
+    "type": "text_string", 
+    "message0": "%1", 
+    "args0": [{ 
+        "type": "field_input", // MUST BE FIELD_INPUT
+        "name": "TEXT",        // MUST BE "TEXT"
+        "text": "text" 
+    }], 
+    "output": "String", 
+    "colour": "#59C059" 
+},
         { "type": "math_num", "message0": "%1", "args0": [{ "type": "field_number", "name": "NUM", "value": 0 }], "output": "Number", "colour": "#59C059" },
         { "type": "logic_bool", "message0": "%1", "args0": [{ "type": "field_dropdown", "name": "BOOL", "options": [["true","true"],["false","false"]] }], "output": "Boolean", "colour": "#59C059" },
 
@@ -176,7 +186,19 @@ window.registerWebBlocks = function() {
         { "type": "html_button", "message0": "button", "message1": "type %1", "args1": [{ "type": "field_dropdown", "name": "TYPE", "options": [["Button","button"],["Submit","submit"],["Reset","reset"]] }], "message2": "text %1", "args2": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6680" },
         { "type": "html_button_js", "message0": "button", "message1": "text %1", "args1": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "message2": "%1", "args2": [{ "type": "input_statement", "name": "DO" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6680" },
         { "type": "html_label", "message0": "label", "message1": "for %1", "args1": [{ "type": "input_value", "name": "FOR", "check": "String" }], "message2": "text %1", "args2": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6680" },
-        { "type": "html_textarea", "message0": "textarea", "message1": "rows %1", "args1": [{ "type": "field_number", "name": "R", "value": 4 }], "message2": "cols %1", "args2": [{ "type": "field_number", "name": "C", "value": 20 }], "previousStatement": null, "nextStatement": null, "colour": "#FF6680" },
+        {
+    "type": "html_textarea",
+    "message0": "textarea rows %1 cols %2 name %3 placeholder %4",
+    "args0": [
+        { "type": "field_number", "name": "R", "value": 4 },
+        { "type": "field_number", "name": "C", "value": 20 },
+        { "type": "input_value", "name": "NAME", "check": "String" }, // Was field_input
+        { "type": "input_value", "name": "PH", "check": "String" }    // Was field_input
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "#FF6680"
+},
         { "type": "html_select", "message0": "select", "message1": "name %1", "args1": [{ "type": "input_value", "name": "NAME", "check": "String" }], "message2": "%1", "args2": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6680" },
         { "type": "html_option", "message0": "option", "message1": "value %1", "args1": [{ "type": "input_value", "name": "VAL", "check": "String" }], "message2": "text %1", "args2": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6680" },
         { "type": "html_form_adv", "message0": "form", "message1": "id %1", "args1": [{ "type": "input_value", "name": "ID", "check": "String" }], "message2": "%1", "args2": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6680" },
@@ -443,6 +465,29 @@ window.registerWebBlocks = function() {
         "nextStatement": null,
         "colour": "#555555"
     },
+
+    // array stuff
+
+     { "type": "arr_new_empty", "message0": "blank array", "output": "Array", "colour": "#FF6666" },
+        { "type": "arr_new_length", "message0": "blank array of length %1", "args0": [{ "type": "input_value", "name": "LEN", "check": "Number" }], "output": "Array", "colour": "#FF6666" },
+        { "type": "arr_parse", "message0": "parse %1 as array", "args0": [{ "type": "input_value", "name": "TXT", "check": "String" }], "output": "Array", "colour": "#FF6666" },
+        { "type": "arr_split", "message0": "split %1 by %2", "args0": [{ "type": "input_value", "name": "TXT", "check": "String" }, { "type": "input_value", "name": "DELIM", "check": "String" }], "output": "Array", "colour": "#FF6666" },
+        
+        { "type": "arr_builder", "message0": "array builder %1  %2 ", "args0": [ { "type": "input_dummy" }, { "type": "input_statement", "name": "DO" }], "output": "Array", "colour": "#FF6666" },
+        { "type": "arr_builder_add", "message0": "append %1 to builder", "args0": [{ "type": "input_value", "name": "ITEM" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6666" },
+        { "type": "arr_builder_set", "message0": "set builder to %1", "args0": [{ "type": "input_value", "name": "ARR", "check": "Array" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6666" },
+
+        { "type": "arr_get", "message0": "get %1 in %2", "args0": [{ "type": "input_value", "name": "IDX", "check": "Number" }, { "type": "input_value", "name": "ARR", "check": "Array" }], "output": null, "colour": "#FF6666" },
+        { "type": "arr_slice", "message0": "items %1 to %2 in %3", "args0": [{ "type": "input_value", "name": "START", "check": "Number" }, { "type": "input_value", "name": "END", "check": "Number" }, { "type": "input_value", "name": "ARR", "check": "Array" }], "output": "Array", "colour": "#FF6666" },
+        { "type": "arr_indexof", "message0": "index of %1 in %2", "args0": [{ "type": "input_value", "name": "ITEM" }, { "type": "input_value", "name": "ARR", "check": "Array" }], "output": "Number", "colour": "#FF6666" },
+        { "type": "arr_includes", "message0": "%1 has %2 ?", "args0": [{ "type": "input_value", "name": "ARR", "check": "Array" }, { "type": "input_value", "name": "ITEM" }], "output": "Boolean", "colour": "#FF6666" },
+        { "type": "arr_length", "message0": "length of %1", "args0": [{ "type": "input_value", "name": "ARR", "check": "Array" }], "output": "Number", "colour": "#FF6666" },
+
+        { "type": "arr_set_idx", "message0": "set %1 in %2 to %3", "args0": [{ "type": "input_value", "name": "IDX", "check": "Number" }, { "type": "input_value", "name": "ARR", "check": "Array" }, { "type": "input_value", "name": "VAL" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6666" },
+        { "type": "arr_push", "message0": "append %1 to %2", "args0": [{ "type": "input_value", "name": "VAL" }, { "type": "input_value", "name": "ARR", "check": "Array" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6666" },
+        { "type": "arr_concat", "message0": "merge %1 with %2", "args0": [{ "type": "input_value", "name": "A", "check": "Array" }, { "type": "input_value", "name": "B", "check": "Array" }], "output": "Array", "colour": "#FF6666" },
+        { "type": "arr_reverse", "message0": "reverse %1", "args0": [{ "type": "input_value", "name": "ARR", "check": "Array" }], "output": "Array", "colour": "#FF6666" },
+        { "type": "arr_join", "message0": "join %1 with %2", "args0": [{ "type": "input_value", "name": "ARR", "check": "Array" }, { "type": "input_value", "name": "DELIM", "check": "String" }], "output": "String", "colour": "#FF6666" },
 
 
 // ill add more later haha
