@@ -1,4 +1,4 @@
-# Reporter Conversion Verification Report
+# Reporter Conversion Verification Report (ts is some ai ass thing that copilopt gave me while i was debugging)
 
 ## Statistics
 
