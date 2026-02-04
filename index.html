@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebBlocks Local</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- 1. CORE: Load Blockly First -->
+    <script src="./node_modules/blockly/blockly_compressed.js"></script>
+    <script src="./node_modules/blockly/blocks_compressed.js"></script>
+    <script src="./node_modules/blockly/javascript_compressed.js"></script>
+    <script src="./node_modules/blockly/msg/en.js"></script>
+
+    <!-- 2. ROBUST SHIM: Make plugins think they are in Node.js -->
+    <script>
+        // Define 'global' for the plugins
+        window.global = window;
+        
+        // Helper to load a plugin and capture its exports
+        function loadPlugin(src, registerCallback) {
+            // Reset module/exports for this plugin
+            window.exports = {};
+            window.module = { exports: window.exports };
+            
+            // Shim 'require' to return Blockly
+            window.require = function(name) {
+                if (name === 'blockly/core' || name === 'blockly') return window.Blockly;
+                return window.Blockly;
+            };
+
+            var script = document.createElement('script');
+            script.src = src;
+            script.onload = function() {
+                // Plugin finished loading. Pass the exports to the callback.
+                var exported = module.exports || window.exports;
+                registerCallback(exported);
+            };
+            script.onerror = function() {
+                console.error("Failed to load plugin:", src);
+            };
+            document.head.appendChild(script);
+        }
+    </script>
+
+    <!-- 3. LOAD PLUGINS VIA SHIM -->
+    <script>
+        // Load Multiline Input
+        loadPlugin('./node_modules/@blockly/field-multilineinput/dist/index.js', function(pkg) {
+            var Field = pkg.FieldMultilineInput || pkg.default;
+            if (Field) {
+                Blockly.fieldRegistry.register('field_multilinetext', Field);
+                console.log("✅ Registered field_multilinetext");
+            } else {
+                console.error("❌ Could not find Multiline class in package", pkg);
+            }
+        });
+
+        // Load Color Picker
+        loadPlugin('./node_modules/@blockly/field-colour/dist/index.js', function(pkg) {
+            var Field = pkg.FieldColour || pkg.default;
+            if (Field) {
+                // Note: Standard blocks use 'field_colour', ensure it's registered
+                Blockly.fieldRegistry.register('field_colour', Field);
+                console.log("✅ Registered field_colour");
+            } else {
+                console.error("❌ Could not find Colour class in package", pkg);
+            }
+        });
+
+        loadPlugin('./node_modules/@blockly/continuous-toolbox/dist/index.js', function(pkg) {
+            // The continuous-toolbox package exposes a registration helper
+            // rather than a Field class. Call registerContinuousToolbox() if present.
+            if (pkg && typeof pkg.registerContinuousToolbox === 'function') {
+                try {
+                    pkg.registerContinuousToolbox();
+                    console.log("✅ Registered Continuous Toolbox (via registerContinuousToolbox)");
+                } catch (err) {
+                    console.error("❌ Error while registering Continuous Toolbox:", err);
+                }
+            } else if (pkg && pkg.default && typeof pkg.default.registerContinuousToolbox === 'function') {
+                try {
+                    pkg.default.registerContinuousToolbox();
+                    console.log("✅ Registered Continuous Toolbox (via default.registerContinuousToolbox)");
+                } catch (err) {
+                    console.error("❌ Error while registering Continuous Toolbox (default):", err);
+                }
+            } else {
+                console.error("❌ Could not find registerContinuousToolbox in package", pkg);
+            }
+        });
+    </script>
+
+</head>
+<body>
+    <div class="app">
+        <div class="titlebar">
+            <span class="titlebar-title">WebBlocks Ultimate</span>
+            <div class="titlebar-buttons">
+                <button class="toolbar-btn" id="btnNew">New</button>
+                <button class="toolbar-btn" id="btnSave">Save</button>
+                <button class="toolbar-btn" id="btnLoad">Load</button>
+                <button class="toolbar-btn primary" id="btnExport">Export HTML</button>
+            </div>
+        </div>
+
+        <div class="main-area">
+            <div class="panel panel-workspace" id="panelWorkspace">
+                <div class="panel-titlebar">
+                    <span class="panel-title">Workspace</span>
+                    <div class="panel-tabs">
+                        <button class="panel-tab active" id="tabBuild">Build</button>
+                        <button class="panel-tab" id="tabCode">Code</button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <div id="blocklyArea"></div>
+                    <div id="codeArea"></div>
+                </div>
+                <div class="resize-handle"></div>
+            </div>
+
+            <div class="panel panel-preview" id="panelPreview">
+                <div class="panel-titlebar">
+                    <span class="panel-title">Live Preview</span>
+                    <div class="panel-tabs">
+                        <button class="size-btn active" id="btnDesktop">Desktop</button>
+                        <button class="size-btn" id="btnMobile">Mobile</button>
+                    </div>
+                </div>
+                <div class="panel-content preview-content">
+                    <div class="preview-frame" id="previewFrame">
+                        <iframe id="previewIframe"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <!-- 4. APP LOGIC (Loaded normally, will run after DOM content loaded) -->
+    <script src="generators.js"></script>
+    <script src="blocks.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

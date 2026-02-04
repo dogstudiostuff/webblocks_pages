@@ -1,0 +1,450 @@
+window.registerWebBlocks = function() {
+    var defineBlocks = Blockly.common ? Blockly.common.defineBlocksWithJsonArray : Blockly.defineBlocksWithJsonArray;
+
+    defineBlocks([
+        // --- REPORTERS ---
+        { "type": "text_string", "message0": "%1", "args0": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "output": "String", "colour": "#59C059" },
+        { "type": "math_num", "message0": "%1", "args0": [{ "type": "field_number", "name": "NUM", "value": 0 }], "output": "Number", "colour": "#59C059" },
+        { "type": "logic_bool", "message0": "%1", "args0": [{ "type": "field_dropdown", "name": "BOOL", "options": [["true","true"],["false","false"]] }], "output": "Boolean", "colour": "#59C059" },
+
+        // TUFF BLOCKS
+        { "type": "evil_block", "message0": "evil block", "previousStatement": null, "nextStatement": null, "colour": "#FF0000" },
+        { "type": "hemmy_poop", "message0": "hemmy poop", "previousStatement": null, "nextStatement": null, "colour": "#c97303" },
+
+
+
+        // --- CUSTOM RAW BLOCKS ---
+         { 
+            "type": "raw_html", 
+            "message0": "custom html", 
+            "message1": "%1",
+            "args1": [{ 
+                "type": "field_multilinetext", 
+                "name": "CODE", 
+                "text": "<div></div>",
+                "spellcheck": false 
+            }], 
+            "previousStatement": null, 
+            "nextStatement": null, 
+            "colour": "#555555" 
+        },
+        { 
+            "type": "raw_css", 
+            "message0": "custom css", 
+            "message1": "%1",
+            "args1": [{ 
+                "type": "field_multilinetext", 
+                "name": "CODE", 
+                "text": ".class { }",
+                "spellcheck": false 
+            }], 
+            "previousStatement": null, 
+            "nextStatement": null, 
+            "colour": "#555555" 
+        },
+        // Alias for compatibility
+        { 
+            "type": "css_raw", 
+            "message0": "custom css", 
+            "message1": "%1",
+            "args1": [{ 
+                "type": "field_multilinetext", 
+                "name": "CODE", 
+                "text": ".class { }",
+                "spellcheck": false 
+            }], 
+            "previousStatement": null, 
+            "nextStatement": null, 
+            "colour": "#555555" 
+        },
+        { "type": "raw_js", "message0": "custom js", "message1": "%1", "args1": [{ "type": "field_multilinetext", "name": "CODE", "text": "console.log('hi');" }], "previousStatement": null, "nextStatement": null, "colour": "#555555" },
+            // --- CSS HELPERS ---
+    {
+        "type": "css_id_class",
+        "message0": "element with ID %1",
+        "args0": [
+            { "type": "input_value", "name": "ID", "check": "String" }
+        ],
+        "message1": "Class %1",
+        "args1": [
+            { "type": "input_value", "name": "CLASS", "check": "String" }
+        ],
+        "message2": "%1", // The empty message creates the C-mouth on a new line
+        "args2": [
+            { "type": "input_statement", "name": "CONTENT" }
+        ],
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": "#4C97FF"
+    },
+    {
+        "type": "css_inline_style",
+        "message0": "inline style",
+        "message1": "property %1",
+        "args1": [
+            { "type": "input_value", "name": "PROP", "check": "String" }
+        ],
+        "message2": "value %1",
+        "args2": [
+            { "type": "input_value", "name": "VAL", "check": "String" }
+        ],
+        "message3": "%1",
+        "args3": [
+            { "type": "input_statement", "name": "CONTENT" }
+        ],
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": "#4C97FF",
+        "tooltip": "Wraps content in a div with a single inline style"
+    },
+        // --- MARKDOWN ---
+        { "type": "md_block", "message0": "markdown", "message1": "%1", "args1": [{ "type": "field_multilinetext", "name": "MD", "text": "# Hello\n**Bold**" }], "previousStatement": null, "nextStatement": null, "colour": "#333333" },
+        { "type": "md_code_inline", "message0": "code", "message1": "` %1 `", "args1": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#333333", "tooltip": "Inline Code" },
+        { "type": "md_code_block", "message0": "code block", "message1": "%1", "args1": [{ "type": "field_multilinetext", "name": "CODE", "text": "console.log('Hello');" }], "previousStatement": null, "nextStatement": null, "colour": "#333333", "tooltip": "Code Block" },
+        { "type": "md_bold", "message0": "bold text", "message1": "** %1 **", "args1": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#333333", "tooltip": "Bold Text" },
+        { "type": "md_italic", "message0": "italic text", "message1": "* %1 *", "args1": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#333333", "tooltip": "Italic Text" },
+        { "type": "md_quote", "message0": "blockquote", "message1": "> %1", "args1": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#333333", "tooltip": "Blockquote" },
+        { "type": "md_divider", "message0": "---", "previousStatement": null, "nextStatement": null, "colour": "#333333", "tooltip": "Horizontal Rule" },
+
+        // --- STRUCTURE ---
+        { "type": "html_html", "message0": "html tag", "message1": "lang %1", "args1": [{ "type": "input_value", "name": "LANG", "check": "String" }], "message2": "%1", "args2": [{ "type": "input_statement", "name": "CONTENT" }], "colour": "#4C97FF" },
+        { "type": "html_head", "message0": "head %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#4C97FF" },
+        { "type": "html_body", "message0": "body %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#4C97FF" },
+        { "type": "html_div", "message0": "div", "message1": "id %1", "args1": [{ "type": "input_value", "name": "ID", "check": "String" }], "message2": "class %1", "args2": [{ "type": "input_value", "name": "CLASS", "check": "String" }], "message3": "%1", "args3": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#4C97FF" },
+        { "type": "html_section", "message0": "section %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#4C97FF" },
+        { "type": "html_header", "message0": "header %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#4C97FF" },
+        { "type": "html_footer", "message0": "footer %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#4C97FF" },
+        { "type": "html_nav", "message0": "nav %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#4C97FF" },
+        { "type": "html_main", "message0": "main %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#4C97FF" },
+        { "type": "html_article", "message0": "article %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#4C97FF" },
+        { "type": "html_aside", "message0": "aside %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#4C97FF" },
+        { "type": "html_details", "message0": "details", "message1": "summary %1", "args1": [{ "type": "input_value", "name": "SUM", "check": "String" }], "message2": "%1", "args2": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#4C97FF" },
+        { "type": "meta_html_wrapper", "message0": "html %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#606060" },
+        // --- META ---
+        { "type": "meta_head_wrapper", "message0": "head %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#606060" },
+        { "type": "meta_title", "message0": "page title %1", "args0": [{ "type": "input_value", "name": "VAL", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#606060" },
+        { "type": "meta_charset", "message0": "charset utf-8", "previousStatement": null, "nextStatement": null, "colour": "#606060" },
+        { "type": "meta_viewport", "message0": "viewport mobile responsive", "previousStatement": null, "nextStatement": null, "colour": "#606060" },
+        { "type": "meta_favicon", "message0": "favicon url %1", "args0": [{ "type": "input_value", "name": "URL", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#606060" },
+        { "type": "meta_body", "message0": "body %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#606060" },
+        { "type": "meta_doctype", "message0": "<!DOCTYPE html>", "nextStatement": null, "colour": "#606060" },
+
+        // --- LAYOUT ---
+        { "type": "layout_flex", "message0": "Flex Box", "message1": "direction %1", "args1": [
+            { "type": "field_dropdown", "name": "DIR", "options": [["row","row"],["column","column"]] }
+        ], "message2": "justify %1 align %2", "args2": [
+            { "type": "field_dropdown", "name": "JUSTIFY", "options": [["start","flex-start"],["center","center"],["end","flex-end"],["space-between","space-between"]] },
+            { "type": "field_dropdown", "name": "ALIGN", "options": [["stretch","stretch"],["start","flex-start"],["center","center"],["end","flex-end"]] }
+        ], "message3": "%1", "args3": [
+            { "type": "input_statement", "name": "CONTENT" }
+        ], "previousStatement": null, "nextStatement": null, "colour": "#4C97FF" },
+        { "type": "layout_grid", "message0": "Grid Box", "message1": "columns %1", "args1": [
+            { "type": "input_value", "name": "COLS", "check": "String" }
+        ], "message2": "gap %1", "args2": [
+            { "type": "input_value", "name": "GAP", "check": "String" }
+        ], "message3": "%1", "args3": [
+            { "type": "input_statement", "name": "CONTENT" }
+        ], "previousStatement": null, "nextStatement": null, "colour": "#4C97FF" },
+        { "type": "layout_div", "message0": "div", "message1": "id %1", "args1": [{ "type": "input_value", "name": "ID", "check": "String" }], "message2": "class %1", "args2": [{ "type": "input_value", "name": "CLASS", "check": "String" }], "message3": "%1", "args3": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#4C97FF" },
+        
+        { "type": "css_style_wrapper", "message0": "style", "message1": "with css %1", "args1": [{ "type": "input_value", "name": "CSS", "check": "String" }], "message2": "%1", "args2": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#4C97FF" },
+
+        // --- TEXT ---
+        { "type": "html_h", "message0": "heading %1 %2", "args0": [{ "type": "field_dropdown", "name": "LVL", "options": [["H1","1"],["H2","2"],["H3","3"]] }, { "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#59C059" },
+        { "type": "html_p", "message0": "paragraph %1", "args0": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#59C059" },
+        { "type": "html_span", "message0": "span %1", "args0": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#59C059" },
+        { "type": "html_a", "message0": "link url %1 text %2", "args0": [{ "type": "input_value", "name": "HREF", "check": "String" }, { "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#59C059" },
+        { "type": "html_br", "message0": "line break", "previousStatement": null, "nextStatement": null, "colour": "#59C059" },
+        { "type": "html_hr", "message0": "horizontal rule", "previousStatement": null, "nextStatement": null, "colour": "#59C059" },
+        { "type": "html_format", "message0": "format %1 text %2", "args0": [{ "type": "field_dropdown", "name": "TAG", "options": [["Bold","b"],["Italic","i"],["Underline","u"],["Strike","s"],["Code","code"],["Pre","pre"],["Quote","blockquote"]] }, { "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#59C059" },
+        { "type": "html_text", "message0": "%1", "args0": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#59C059" },
+
+        // --- LISTS ---
+        { "type": "html_ul", "message0": "unordered list %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#FFAB19" },
+        { "type": "html_ol", "message0": "ordered list %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#FFAB19" },
+        { "type": "html_li", "message0": "list item %1", "args0": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#FFAB19" },
+
+        // --- TABLES ---
+        { "type": "html_table", "message0": "table", "message1": "border %1", "args1": [{ "type": "field_number", "name": "BORDER", "value": 1 }], "message2": "%1", "args2": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#5CA65C" },
+        { "type": "html_tr", "message0": "table row %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#5CA65C" },
+        { "type": "html_td", "message0": "table cell %1", "args0": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#5CA65C" },
+        { "type": "html_th", "message0": "table header %1", "args0": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#5CA65C" },
+
+        // --- FORMS ---
+        { "type": "html_form", "message0": "form", "message1": "action %1", "args1": [{ "type": "input_value", "name": "ACT", "check": "String" }], "message2": "%1", "args2": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6680" },
+        { "type": "html_input", "message0": "input", "message1": "type %1", "args1": [{ "type": "field_dropdown", "name": "TYPE", "options": [["Text","text"],["Password","password"],["Email","email"],["Number","number"],["Date","date"],["Color","color"],["Checkbox","checkbox"],["Radio","radio"],["File","file"]] }], "message2": "name %1", "args2": [{ "type": "input_value", "name": "NAME", "check": "String" }], "message3": "placeholder %1", "args3": [{ "type": "input_value", "name": "PH", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6680" },
+        { "type": "html_button", "message0": "button", "message1": "type %1", "args1": [{ "type": "field_dropdown", "name": "TYPE", "options": [["Button","button"],["Submit","submit"],["Reset","reset"]] }], "message2": "text %1", "args2": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6680" },
+        { "type": "html_button_js", "message0": "button", "message1": "text %1", "args1": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "message2": "%1", "args2": [{ "type": "input_statement", "name": "DO" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6680" },
+        { "type": "html_label", "message0": "label", "message1": "for %1", "args1": [{ "type": "input_value", "name": "FOR", "check": "String" }], "message2": "text %1", "args2": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6680" },
+        { "type": "html_textarea", "message0": "textarea", "message1": "rows %1", "args1": [{ "type": "field_number", "name": "R", "value": 4 }], "message2": "cols %1", "args2": [{ "type": "field_number", "name": "C", "value": 20 }], "previousStatement": null, "nextStatement": null, "colour": "#FF6680" },
+        { "type": "html_select", "message0": "select", "message1": "name %1", "args1": [{ "type": "input_value", "name": "NAME", "check": "String" }], "message2": "%1", "args2": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6680" },
+        { "type": "html_option", "message0": "option", "message1": "value %1", "args1": [{ "type": "input_value", "name": "VAL", "check": "String" }], "message2": "text %1", "args2": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6680" },
+        { "type": "html_form_adv", "message0": "form", "message1": "id %1", "args1": [{ "type": "input_value", "name": "ID", "check": "String" }], "message2": "%1", "args2": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6680" },
+        { "type": "html_input_req", "message0": "input", "message1": "name %1", "args1": [{ "type": "input_value", "name": "NAME", "check": "String" }], "message2": "type %1", "args2": [{ "type": "field_dropdown", "name": "TYPE", "options": [["Text","text"],["Email","email"],["Password","password"],["Date","date"]] }], "message3": "required %1", "args3": [{ "type": "field_checkbox", "name": "REQ", "checked": true }], "previousStatement": null, "nextStatement": null, "colour": "#FF6680" },
+        { "type": "js_form_submit", "message0": "on form", "message1": "id %1", "args1": [{ "type": "input_value", "name": "ID", "check": "String" }], "message2": "submit %1", "args2": [{ "type": "input_statement", "name": "DO" }], "colour": "#FF6680" },
+
+        // --- MEDIA ---
+        { "type": "html_img", "message0": "img", "message1": "src %1", "args1": [{ "type": "input_value", "name": "SRC", "check": "String" }], "message2": "alt %1", "args2": [{ "type": "input_value", "name": "ALT", "check": "String" }], "message3": "width %1", "args3": [{ "type": "input_value", "name": "W", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
+        { "type": "html_video", "message0": "video", "message1": "src %1", "args1": [{ "type": "input_value", "name": "SRC", "check": "String" }], "message2": "controls %1", "args2": [{ "type": "field_checkbox", "name": "CTRL", "checked": true }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
+        { "type": "html_audio", "message0": "audio", "message1": "src %1", "args1": [{ "type": "input_value", "name": "SRC", "check": "String" }], "message2": "controls %1", "args2": [{ "type": "field_checkbox", "name": "CTRL", "checked": true }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
+        { "type": "html_iframe", "message0": "iframe", "message1": "src %1", "args1": [{ "type": "input_value", "name": "SRC", "check": "String" }], "message2": "width %1", "args2": [{ "type": "input_value", "name": "W", "check": "String" }], "message3": "height %1", "args3": [{ "type": "input_value", "name": "H", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
+
+        // --- GRAPHICS ---
+        { "type": "html_canvas", "message0": "canvas", "message1": "id %1", "args1": [{ "type": "field_input", "name": "ID", "text": "myCanvas" }], "message2": "w %1 h %2", "args2": [{ "type": "field_number", "name": "W", "value": 300 }, { "type": "field_number", "name": "H", "value": 200 }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
+        { "type": "js_canvas_draw", "message0": "on canvas", "message1": "id %1", "args1": [{ "type": "field_input", "name": "ID", "text": "myCanvas" }], "message2": "draw %1", "args2": [{ "type": "input_statement", "name": "DO" }], "colour": "#9966FF" },
+        { "type": "js_canvas_rect", "message0": "rect x %1 y %2 w %3 h %4 color %5 filled %6", "args0": [{ "type": "field_number", "name": "X", "value": 10 }, { "type": "field_number", "name": "Y", "value": 10 }, { "type": "field_number", "name": "W", "value": 50 }, { "type": "field_number", "name": "H", "value": 50 }, { "type": "field_colour", "name": "C", "colour": "#ff0000" }, { "type": "field_checkbox", "name": "FILL", "checked": true }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
+        { "type": "html_svg", "message0": "svg", "message1": "width %1", "args1": [{ "type": "field_number", "name": "W", "value": 100 }], "message2": "height %1", "args2": [{ "type": "field_number", "name": "H", "value": 100 }], "message3": "%1", "args3": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
+        { "type": "svg_rect", "message0": "svg rect x %1 y %2 w %3 h %4 fill %5", "args0": [{ "type": "field_number", "name": "X", "value": 0 }, { "type": "field_number", "name": "Y", "value": 0 }, { "type": "field_number", "name": "W", "value": 50 }, { "type": "field_number", "name": "H", "value": 50 }, { "type": "field_colour", "name": "C", "colour": "#0000ff" }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
+        { "type": "svg_circle", "message0": "svg circle cx %1 cy %2 r %3 fill %4", "args0": [{ "type": "field_number", "name": "X", "value": 50 }, { "type": "field_number", "name": "Y", "value": 50 }, { "type": "field_number", "name": "R", "value": 20 }, { "type": "field_colour", "name": "C", "colour": "#00ff00" }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
+
+        // --- AUDIO API ---
+        { "type": "js_audio_play", "message0": "play sound %1", "args0": [{ "type": "input_value", "name": "URL", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#CF63CF" },
+        { "type": "js_audio_synth", "message0": "synth note %1 duration %2 ms", "args0": [{ "type": "field_dropdown", "name": "NOTE", "options": [["C4","261.63"],["D4","293.66"],["E4","329.63"],["F4","349.23"],["G4","392.00"],["A4","440.00"],["B4","493.88"]] }, { "type": "field_number", "name": "DUR", "value": 500 }], "previousStatement": null, "nextStatement": null, "colour": "#CF63CF" },
+
+        // --- SCRIPTING ---
+        { "type": "js_event", "message0": "on event", "message1": "event %1", "args1": [{ "type": "field_dropdown", "name": "EVT", "options": [["Click","click"],["Hover","mouseenter"],["Input","input"]] }], "message2": "selector %1", "args2": [{ "type": "input_value", "name": "SEL", "check": "String" }], "message3": "%1", "args3": [{ "type": "input_statement", "name": "DO" }], "colour": "#FF8C1A" },
+        { "type": "js_alert", "message0": "alert %1", "args0": [{ "type": "input_value", "name": "MSG", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#FF8C1A" },
+        { "type": "js_console", "message0": "console log %1", "args0": [{ "type": "input_value", "name": "MSG", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#FF8C1A" },
+        { "type": "js_dom_text", "message0": "set text", "message1": "of %1", "args1": [{ "type": "input_value", "name": "SEL", "check": "String" }], "message2": "to %1", "args2": [{ "type": "input_value", "name": "VAL", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#FF8C1A" },
+        { "type": "js_dom_style", "message0": "set css", "message1": "property %1", "args1": [{ "type": "input_value", "name": "PROP", "check": "String" }], "message2": "of %1", "args2": [{ "type": "input_value", "name": "SEL", "check": "String" }], "message3": "to %1", "args3": [{ "type": "input_value", "name": "VAL", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#FF8C1A" },
+        {
+            "type": "js_clipboard",
+            "message0": "add %1 to clipboard",
+            "args0": [{ "type": "input_value", "name": "TEXT", "check": "String" }],
+            "previousStatement": null,
+            "nextStatement": null,
+            "colour": "#4C97FF",
+            "tooltip": "Copy text to clipboard"
+        },
+        {
+            "type": "js_mouse_clicked",
+            "message0": "mouse clicked?",
+            "output": "Boolean",
+            "colour": "#4C97FF", // Blue like sensing
+            "tooltip": "Returns true if mouse was just clicked"
+        },
+        {
+            "type": "js_mouse_down",
+            "message0": "mouse down?",
+            "output": "Boolean",
+            "colour": "#4C97FF", // Blue like sensing
+            "tooltip": "Returns true if mouse is currently held down"
+        },
+        {
+            "type": "js_throw_error",
+            "message0": "throw error %1",
+            "args0": [{ "type": "input_value", "name": "MSG", "check": "String" }],
+            "previousStatement": null,
+            "nextStatement": null,
+            "colour": "#FFAB19", // Orange/Yellow like Control
+            "tooltip": "Throws a JS Error"
+        },
+        // --- API & STORAGE ---
+        { "type": "js_geo_get", "message0": "get location", "message1": "lat variable %1", "args1": [{ "type": "field_variable", "name": "LAT", "variable": "lat" }], "message2": "lng variable %1", "args2": [{ "type": "field_variable", "name": "LNG", "variable": "lng" }], "message3": "%1", "args3": [{ "type": "input_statement", "name": "DO" }], "colour": "#FF8C1A" },
+        { "type": "js_fetch_json", "message0": "fetch json", "message1": "from %1", "args1": [{ "type": "input_value", "name": "URL", "check": "String" }], "message2": "store in %1", "args2": [{ "type": "field_variable", "name": "DATA", "variable": "data" }], "message3": "%1", "args3": [{ "type": "input_statement", "name": "DO" }], "colour": "#FF8C1A" },
+        { "type": "js_localstorage_set", "message0": "storage set %1 = %2", "args0": [{ "type": "input_value", "name": "KEY", "check": "String" }, { "type": "input_value", "name": "VAL", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#FF8C1A" },
+        { "type": "js_localstorage_get", "message0": "storage get %1", "args0": [{ "type": "input_value", "name": "KEY", "check": "String" }], "output": "String", "colour": "#FF8C1A" },
+        // More CSS Stuff
+
+         {
+            "type": "html_styled_div",
+            "message0": "Styled Box",
+            "message1": "Styles %1",
+            "args1": [{ "type": "input_statement", "name": "STYLES", "check": "CSS_PROP" }],
+            "message2": "Content %1",
+            "args2": [{ "type": "input_statement", "name": "CONTENT" }],
+            "previousStatement": null,
+            "nextStatement": null,
+            "colour": "#9966FF",
+            "tooltip": "Container with visual styling"
+        },
+
+        // --- VISUAL CSS PROPERTIES ---
+        {
+            "type": "css_prop_text",
+            "message0": "Text color %1 size %2 align %3 weight %4",
+            "args0": [
+                { "type": "field_colour", "name": "COLOR", "colour": "#000000" },
+                { "type": "field_number", "name": "SIZE", "value": 16, "min": 0 },
+                { "type": "field_dropdown", "name": "ALIGN", "options": [["Left","left"],["Center","center"],["Right","right"],["Justify","justify"]] },
+                { "type": "field_dropdown", "name": "WEIGHT", "options": [["Normal","normal"],["Bold","bold"],["Thin","lighter"]] }
+            ],
+            "previousStatement": "CSS_PROP",
+            "nextStatement": "CSS_PROP",
+            "colour": "#9966FF"
+        },
+        {
+            "type": "css_prop_background",
+            "message0": "Background color %1",
+            "args0": [
+                { "type": "field_colour", "name": "COLOR", "colour": "#f0f0f0" }
+            ],
+            "previousStatement": "CSS_PROP",
+            "nextStatement": "CSS_PROP",
+            "colour": "#9966FF"
+        },
+        {
+            "type": "css_prop_border",
+            "message0": "Border width %1 color %2 style %3 radius %4",
+            "args0": [
+                { "type": "field_number", "name": "WIDTH", "value": 1, "min": 0 },
+                { "type": "field_colour", "name": "COLOR", "colour": "#000000" },
+                { "type": "field_dropdown", "name": "STYLE", "options": [["Solid","solid"],["Dashed","dashed"],["Dotted","dotted"],["None","none"]] },
+                { "type": "field_number", "name": "RADIUS", "value": 0, "min": 0 }
+            ],
+            "previousStatement": "CSS_PROP",
+            "nextStatement": "CSS_PROP",
+            "colour": "#9966FF"
+        },
+        {
+            "type": "css_prop_size",
+            "message0": "Size width %1 height %2",
+            "args0": [
+                { "type": "field_input", "name": "W", "text": "100%" },
+                { "type": "field_input", "name": "H", "text": "auto" }
+            ],
+            "previousStatement": "CSS_PROP",
+            "nextStatement": "CSS_PROP",
+            "colour": "#9966FF"
+        },
+        {
+            "type": "css_prop_margin_padding",
+            "message0": "Spacing margin %1 padding %2",
+            "args0": [
+                { "type": "field_number", "name": "MARGIN", "value": 5, "min": 0 },
+                { "type": "field_number", "name": "PADDING", "value": 10, "min": 0 }
+            ],
+            "previousStatement": "CSS_PROP",
+            "nextStatement": "CSS_PROP",
+            "colour": "#9966FF"
+        },
+        {
+            "type": "css_prop_flex_layout",
+            "message0": "Flex Layout dir %1 align %2 justify %3",
+            "args0": [
+                { "type": "field_dropdown", "name": "DIR", "options": [["Row","row"],["Column","column"]] },
+                { "type": "field_dropdown", "name": "ALIGN", "options": [["Stretch","stretch"],["Center","center"],["Start","flex-start"],["End","flex-end"]] },
+                { "type": "field_dropdown", "name": "JUSTIFY", "options": [["Start","flex-start"],["Center","center"],["End","flex-end"],["Space Between","space-between"]] }
+            ],
+            "previousStatement": "CSS_PROP",
+            "nextStatement": "CSS_PROP",
+            "colour": "#9966FF"
+        },
+
+        // more reporters
+        {
+    "type": "js_get_form_data",
+    "message0": "form data from %1",
+    "args0": [{ "type": "input_value", "name": "ID", "check": "String" }],
+    "output": "Array",
+    "colour": "#4C97FF",
+    "tooltip": "Returns form data as an object"
+},
+{
+    "type": "js_get_url_param",
+    "message0": "url parameter %1",
+    "args0": [{ "type": "input_value", "name": "KEY", "check": "String" }],
+    "output": "String",
+    "colour": "#4C97FF",
+    "tooltip": "Get value from ?key=value in URL"
+},
+{
+    "type": "js_get_time",
+    "message0": "current time",
+    "output": "String",
+    "colour": "#59C059",
+    "tooltip": "Returns HH:MM:SS"
+},
+{
+    "type": "js_get_date",
+    "message0": "current date",
+    "output": "String",
+    "colour": "#59C059",
+    "tooltip": "Returns YYYY-MM-DD"
+},
+{
+    "type": "js_get_screen_width",
+    "message0": "screen width",
+    "output": "Number",
+    "colour": "#59C059",
+    "tooltip": "Window width in pixels"
+},
+
+//more ui blocks
+  {
+        "type": "ui_page_wrapper",
+        "message0": "Modern Page %1 Theme %2 %3 Content %4",
+        "args0": [
+            { "type": "input_dummy" },
+            { "type": "field_dropdown", "name": "THEME", "options": [["Dark Mode", "dark"], ["Light Mode", "light"]] },
+            { "type": "input_dummy" },
+            { "type": "input_statement", "name": "CONTENT" }
+        ],
+        "colour": "#333333",
+        "tooltip": "Sets up the page body with font and colors"
+    },
+    {
+        "type": "ui_hero_section",
+        "message0": "Hero Section %1 Title %2 Subtitle %3 Button Text %4 Button Action %5",
+        "args0": [
+            { "type": "input_dummy" },
+            { "type": "input_value", "name": "TITLE", "check": "String" },
+            { "type": "input_value", "name": "SUB", "check": "String" },
+            { "type": "field_input", "name": "BTN_TEXT", "text": "Get Started" },
+            { "type": "input_statement", "name": "DO" }
+        ],
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": "#4C97FF",
+        "tooltip": "Big banner at top of page"
+    },
+    {
+        "type": "ui_feature_grid",
+        "message0": "Feature Grid %1",
+        "args0": [{ "type": "input_statement", "name": "CONTENT" }],
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": "#4C97FF",
+        "tooltip": "Container for feature cards"
+    },
+    {
+        "type": "ui_feature_card",
+        "message0": "Feature Card %1 Title %2 Text %3 Icon %4",
+        "args0": [
+            { "type": "input_dummy" },
+            { "type": "input_value", "name": "TITLE", "check": "String" },
+            { "type": "input_value", "name": "TEXT", "check": "String" },
+            { "type": "field_dropdown", "name": "ICON", "options": [["Star","star"],["Code","code"],["Zap","zap"],["Heart","heart"]] }
+        ],
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": "#9966FF",
+        "tooltip": "A single card for the grid"
+    },
+    {
+        "type": "ui_navbar_simple",
+        "message0": "Navbar Logo %1 Links %2",
+        "args0": [
+            { "type": "field_input", "name": "LOGO", "text": "MySite" },
+            { "type": "input_statement", "name": "LINKS" }
+        ],
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": "#333333"
+    },
+    {
+        "type": "ui_nav_link",
+        "message0": "Nav Link %1 URL %2",
+        "args0": [
+            { "type": "field_input", "name": "TEXT", "text": "Home" },
+            { "type": "field_input", "name": "URL", "text": "#" }
+        ],
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": "#555555"
+    },
+
+
+// ill add more later haha
+    ]);
+};

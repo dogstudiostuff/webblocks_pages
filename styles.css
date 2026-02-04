@@ -1,0 +1,57 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; font-family: "Segoe UI", Tahoma, sans-serif; font-size: 12px; }
+body { background: #008080; }
+
+.app { height: 100%; display: flex; flex-direction: column; }
+.titlebar { height: 36px; background: linear-gradient(180deg, #0a0a6a, #0000a0); border-bottom: 2px solid #000; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; flex-shrink: 0; }
+.titlebar-title { color: #fff; font-weight: bold; font-size: 14px; text-shadow: 1px 1px #000; }
+.titlebar-buttons { display: flex; gap: 6px; }
+
+.toolbar-btn { padding: 4px 12px; font-family: inherit; font-weight: bold; background: #c0c0c0; border: 2px solid; border-color: #fff #808080 #808080 #fff; cursor: pointer; }
+.toolbar-btn:active { border-color: #808080 #fff #fff #808080; }
+.toolbar-btn.primary { background: #3060a0; color: #fff; }
+
+.main-area { flex: 1; display: flex; padding: 6px; background: #c0c0c0; overflow: hidden; }
+.panel { display: flex; flex-direction: column; background: #c0c0c0; border: 2px solid; border-color: #fff #808080 #808080 #fff; position: relative; }
+.panel-workspace { width: 65%; min-width: 300px; }
+.panel-preview { flex: 1; min-width: 250px; }
+
+.panel-titlebar { height: 28px; background: linear-gradient(90deg, #000080, #1084d0); display: flex; align-items: center; justify-content: space-between; padding: 0 8px; flex-shrink: 0; }
+.panel-title { color: #fff; font-weight: bold; }
+.panel-tabs { display: flex; gap: 4px; }
+
+.panel-tab, .size-btn { padding: 2px 10px; font-family: inherit; font-weight: bold; background: #808080; border: 1px solid #404040; cursor: pointer; color: #fff; }
+.panel-tab.active, .size-btn.active { background: #e0e0e0; color: #000; border-color: #fff #808080 #808080 #fff; }
+
+.panel-content { flex: 1; position: relative; background: #fff; border: 2px inset #808080; margin: 4px; overflow: hidden; }
+#blocklyArea { position: absolute; width: 100%; height: 100%; }
+#codeArea { position: absolute; width: 100%; height: 100%; display: none; background: #1a1a2e; color: #0f0; font-family: monospace; padding: 10px; overflow: auto; white-space: pre-wrap; }
+#codeArea.active { display: block; }
+
+.preview-content { background: #404040; display: flex; justify-content: center; padding: 10px; overflow: auto; }
+.preview-frame { width: 100%; height: 100%; background: #fff; border: 3px ridge #a0a0a0; }
+.preview-frame.mobile { width: 375px; flex-shrink: 0; }
+.preview-frame iframe { width: 100%; height: 100%; border: none; }
+
+.resize-handle { width: 8px; cursor: col-resize; background: #808080; border: 1px solid #fff; z-index: 10; position: absolute; right: 0; top: 0; bottom: 0; }
+
+.toast { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #ffffaa; border: 2px solid #000; padding: 8px 20px; font-weight: bold; z-index: 9999; }
+.toast.show { display: block; }
+
+.blocklyToolboxDiv { background-color: #f9f9f9 !important; border-right: 1px solid #ddd !important; }
+.blocklyFlyoutBackground { fill: #e8e8e8 !important; }
+
+/* Styling for the markdown thingymabob */
+.markdown-body blockquote {
+    margin: 10px 0;
+    font-style: italic;
+    background: #f9f9f9;
+}
+.markdown-body h1, .markdown-body h2 {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+    margin-top: 20px;
+}
+.markdown-body code {
+    color: #d63384;
+}
