@@ -1,4 +1,4 @@
-# Block Reporter Conversion - Complete Summary
+# Block Reporter Conversion - Complete Summary (ts is some ai ass thing that copilopt gave me while i was debugging)
 
 ## Overview
 Successfully converted **ALL** blocks in the Powerful Visual Website Builder to accept reporters (variables, join blocks, math blocks, etc.) in addition to typed text inputs.
