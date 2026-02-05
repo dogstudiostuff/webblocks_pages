@@ -452,7 +452,7 @@ function init() {
 
     workspace = Blockly.inject("blocklyArea", {
         toolbox: toolbox,
-        renderer: "zelos",
+        renderer: "webblocks",
         theme: Blockly.Themes.Zelos,
         grid: { spacing: 25, length: 3, colour: "#ccc", snap: true },
         zoom: { controls: true, wheel: true, startScale: 0.8 },
