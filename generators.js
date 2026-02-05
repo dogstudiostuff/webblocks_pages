@@ -502,18 +502,56 @@ htmlGenerator.forBlock["arr_concat"] = (b) => [`${htmlGenerator.valueToCode(b, '
 htmlGenerator.forBlock["arr_reverse"] = (b) => [`[...${htmlGenerator.valueToCode(b, 'ARR', 0)}].reverse()`, 0];
 htmlGenerator.forBlock["arr_join"] = (b) => [`${htmlGenerator.valueToCode(b, 'ARR', 0)}.join(${htmlGenerator.valueToCode(b, 'DELIM', 0)})`, 0];
 
-// --- JAVASCRIPT GENERATORS FOR CUSTOM ARRAY BLOCKS ---
-const jsGen = Blockly.JavaScript || window.Blockly.JavaScript;
+// tuff json tools
 
-// Define JS generators for array blocks so they can be used in expressions/variables
-Blockly.JavaScript.forBlock["arr_new_empty"] = () => ["[]", Blockly.JavaScript.ORDER_ATOMIC];
-Blockly.JavaScript.forBlock["arr_new_length"] = (b) => [`new Array(${Blockly.JavaScript.valueToCode(b, 'LEN', Blockly.JavaScript.ORDER_ATOMIC) || 0})`, Blockly.JavaScript.ORDER_ATOMIC];
-Blockly.JavaScript.forBlock["arr_parse"] = (b) => [`JSON.parse(${Blockly.JavaScript.valueToCode(b, 'TXT', Blockly.JavaScript.ORDER_ATOMIC) || '[]'})`, Blockly.JavaScript.ORDER_ATOMIC];
-Blockly.JavaScript.forBlock["arr_split"] = (b) => [`(${Blockly.JavaScript.valueToCode(b, 'TXT', Blockly.JavaScript.ORDER_ATOMIC) || "''"}).split(${Blockly.JavaScript.valueToCode(b, 'DELIM', Blockly.JavaScript.ORDER_ATOMIC) || "''"})`, Blockly.JavaScript.ORDER_ATOMIC];
-Blockly.JavaScript.forBlock["arr_length"] = (b) => [`(${Blockly.JavaScript.valueToCode(b, 'ARR', Blockly.JavaScript.ORDER_ATOMIC) || '[]'}).length`, Blockly.JavaScript.ORDER_MEMBER];
-Blockly.JavaScript.forBlock["arr_get_index"] = (b) => [`(${Blockly.JavaScript.valueToCode(b, 'ARR', Blockly.JavaScript.ORDER_MEMBER) || '[]'})[${Blockly.JavaScript.valueToCode(b, 'INDEX', Blockly.JavaScript.ORDER_ATOMIC) || 0}]`, Blockly.JavaScript.ORDER_MEMBER];
-Blockly.JavaScript.forBlock["arr_contains"] = (b) => [`(${Blockly.JavaScript.valueToCode(b, 'ARR', Blockly.JavaScript.ORDER_MEMBER) || '[]'}).includes(${Blockly.JavaScript.valueToCode(b, 'ITEM', Blockly.JavaScript.ORDER_ATOMIC) || ''})`, Blockly.JavaScript.ORDER_EQUALITY];
-Blockly.JavaScript.forBlock["arr_join"] = (b) => [`(${Blockly.JavaScript.valueToCode(b, 'ARR', Blockly.JavaScript.ORDER_MEMBER) || '[]'}).join(${Blockly.JavaScript.valueToCode(b, 'SEP', Blockly.JavaScript.ORDER_ATOMIC) || "''"})`, Blockly.JavaScript.ORDER_MEMBER];
+// --- OBJECTS ---
+htmlGenerator.forBlock["obj_new"] = () => ["{}", htmlGenerator.ORDER_ATOMIC];
+htmlGenerator.forBlock["obj_parse"] = (b) => [`JSON.parse(${htmlGenerator.valueToCode(b, 'TXT', htmlGenerator.ORDER_ATOMIC) || "'{}'"})`, htmlGenerator.ORDER_ATOMIC];
+htmlGenerator.forBlock["obj_from_entries"] = (b) => [`Object.fromEntries(${htmlGenerator.valueToCode(b, 'ENTRIES', htmlGenerator.ORDER_ATOMIC) || "[]"})`, htmlGenerator.ORDER_ATOMIC];
+
+htmlGenerator.forBlock["obj_builder"] = (b) => {
+    const code = htmlGenerator.statementToCode(b, 'DO');
+    return [`(function(){ var _obj = {}; ${code} return _obj; })()`, htmlGenerator.ORDER_ATOMIC];
+};
+htmlGenerator.forBlock["obj_builder_add"] = (b) => `_obj[${htmlGenerator.valueToCode(b, 'KEY', htmlGenerator.ORDER_ATOMIC)}] = ${htmlGenerator.valueToCode(b, 'VAL', htmlGenerator.ORDER_ATOMIC)};\n`;
+htmlGenerator.forBlock["obj_builder_set"] = (b) => `_obj = ${htmlGenerator.valueToCode(b, 'OBJ', htmlGenerator.ORDER_ATOMIC) || '{}'};\n`;
+
+htmlGenerator.forBlock["obj_get"] = (b) => [`${htmlGenerator.valueToCode(b, 'OBJ', htmlGenerator.ORDER_ATOMIC)}[${htmlGenerator.valueToCode(b, 'KEY', htmlGenerator.ORDER_ATOMIC)}]`, htmlGenerator.ORDER_ATOMIC];
+htmlGenerator.forBlock["obj_has"] = (b) => [`${htmlGenerator.valueToCode(b, 'OBJ', htmlGenerator.ORDER_ATOMIC)}.hasOwnProperty(${htmlGenerator.valueToCode(b, 'KEY', htmlGenerator.ORDER_ATOMIC)})`, htmlGenerator.ORDER_ATOMIC];
+htmlGenerator.forBlock["obj_keys"] = (b) => [`Object.keys(${htmlGenerator.valueToCode(b, 'OBJ', htmlGenerator.ORDER_ATOMIC)})`, htmlGenerator.ORDER_ATOMIC];
+htmlGenerator.forBlock["obj_values"] = (b) => [`Object.values(${htmlGenerator.valueToCode(b, 'OBJ', htmlGenerator.ORDER_ATOMIC)})`, htmlGenerator.ORDER_ATOMIC];
+htmlGenerator.forBlock["obj_entries"] = (b) => [`Object.entries(${htmlGenerator.valueToCode(b, 'OBJ', htmlGenerator.ORDER_ATOMIC)})`, htmlGenerator.ORDER_ATOMIC];
+htmlGenerator.forBlock["obj_stringify"] = (b) => [`JSON.stringify(${htmlGenerator.valueToCode(b, 'OBJ', htmlGenerator.ORDER_ATOMIC)})`, htmlGenerator.ORDER_ATOMIC];
+
+htmlGenerator.forBlock["obj_set"] = (b) => wrapJs(b, `${htmlGenerator.valueToCode(b, 'OBJ', htmlGenerator.ORDER_ATOMIC)}[${htmlGenerator.valueToCode(b, 'KEY', htmlGenerator.ORDER_ATOMIC)}] = ${htmlGenerator.valueToCode(b, 'VAL', htmlGenerator.ORDER_ATOMIC)};`);
+htmlGenerator.forBlock["obj_delete"] = (b) => wrapJs(b, `delete ${htmlGenerator.valueToCode(b, 'OBJ', htmlGenerator.ORDER_ATOMIC)}[${htmlGenerator.valueToCode(b, 'KEY', htmlGenerator.ORDER_ATOMIC)}];`);
+htmlGenerator.forBlock["obj_merge"] = (b) => wrapJs(b, `Object.assign(${htmlGenerator.valueToCode(b, 'DEST', htmlGenerator.ORDER_ATOMIC)}, ${htmlGenerator.valueToCode(b, 'SRC', htmlGenerator.ORDER_ATOMIC)});`);
+
+// --- JAVASCRIPT GENERATORS FOR CUSTOM OBJECT BLOCKS ---
+Blockly.JavaScript.forBlock = Blockly.JavaScript.forBlock || {};
+Blockly.JavaScript.forBlock["obj_new"] = () => ["{}", Blockly.JavaScript.ORDER_ATOMIC];
+Blockly.JavaScript.forBlock["obj_parse"] = (b) => [`JSON.parse(${Blockly.JavaScript.valueToCode(b, 'TXT', Blockly.JavaScript.ORDER_ATOMIC) || '{}'})`, Blockly.JavaScript.ORDER_ATOMIC];
+Blockly.JavaScript.forBlock["obj_from_entries"] = (b) => [`Object.fromEntries(${Blockly.JavaScript.valueToCode(b, 'ENTRIES', Blockly.JavaScript.ORDER_ATOMIC) || '[]'})`, Blockly.JavaScript.ORDER_ATOMIC];
+
+Blockly.JavaScript.forBlock["obj_builder"] = (b) => {
+    const code = Blockly.JavaScript.statementToCode(b, 'DO');
+    return [`(function(){ var _obj = {}; ${code} return _obj; })()`, Blockly.JavaScript.ORDER_ATOMIC];
+};
+Blockly.JavaScript.forBlock["obj_builder_add"] = (b) => `_obj[${Blockly.JavaScript.valueToCode(b, 'KEY', Blockly.JavaScript.ORDER_ATOMIC)}] = ${Blockly.JavaScript.valueToCode(b, 'VAL', Blockly.JavaScript.ORDER_ATOMIC)};\n`;
+Blockly.JavaScript.forBlock["obj_builder_set"] = (b) => `_obj = ${Blockly.JavaScript.valueToCode(b, 'OBJ', Blockly.JavaScript.ORDER_ATOMIC) || '{}'};\n`;
+
+Blockly.JavaScript.forBlock["obj_get"] = (b) => [`${Blockly.JavaScript.valueToCode(b, 'OBJ', Blockly.JavaScript.ORDER_ATOMIC)}[${Blockly.JavaScript.valueToCode(b, 'KEY', Blockly.JavaScript.ORDER_ATOMIC)}]`, Blockly.JavaScript.ORDER_ATOMIC];
+Blockly.JavaScript.forBlock["obj_has"] = (b) => [`${Blockly.JavaScript.valueToCode(b, 'OBJ', Blockly.JavaScript.ORDER_ATOMIC)}.hasOwnProperty(${Blockly.JavaScript.valueToCode(b, 'KEY', Blockly.JavaScript.ORDER_ATOMIC)})`, Blockly.JavaScript.ORDER_ATOMIC];
+Blockly.JavaScript.forBlock["obj_keys"] = (b) => [`Object.keys(${Blockly.JavaScript.valueToCode(b, 'OBJ', Blockly.JavaScript.ORDER_ATOMIC)})`, Blockly.JavaScript.ORDER_ATOMIC];
+Blockly.JavaScript.forBlock["obj_values"] = (b) => [`Object.values(${Blockly.JavaScript.valueToCode(b, 'OBJ', Blockly.JavaScript.ORDER_ATOMIC)})`, Blockly.JavaScript.ORDER_ATOMIC];
+Blockly.JavaScript.forBlock["obj_entries"] = (b) => [`Object.entries(${Blockly.JavaScript.valueToCode(b, 'OBJ', Blockly.JavaScript.ORDER_ATOMIC)})`, Blockly.JavaScript.ORDER_ATOMIC];
+Blockly.JavaScript.forBlock["obj_stringify"] = (b) => [`JSON.stringify(${Blockly.JavaScript.valueToCode(b, 'OBJ', Blockly.JavaScript.ORDER_ATOMIC)})`, Blockly.JavaScript.ORDER_ATOMIC];
+
+Blockly.JavaScript.forBlock["obj_set"] = (b) => `${Blockly.JavaScript.valueToCode(b, 'OBJ', Blockly.JavaScript.ORDER_ATOMIC)}[${Blockly.JavaScript.valueToCode(b, 'KEY', Blockly.JavaScript.ORDER_ATOMIC)}] = ${Blockly.JavaScript.valueToCode(b, 'VAL', Blockly.JavaScript.ORDER_ATOMIC)};`;
+Blockly.JavaScript.forBlock["obj_delete"] = (b) => `delete ${Blockly.JavaScript.valueToCode(b, 'OBJ', Blockly.JavaScript.ORDER_ATOMIC)}[${Blockly.JavaScript.valueToCode(b, 'KEY', Blockly.JavaScript.ORDER_ATOMIC)}];`;
+Blockly.JavaScript.forBlock["obj_merge"] = (b) => `Object.assign(${Blockly.JavaScript.valueToCode(b, 'DEST', Blockly.JavaScript.ORDER_ATOMIC)}, ${Blockly.JavaScript.valueToCode(b, 'SRC', Blockly.JavaScript.ORDER_ATOMIC)});`;
+
+
 
 // --- BRIDGE TO STANDARD BLOCKLY JS GENERATOR ---
 const standardBlocks = [
