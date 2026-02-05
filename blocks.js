@@ -1,6 +1,16 @@
 window.registerWebBlocks = function() {
     var defineBlocks = Blockly.common ? Blockly.common.defineBlocksWithJsonArray : Blockly.defineBlocksWithJsonArray;
 
+
+    // Register a custom extension to force square corners
+if (!Blockly.Extensions.isRegistered('shape_square')) {
+    Blockly.Extensions.register('shape_square', function() {
+        // Force the output connection to be square
+        this.setOutputShape(Blockly.OUTPUT_SHAPE_SQUARE);
+    });
+}
+
+
     defineBlocks([
         // --- REPORTERS ---
 { 
@@ -468,28 +478,46 @@ window.registerWebBlocks = function() {
 
     // array stuff
 
-     { "type": "arr_new_empty", "message0": "blank array", "output": "Array", "colour": "#FF6666" },
-        { "type": "arr_new_length", "message0": "blank array of length %1", "args0": [{ "type": "input_value", "name": "LEN", "check": "Number" }], "output": "Array", "colour": "#FF6666" },
-        { "type": "arr_parse", "message0": "parse %1 as array", "args0": [{ "type": "input_value", "name": "TXT", "check": "String" }], "output": "Array", "colour": "#FF6666" },
-        { "type": "arr_split", "message0": "split %1 by %2", "args0": [{ "type": "input_value", "name": "TXT", "check": "String" }, { "type": "input_value", "name": "DELIM", "check": "String" }], "output": "Array", "colour": "#FF6666" },
+     { "type": "arr_new_empty", "message0": "blank array", "output": "Array", "colour": "#FF6666", "extensions": ["shape_square"] },
+        { "type": "arr_new_length", "message0": "blank array of length %1", "args0": [{ "type": "input_value", "name": "LEN", "check": "Number" }], "output": "Array", "colour": "#FF6666", "extensions": ["shape_square"] },
+        { "type": "arr_parse", "message0": "parse %1 as array", "args0": [{ "type": "input_value", "name": "TXT", "check": "String" }], "output": "Array", "colour": "#FF6666", "extensions": ["shape_square"] },
+        { "type": "arr_split", "message0": "split %1 by %2", "args0": [{ "type": "input_value", "name": "TXT", 	"check":"String"}, {	"type":"input_value","name":"DELIM","check":"String"}], 	"output":"Array","colour":"#FF6666","extensions":["shape_square"]},
         
-        { "type": "arr_builder", "message0": "array builder %1  %2 ", "args0": [ { "type": "input_dummy" }, { "type": "input_statement", "name": "DO" }], "output": "Array", "colour": "#FF6666" },
-        { "type": "arr_builder_add", "message0": "append %1 to builder", "args0": [{ "type": "input_value", "name": "ITEM" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6666" },
-        { "type": "arr_builder_set", "message0": "set builder to %1", "args0": [{ "type": "input_value", "name": "ARR", "check": "Array" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6666" },
+        { "type": "arr_builder", "message0": "array builder %1  %2 ", "args0": [ { "type": "input_dummy" }, { "type": "input_statement", "name": "DO" }], "output": "Array", "colour": "#FF6666", "extensions": ["shape_square"] },
+        { "type": "arr_builder_add", "message0": "append %1 to builder", "args0": [{ "type": "input_value", "name": "ITEM" }], "previousStatement": null, "nextStatement": null, 	"colour": "#FF6666", "extensions": ["shape_square"] },
+        { "type": "arr_builder_set", 	"message0":"set builder to %1","args0":[{"type":"input_value","name":"ARR","check":"Array"}],"previousStatement":null,"nextStatement":null,"colour":"#FF6666","extensions":["shape_square"]},
 
-        { "type": "arr_get", "message0": "get %1 in %2", "args0": [{ "type": "input_value", "name": "IDX", "check": "Number" }, { "type": "input_value", "name": "ARR", "check": "Array" }], "output": null, "colour": "#FF6666" },
-        { "type": "arr_slice", "message0": "items %1 to %2 in %3", "args0": [{ "type": "input_value", "name": "START", "check": "Number" }, { "type": "input_value", "name": "END", "check": "Number" }, { "type": "input_value", "name": "ARR", "check": "Array" }], "output": "Array", "colour": "#FF6666" },
-        { "type": "arr_indexof", "message0": "index of %1 in %2", "args0": [{ "type": "input_value", "name": "ITEM" }, { "type": "input_value", "name": "ARR", "check": "Array" }], "output": "Number", "colour": "#FF6666" },
-        { "type": "arr_includes", "message0": "%1 has %2 ?", "args0": [{ "type": "input_value", "name": "ARR", "check": "Array" }, { "type": "input_value", "name": "ITEM" }], "output": "Boolean", "colour": "#FF6666" },
-        { "type": "arr_length", "message0": "length of %1", "args0": [{ "type": "input_value", "name": "ARR", "check": "Array" }], "output": "Number", "colour": "#FF6666" },
+        { "type": "arr_get", "message0": "get %1 in %2", "args0": [{ "type": "input_value", "name": "IDX", "check": "Number" }, { "type": "input_value", "name": "ARR", "check": "Array" }], "output": null, "colour": "#FF6666", "extensions": ["shape_square"] },
+        { "type": "arr_slice", "message0": "items %1 to %2 in %3", "args0": [{ "type": "input_value", "name": "START", "check": "Number" }, { "type": "input_value", "name": "END", "check": "Number" }, { "type": "input_value", "name": "ARR", "check": "Array" }], "output": "Array", "colour": "#FF6666", 	"extensions":["shape_square"] },
+        { "type": "arr_indexof", "message0": "index of %1 in %2", "args0": [{ "type": "input_value", "name": "ITEM" }, { 	"type":"input_value","name":"ARR","check":"Array"}], 	"output":"Number","colour":"#FF6666","extensions":["shape_square"]},
+        { "type": "arr_includes", 	"message0":"%1 has %2 ?","args0":[{"type":"input_value","name":"ARR","check":"Array"},{"type":"input_value","name":"ITEM"}],"output":"Boolean","colour":"#FF6666","extensions":["shape_square"]},
+        { 	"type":"arr_length","message0":"length of %1","args0":[{"type":"input_value","name":"ARR","check":"Array"}],"output":"Number","colour":"#FF6666","extensions":["shape_square"]},
 
-        { "type": "arr_set_idx", "message0": "set %1 in %2 to %3", "args0": [{ "type": "input_value", "name": "IDX", "check": "Number" }, { "type": "input_value", "name": "ARR", "check": "Array" }, { "type": "input_value", "name": "VAL" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6666" },
-        { "type": "arr_push", "message0": "append %1 to %2", "args0": [{ "type": "input_value", "name": "VAL" }, { "type": "input_value", "name": "ARR", "check": "Array" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6666" },
-        { "type": "arr_concat", "message0": "merge %1 with %2", "args0": [{ "type": "input_value", "name": "A", "check": "Array" }, { "type": "input_value", "name": "B", "check": "Array" }], "output": "Array", "colour": "#FF6666" },
-        { "type": "arr_reverse", "message0": "reverse %1", "args0": [{ "type": "input_value", "name": "ARR", "check": "Array" }], "output": "Array", "colour": "#FF6666" },
-        { "type": "arr_join", "message0": "join %1 with %2", "args0": [{ "type": "input_value", "name": "ARR", "check": "Array" }, { "type": "input_value", "name": "DELIM", "check": "String" }], "output": "String", "colour": "#FF6666" },
+        { "type": "arr_set_idx", "message0": "set %1 in %2 to %3", "args0": [{ "type": "input_value", "name": "IDX", "check": "Number" }, { "type": "input_value", "name": "ARR", "check": "Array" }, { "type": "input_value", "name": "VAL" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6666", "extensions": ["shape_square"] },
+        { "type": "arr_push", "message0": "append %1 to %2", "args0": [{ "type": "input_value", "name": "VAL" }, { "type": "input_value", "name": "ARR", "check": "Array" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6666", "extensions": ["shape_square"] },
+        { "type": "arr_concat", "message0": "merge %1 with %2", "args0": [{ "type": "input_value", "name": "A", "check": "Array" }, { "type": "input_value", "name": "B", "check": "Array" }], 	"output":"Array","colour":"#FF6666","extensions":["shape_square"]},
+        { 	"type":"arr_reverse","message0":"reverse %1","args0":[{"type":"input_value","name":"ARR","check":"Array"}],"output":"Array","colour":"#FF6666","extensions":["shape_square"]},
+        { 	"type":"arr_join","message0":"join %1 with %2","args0":[{"type":"input_value","name":"ARR","check":"Array"},{"type":"input_value","name":"DELIM","check":"String"}],"output":"String","colour":"#FF6666","extensions":["shape_square"]},
 
+                // --- OBJECTS (JSON) ---
+        { "type": "obj_new", "message0": "blank object", "output": "Object", "colour": "#FFCC33" },
+        { "type": "obj_parse", "message0": "parse %1 as object", "args0": [{ "type": "input_value", "name": "TXT", "check": "String" }], "output": "Object", "colour": "#FFCC33" },
+        { "type": "obj_from_entries", "message0": "from entries %1", "args0": [{ "type": "input_value", "name": "ENTRIES", "check": "Array" }], "output": "Object", "colour": "#FFCC33" },
 
+        { "type": "obj_builder", "message0": "object builder %1  %2 ", "args0": [{ "type": "input_dummy" },  { "type": "input_statement", "name": "DO" }], "output": "Object", "colour": "#FFCC33" },
+        { "type": "obj_builder_add", "message0": "append key %1 value %2 to builder", "args0": [{ "type": "input_value", "name": "KEY", "check": "String" }, { "type": "input_value", "name": "VAL" }], "previousStatement": null, "nextStatement": null, "colour": "#FFCC33" },
+        { "type": "obj_builder_set", "message0": "set builder to %1", "args0": [{ "type": "input_value", "name": "OBJ", "check": "Object" }], "previousStatement": null, "nextStatement": null, "colour": "#FFCC33" },
+
+        { "type": "obj_get", "message0": "get %1 in %2", "args0": [{ "type": "input_value", "name": "KEY", "check": "String" }, { "type": "input_value", "name": "OBJ", "check": "Object" }], "output": null, "colour": "#FFCC33" },
+        { "type": "obj_has", "message0": "%1 has key %2 ?", "args0": [{ "type": "input_value", "name": "OBJ", "check": "Object" }, { "type": "input_value", "name": "KEY", "check": "String" }], "output": "Boolean", "colour": "#FFCC33" },
+        { "type": "obj_keys", "message0": "keys of %1", "args0": [{ "type": "input_value", "name": "OBJ", "check": "Object" }], "output": "Array", "colour": "#FFCC33" },
+        { "type": "obj_values", "message0": "values of %1", "args0": [{ "type": "input_value", "name": "OBJ", "check": "Object" }], "output": "Array", "colour": "#FFCC33" },
+        { "type": "obj_entries", "message0": "entries of %1", "args0": [{ "type": "input_value", "name": "OBJ", "check": "Object" }], "output": "Array", "colour": "#FFCC33" },
+        { "type": "obj_stringify", "message0": "stringify %1", "args0": [{ "type": "input_value", "name": "OBJ" }], "output": "String", "colour": "#FFCC33" },
+
+        { "type": "obj_set", "message0": "set %1 in %2 to %3", "args0": [{ "type": "input_value", "name": "KEY", "check": "String" }, { "type": "input_value", "name": "OBJ", "check": "Object" }, { "type": "input_value", "name": "VAL" }], "previousStatement": null, "nextStatement": null, "colour": "#FFCC33" },
+        { "type": "obj_delete", "message0": "delete key %1 from %2", "args0": [{ "type": "input_value", "name": "KEY", "check": "String" }, { "type": "input_value", "name": "OBJ", "check": "Object" }], "previousStatement": null, "nextStatement": null, "colour": "#FFCC33" },
+        { "type": "obj_merge", "message0": "merge %1 into %2", "args0": [{ "type": "input_value", "name": "SRC", "check": "Object" }, { "type": "input_value", "name": "DEST", "check": "Object" }], "previousStatement": null, "nextStatement": null, "colour": "#FFCC33" }
 // ill add more later haha
     ]);
 };

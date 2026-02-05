@@ -260,6 +260,34 @@ const toolbox = {
             ]
         },
 
+              {
+            kind: "category",
+            name: "Objects",
+            colour: "#FFCC33",
+            contents: [
+                { kind: "block", type: "obj_new" },
+                { 
+                    kind: "block", 
+                    type: "obj_parse",
+                    inputs: { TXT: { shadow: { type: "text_string", fields: { TEXT: '{"a":1}' } } } }
+                },
+                { kind: "block", type: "obj_from_entries" },
+                { kind: "block", type: "obj_builder" },
+                { 
+                    kind: "block", 
+                    type: "obj_builder_add",
+                    inputs: { KEY: { shadow: { type: "text_string", fields: { TEXT: "key" } } } }
+                },
+                { kind: "block", type: "obj_get", inputs: { KEY: { shadow: { type: "text_string", fields: { TEXT: "key" } } } } },
+                { kind: "block", type: "obj_set", inputs: { KEY: { shadow: { type: "text_string", fields: { TEXT: "key" } } } } },
+                { kind: "block", type: "obj_delete", inputs: { KEY: { shadow: { type: "text_string", fields: { TEXT: "key" } } } } },
+                { kind: "block", type: "obj_keys" },
+                { kind: "block", type: "obj_values" },
+                { kind: "block", type: "obj_stringify" },
+                { kind: "block", type: "obj_has", inputs: { KEY: { shadow: { type: "text_string", fields: { TEXT: "key" } } } } }
+            ]
+        },  
+
         {
             kind: "category",
             name: "API/Storage",
