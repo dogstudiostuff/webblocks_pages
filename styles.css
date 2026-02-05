@@ -55,3 +55,7 @@ body { background: #008080; }
 .markdown-body code {
     color: #d63384;
 }
+
+/* Custom overlays for webblocks shapes */
+.wb-shape-overlay { pointer-events: none; }
+.wb-shape-overlay path { vector-effect: non-scaling-stroke; }

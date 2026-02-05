@@ -459,6 +459,107 @@ function init() {
         trashcan: true
     });
 
+    // Apply custom silhouettes for arrays and objects (SVG overlay)
+    function applyCustomSilhouetteToBlock(block) {
+        try {
+            if (!block || !block.getSvgRoot) return;
+            const t = block.type || '';
+            if (!t.startsWith('arr_') && !t.startsWith('obj_')) return;
+
+            const svgRoot = block.getSvgRoot();
+            if (!svgRoot) return;
+
+            // Remove existing overlay
+            const existing = svgRoot.querySelector('.wb-shape-overlay');
+            if (existing) existing.remove();
+
+            const hw = block.getHeightWidth();
+            const w = Math.max(40, hw.width || 100);
+            const h = Math.max(24, hw.height || 24);
+
+            const ns = 'http://www.w3.org/2000/svg';
+            const g = document.createElementNS(ns, 'g');
+            g.setAttribute('class', 'wb-shape-overlay');
+            g.setAttribute('pointer-events', 'none');
+
+            // Determine fill/stroke from block main path if possible
+            const mainPath = svgRoot.querySelector('.blocklyPath');
+            let fill = '#ffffff';
+            let stroke = '#000000';
+            if (mainPath) {
+                const computed = window.getComputedStyle(mainPath);
+                fill = mainPath.getAttribute('fill') || computed.fill || fill;
+                stroke = mainPath.getAttribute('stroke') || computed.stroke || stroke;
+            }
+
+            // Small decorative notches to suggest different shapes
+            if (t.startsWith('arr_')) {
+                // Draw square bracket-like notches on left/right
+                const left = document.createElementNS(ns, 'path');
+                const notchW = Math.min(12, w * 0.12);
+                const notchH = Math.min(12, h * 0.5);
+                const lx = 2;
+                const ly = Math.round(h / 2 - notchH / 2);
+                const ld = `M ${lx} ${ly} l ${notchW} 0 l 0 ${notchH} l -${notchW} 0`;
+                left.setAttribute('d', ld);
+                left.setAttribute('fill', 'none');
+                left.setAttribute('stroke', stroke);
+                left.setAttribute('stroke-width', '2');
+                g.appendChild(left);
+
+                const right = document.createElementNS(ns, 'path');
+                const rx = Math.round(w - notchW - 2);
+                const rd = `M ${rx} ${ly} l ${notchW} 0 l 0 ${notchH} l -${notchW} 0`;
+                right.setAttribute('d', rd);
+                right.setAttribute('fill', 'none');
+                right.setAttribute('stroke', stroke);
+                right.setAttribute('stroke-width', '2');
+                g.appendChild(right);
+            } else if (t.startsWith('obj_')) {
+                // Draw curly-like approximate bumps at left/right
+                const left = document.createElementNS(ns, 'path');
+                const notchW = Math.min(14, w * 0.14);
+                const cx = 6;
+                const cy = Math.round(h / 2);
+                const curve = `M ${cx} ${cy - 8} q ${notchW/2} 8 ${notchW} 8 q -${notchW/2} 8 0 16`;
+                left.setAttribute('d', curve);
+                left.setAttribute('fill', 'none');
+                left.setAttribute('stroke', stroke);
+                left.setAttribute('stroke-width', '2');
+                g.appendChild(left);
+
+                const right = document.createElementNS(ns, 'path');
+                const rx = Math.round(w - 6 - notchW);
+                const curveR = `M ${rx} ${cy - 8} q ${notchW/2} 8 ${notchW} 8 q -${notchW/2} 8 0 16`;
+                right.setAttribute('d', curveR);
+                right.setAttribute('fill', 'none');
+                right.setAttribute('stroke', stroke);
+                right.setAttribute('stroke-width', '2');
+                g.appendChild(right);
+            }
+
+            svgRoot.appendChild(g);
+        } catch (e) {
+            console.warn('applyCustomSilhouetteToBlock error', e);
+        }
+    }
+
+    function applyCustomSilhouettesToWorkspace(ws) {
+        if (!ws) return;
+        ws.getAllBlocks(false).forEach(b => applyCustomSilhouetteToBlock(b));
+    }
+
+    // Apply on create/move/render events
+    workspace.addChangeListener((event) => {
+        if (!workspace) return;
+        if (event.type === Blockly.Events.BLOCK_CREATE || event.type === Blockly.Events.BLOCK_MOVE || event.type === Blockly.Events.BLOCK_CHANGE) {
+            applyCustomSilhouettesToWorkspace(workspace);
+        }
+    });
+
+    // Initial pass (after a short delay to let initial rendering finish)
+    setTimeout(() => applyCustomSilhouettesToWorkspace(workspace), 200);
+
     // --- OPTIMIZED UPDATE LOGIC ---
     let updateTimeout = null;
 
