@@ -222,8 +222,8 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
         { "type": "html_iframe", "message0": "iframe", "message1": "src %1", "args1": [{ "type": "input_value", "name": "SRC", "check": "String" }], "message2": "width %1", "args2": [{ "type": "input_value", "name": "W", "check": "String" }], "message3": "height %1", "args3": [{ "type": "input_value", "name": "H", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
 
         // --- GRAPHICS ---
-        { "type": "html_canvas", "message0": "canvas", "message1": "id %1", "args1": [{ "type": "field_input", "name": "ID", "text": "myCanvas" }], "message2": "w %1 h %2", "args2": [{ "type": "field_number", "name": "W", "value": 300 }, { "type": "field_number", "name": "H", "value": 200 }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
-        { "type": "js_canvas_draw", "message0": "on canvas", "message1": "id %1", "args1": [{ "type": "field_input", "name": "ID", "text": "myCanvas" }], "message2": "draw %1", "args2": [{ "type": "input_statement", "name": "DO" }], "colour": "#9966FF" },
+        { "type": "html_canvas", "message0": "canvas", "message1": "id %1", "args1": [{ "type": "input_value", "name": "ID", "check": "String" }], "message2": "w %1 h %2", "args2": [{ "type": "field_number", "name": "W", "value": 300 }, { "type": "field_number", "name": "H", "value": 200 }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
+        { "type": "js_canvas_draw", "message0": "on canvas", "message1": "id %1", "args1": [{ "type": "input_value", "name": "ID", "check": "String" }], "message2": "draw %1", "args2": [{ "type": "input_statement", "name": "DO" }], "colour": "#9966FF" },
         { "type": "js_canvas_rect", "message0": "rect x %1 y %2 w %3 h %4 color %5 filled %6", "args0": [{ "type": "field_number", "name": "X", "value": 10 }, { "type": "field_number", "name": "Y", "value": 10 }, { "type": "field_number", "name": "W", "value": 50 }, { "type": "field_number", "name": "H", "value": 50 }, { "type": "field_colour", "name": "C", "colour": "#ff0000" }, { "type": "field_checkbox", "name": "FILL", "checked": true }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
         { "type": "html_svg", "message0": "svg", "message1": "width %1", "args1": [{ "type": "field_number", "name": "W", "value": 100 }], "message2": "height %1", "args2": [{ "type": "field_number", "name": "H", "value": 100 }], "message3": "%1", "args3": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
         { "type": "svg_rect", "message0": "svg rect x %1 y %2 w %3 h %4 fill %5", "args0": [{ "type": "field_number", "name": "X", "value": 0 }, { "type": "field_number", "name": "Y", "value": 0 }, { "type": "field_number", "name": "W", "value": 50 }, { "type": "field_number", "name": "H", "value": 50 }, { "type": "field_colour", "name": "C", "colour": "#0000ff" }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
@@ -332,8 +332,8 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
             "type": "css_prop_size",
             "message0": "Size width %1 height %2",
             "args0": [
-                { "type": "field_input", "name": "W", "text": "100%" },
-                { "type": "field_input", "name": "H", "text": "auto" }
+                { "type": "input_value", "name": "W", "check": "String" },
+                { "type": "input_value", "name": "H", "check": "String" }
             ],
             "previousStatement": "CSS_PROP",
             "nextStatement": "CSS_PROP",
@@ -422,7 +422,7 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
             { "type": "input_dummy" },
             { "type": "input_value", "name": "TITLE", "check": "String" },
             { "type": "input_value", "name": "SUB", "check": "String" },
-            { "type": "field_input", "name": "BTN_TEXT", "text": "Get Started" },
+            { "type": "input_value", "name": "BTN_TEXT", "check": "String" },
             { "type": "input_statement", "name": "DO" }
         ],
         "previousStatement": null,
@@ -457,7 +457,7 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
         "type": "ui_navbar_simple",
         "message0": "Navbar Logo %1 Links %2",
         "args0": [
-            { "type": "field_input", "name": "LOGO", "text": "MySite" },
+            { "type": "input_value", "name": "LOGO", "check": "String" },
             { "type": "input_statement", "name": "LINKS" }
         ],
         "previousStatement": null,
@@ -468,8 +468,8 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
         "type": "ui_nav_link",
         "message0": "Nav Link %1 URL %2",
         "args0": [
-            { "type": "field_input", "name": "TEXT", "text": "Home" },
-            { "type": "field_input", "name": "URL", "text": "#" }
+            { "type": "input_value", "name": "TEXT", "check": "String" },
+            { "type": "input_value", "name": "URL", "check": "String" }
         ],
         "previousStatement": null,
         "nextStatement": null,
@@ -517,7 +517,14 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
 
         { "type": "obj_set", "message0": "set %1 in %2 to %3", "args0": [{ "type": "input_value", "name": "KEY", "check": "String" }, { "type": "input_value", "name": "OBJ", "check": "Object" }, { "type": "input_value", "name": "VAL" }], "previousStatement": null, "nextStatement": null, "colour": "#FFCC33" },
         { "type": "obj_delete", "message0": "delete key %1 from %2", "args0": [{ "type": "input_value", "name": "KEY", "check": "String" }, { "type": "input_value", "name": "OBJ", "check": "Object" }], "previousStatement": null, "nextStatement": null, "colour": "#FFCC33" },
-        { "type": "obj_merge", "message0": "merge %1 into %2", "args0": [{ "type": "input_value", "name": "SRC", "check": "Object" }, { "type": "input_value", "name": "DEST", "check": "Object" }], "previousStatement": null, "nextStatement": null, "colour": "#FFCC33" }
+        { "type": "obj_merge", "message0": "merge %1 into %2", "args0": [{ "type": "input_value", "name": "SRC", "check": "Object" }, { "type": "input_value", "name": "DEST", "check": "Object" }], "previousStatement": null, "nextStatement": null, "colour": "#FFCC33" },
 // ill add more later haha
+
+        // --- EXTRA UTILITY BLOCKS ---
+        { "type": "text_trim", "message0": "trim %1", "args0": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "output": "String", "colour": "#59C059" },
+        { "type": "text_replace", "message0": "replace %1 with %2 in %3", "args0": [{ "type": "input_value", "name": "SEARCH", "check": "String" }, { "type": "input_value", "name": "REPL", "check": "String" }, { "type": "input_value", "name": "TEXT", "check": "String" }], "output": "String", "colour": "#59C059" },
+        { "type": "math_random_int", "message0": "random int from %1 to %2", "args0": [{ "type": "input_value", "name": "FROM", "check": "Number" }, { "type": "input_value", "name": "TO", "check": "Number" }], "output": "Number", "colour": "#59C059" },
+        { "type": "url_parse", "message0": "parse url %1", "args0": [{ "type": "input_value", "name": "URL", "check": "String" }], "output": "Object", "colour": "#4C97FF", "tooltip": "Returns object with url parts (protocol, host, path, query)" },
+        { "type": "is_email", "message0": "is %1 an email?", "args0": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "output": "Boolean", "colour": "#59C059" }
     ]);
 };
