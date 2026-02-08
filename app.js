@@ -448,7 +448,41 @@ function init() {
     // CRITICAL: Call the function we created in blocks.js
     if (window.registerWebBlocks) {
         window.registerWebBlocks();
+
+        
     }
+
+    // --- AUTO-SAVE FEATURE ---
+function initAutoSave() {
+    // 1. Check for existing autosave on load
+    const savedState = localStorage.getItem("wb_autosave");
+    if (savedState) {
+        if(confirm("Found an unsaved backup from your last session. Restore it?")) {
+            workspace.clear();
+            const dom = Blockly.Xml.textToDom(savedState);
+            Blockly.Xml.domToWorkspace(dom, workspace);
+        }
+    }
+
+    initAutoSave();
+
+    // 2. Set interval to save every 30 seconds
+    setInterval(() => {
+        if(workspace) {
+            const xml = Blockly.Xml.workspaceToDom(workspace);
+            const xmlText = Blockly.Xml.domToText(xml);
+            localStorage.setItem("wb_autosave", xmlText);
+            
+            // Optional: Show a subtle toast or log
+            console.log("Auto-saved @ " + new Date().toLocaleTimeString());
+        }
+    }, 30000); // 30000 ms = 30 seconds
+}
+
+
+
+
+    
 
     workspace = Blockly.inject("blocklyArea", {
         toolbox: toolbox,

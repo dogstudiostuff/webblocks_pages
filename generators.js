@@ -163,6 +163,74 @@ htmlGenerator.forBlock['html_text'] = (b) => {
 htmlGenerator.forBlock['html_h'] = (b) => `<h${b.getFieldValue('LVL')}>${getVal(b, 'TEXT')}</h${b.getFieldValue('LVL')}>\n`;
 htmlGenerator.forBlock['html_raw'] = (b) => b.getFieldValue('CODE') + "\n";
 
+// STAGE STUFF
+htmlGenerator.forBlock['game_init'] = function(block) {
+    const w = block.getFieldValue('W');
+    const h = block.getFieldValue('H');
+    // This is where the error was happening because 'COL' didn't exist in the block
+    const col = getVal(block, 'COL') || "#000000"; 
+    
+    return `
+<canvas id="stage" width="${w}" height="${h}" style="background:${col}; display:block; margin:auto; border: 4px solid #808080;"></canvas>
+<script>
+    const canvas = document.getElementById('stage');
+    const ctx = canvas.getContext('2d');
+    
+    const keys = {};
+    window.addEventListener('keydown', e => { keys[e.key] = true; });
+    window.addEventListener('keyup', e => { keys[e.key] = false; });
+</script>\n`;
+};
+
+htmlGenerator.forBlock['colour_picker'] = function(block) {
+  const code = block.getFieldValue('COLOUR');
+  // We wrap it in quotes so it's a valid string in JS
+  return ["'" + code + "'", htmlGenerator.ORDER_ATOMIC];
+};
+
+// 1. Keep your existing HTML generator for the block
+htmlGenerator.forBlock['game_draw_rect'] = function(block) {
+    const name = block.getFieldValue('NAME');
+    const x = getVal(block, 'X') || 0;
+    const y = getVal(block, 'Y') || 0;
+    const w = getVal(block, 'W') || 50;
+    const h = getVal(block, 'H') || 50;
+    const col = getVal(block, 'COL') || "#ffffff";
+    
+    // This is the code that will actually run inside the <script> tags
+    return `ctx.fillStyle = "${col}";\nctx.fillRect(${x}, ${y}, ${w}, ${h});\n`;
+};
+
+// 2. THE FIX: Register it with the JavaScript generator too
+if (Blockly.JavaScript) {
+    Blockly.JavaScript.forBlock['game_draw_rect'] = function(block) {
+        // We reuse the exact same logic as the HTML generator
+        return htmlGenerator.forBlock['game_draw_rect'](block);
+    };
+}
+
+// Add the key pressed detector
+htmlGenerator.forBlock['js_key_pressed'] = function(block) {
+    let key = block.getFieldValue('KEY');
+    
+    // Logic to handle common naming mistakes
+    if (key.toLowerCase() === "space") key = " ";
+    
+    // Returns the check against our global 'keys' object
+    return [`keys["${key}"]`, htmlGenerator.ORDER_ATOMIC];
+};
+htmlGenerator.forBlock['game_loop'] = function(block) {
+    const branch = htmlGenerator.statementToCode(block, 'DO');
+    return `
+function update() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear screen
+    ${branch}
+    requestAnimationFrame(update);
+}
+update();\n`;
+};
+
+
 // MARKDOWN
 htmlGenerator.forBlock['md_block'] = (b) => {
   let md = b.getFieldValue('MD');
