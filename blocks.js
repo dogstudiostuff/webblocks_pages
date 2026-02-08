@@ -2,31 +2,34 @@ window.registerWebBlocks = function() {
     var defineBlocks = Blockly.common ? Blockly.common.defineBlocksWithJsonArray : Blockly.defineBlocksWithJsonArray;
 
 
-    // Register a custom extension to force square corners
 if (!Blockly.Extensions.isRegistered('shape_square')) {
     Blockly.Extensions.register('shape_square', function() {
-        // Force the output connection to be square
-        this.setOutputShape(Blockly.OUTPUT_SHAPE_SQUARE);
+        if (this.outputConnection) this.setOutputShape(Blockly.OUTPUT_SHAPE_SQUARE);
+        this._isBoxShape = true;
+    });
+}
+
+if (!Blockly.Extensions.isRegistered('shape_ticket')) {
+    Blockly.Extensions.register('shape_ticket', function() {
+        if (this.outputConnection) this.setOutputShape(window.WEBBLOCKS_OUTPUT_SHAPE_TICKET || 6);
+        this._isTicketShape = true;
     });
 }
 
 
     defineBlocks([
-        // stage stuff
-        // The "Stage" where the game lives
    {
     "type": "game_init",
     "message0": "Create Stage Width %1 Height %2 Color %3", 
     "args0": [
-        { "type": "field_number", "name": "W", "value": 800 }, // %1
-        { "type": "field_number", "name": "H", "value": 600 }, // %2
-        { "type": "input_value", "name": "COL", "check": "String" } // %3 - THE MISSING PART
+        { "type": "field_number", "name": "W", "value": 800 },
+        { "type": "field_number", "name": "H", "value": 600 },
+        { "type": "input_value", "name": "COL", "check": "String" }
     ],
     "nextStatement": null,
     "colour": "#FFAB19",
     "tooltip": "Initialize the game canvas."
 },
-    // The Update Loop (Runs 60 times per second)
     {
         "type": "game_loop",
         "message0": "Every Frame (60fps) %1",
@@ -35,7 +38,6 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
         "nextStatement": null,
         "colour": "#FFAB19"
     },
-    // Simple Movement
     {
         "type": "game_move_sprite",
         "message0": "Move Sprite %1 x: %2 y: %3",
@@ -77,8 +79,8 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
     "type": "ui_append",
     "message0": "append %1 to builder",
     "args0": [{ "type": "input_value", "name": "VAL" }],
-    "previousStatement": null, // This adds the notch on top
-    "nextStatement": null,     // This adds the bump on the bottom
+    "previousStatement": null,
+    "nextStatement": null,
     "colour": "#FF6666"
 },
         {
@@ -120,13 +122,12 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
     "colour": "#38bdf8",
     "tooltip": "A div container using Tailwind classes (e.g., 'bg-blue-500 p-4')"
 },
-        // --- REPORTERS ---
 { 
     "type": "text_string", 
     "message0": "%1", 
     "args0": [{ 
-        "type": "field_input", // MUST BE FIELD_INPUT
-        "name": "TEXT",        // MUST BE "TEXT"
+        "type": "field_input",
+        "name": "TEXT",
         "text": "text" 
     }], 
     "output": "String", 
@@ -139,9 +140,6 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
         { "type": "evil_block", "message0": "evil block", "previousStatement": null, "nextStatement": null, "colour": "#FF0000" },
         { "type": "hemmy_poop", "message0": "hemmy poop", "previousStatement": null, "nextStatement": null, "colour": "#c97303" },
 
-
-
-        // --- CUSTOM RAW BLOCKS ---
          { 
             "type": "raw_html", 
             "message0": "custom html", 
@@ -170,8 +168,7 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
             "nextStatement": null, 
             "colour": "#555555" 
         },
-        // Alias for compatibility
-        { 
+        {
             "type": "css_raw", 
             "message0": "custom css", 
             "message1": "%1",
@@ -186,7 +183,6 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
             "colour": "#555555" 
         },
         { "type": "raw_js", "message0": "custom js", "message1": "%1", "args1": [{ "type": "field_multilinetext", "name": "CODE", "text": "console.log('hi');" }], "previousStatement": null, "nextStatement": null, "colour": "#555555" },
-            // --- CSS HELPERS ---
     {
         "type": "css_id_class",
         "message0": "element with ID %1",
@@ -197,7 +193,7 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
         "args1": [
             { "type": "input_value", "name": "CLASS", "check": "String" }
         ],
-        "message2": "%1", // The empty message creates the C-mouth on a new line
+        "message2": "%1",
         "args2": [
             { "type": "input_statement", "name": "CONTENT" }
         ],
@@ -225,7 +221,6 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
         "colour": "#4C97FF",
         "tooltip": "Wraps content in a div with a single inline style"
     },
-        // --- MARKDOWN ---
         { "type": "md_block", "message0": "markdown", "message1": "%1", "args1": [{ "type": "field_multilinetext", "name": "MD", "text": "# Hello\n**Bold**" }], "previousStatement": null, "nextStatement": null, "colour": "#333333" },
         { "type": "md_code_inline", "message0": "code", "message1": "` %1 `", "args1": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#333333", "tooltip": "Inline Code" },
         { "type": "md_code_block", "message0": "code block", "message1": "%1", "args1": [{ "type": "field_multilinetext", "name": "CODE", "text": "console.log('Hello');" }], "previousStatement": null, "nextStatement": null, "colour": "#333333", "tooltip": "Code Block" },
@@ -234,7 +229,6 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
         { "type": "md_quote", "message0": "blockquote", "message1": "> %1", "args1": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#333333", "tooltip": "Blockquote" },
         { "type": "md_divider", "message0": "---", "previousStatement": null, "nextStatement": null, "colour": "#333333", "tooltip": "Horizontal Rule" },
 
-        // --- STRUCTURE ---
         { "type": "html_html", "message0": "html tag", "message1": "lang %1", "args1": [{ "type": "input_value", "name": "LANG", "check": "String" }], "message2": "%1", "args2": [{ "type": "input_statement", "name": "CONTENT" }], "colour": "#4C97FF" },
         { "type": "html_head", "message0": "head %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#4C97FF" },
         { "type": "html_body", "message0": "body %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#4C97FF" },
@@ -248,7 +242,6 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
         { "type": "html_aside", "message0": "aside %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#4C97FF" },
         { "type": "html_details", "message0": "details", "message1": "summary %1", "args1": [{ "type": "input_value", "name": "SUM", "check": "String" }], "message2": "%1", "args2": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#4C97FF" },
         { "type": "meta_html_wrapper", "message0": "html %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#606060" },
-        // --- META ---
         { "type": "meta_head_wrapper", "message0": "head %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#606060" },
         { "type": "meta_title", "message0": "page title %1", "args0": [{ "type": "input_value", "name": "VAL", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#606060" },
         { "type": "meta_charset", "message0": "charset utf-8", "previousStatement": null, "nextStatement": null, "colour": "#606060" },
@@ -257,7 +250,6 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
         { "type": "meta_body", "message0": "body %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#606060" },
         { "type": "meta_doctype", "message0": "<!DOCTYPE html>", "nextStatement": null, "colour": "#606060" },
 
-        // --- LAYOUT ---
         { "type": "layout_flex", "message0": "Flex Box", "message1": "direction %1", "args1": [
             { "type": "field_dropdown", "name": "DIR", "options": [["row","row"],["column","column"]] }
         ], "message2": "justify %1 align %2", "args2": [
@@ -277,7 +269,6 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
         
         { "type": "css_style_wrapper", "message0": "style", "message1": "with css %1", "args1": [{ "type": "input_value", "name": "CSS", "check": "String" }], "message2": "%1", "args2": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#4C97FF" },
 
-        // --- TEXT ---
         { "type": "html_h", "message0": "heading %1 %2", "args0": [{ "type": "field_dropdown", "name": "LVL", "options": [["H1","1"],["H2","2"],["H3","3"]] }, { "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#59C059" },
         { "type": "html_p", "message0": "paragraph %1", "args0": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#59C059" },
         { "type": "html_span", "message0": "span %1", "args0": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#59C059" },
@@ -287,18 +278,15 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
         { "type": "html_format", "message0": "format %1 text %2", "args0": [{ "type": "field_dropdown", "name": "TAG", "options": [["Bold","b"],["Italic","i"],["Underline","u"],["Strike","s"],["Code","code"],["Pre","pre"],["Quote","blockquote"]] }, { "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#59C059" },
         { "type": "html_text", "message0": "%1", "args0": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#59C059" },
 
-        // --- LISTS ---
         { "type": "html_ul", "message0": "unordered list %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#FFAB19" },
         { "type": "html_ol", "message0": "ordered list %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#FFAB19" },
         { "type": "html_li", "message0": "list item %1", "args0": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#FFAB19" },
 
-        // --- TABLES ---
         { "type": "html_table", "message0": "table", "message1": "border %1", "args1": [{ "type": "field_number", "name": "BORDER", "value": 1 }], "message2": "%1", "args2": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#5CA65C" },
         { "type": "html_tr", "message0": "table row %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#5CA65C" },
         { "type": "html_td", "message0": "table cell %1", "args0": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#5CA65C" },
         { "type": "html_th", "message0": "table header %1", "args0": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#5CA65C" },
 
-        // --- FORMS ---
         { "type": "html_form", "message0": "form", "message1": "action %1", "args1": [{ "type": "input_value", "name": "ACT", "check": "String" }], "message2": "%1", "args2": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6680" },
         { "type": "html_input", "message0": "input", "message1": "type %1", "args1": [{ "type": "field_dropdown", "name": "TYPE", "options": [["Text","text"],["Password","password"],["Email","email"],["Number","number"],["Date","date"],["Color","color"],["Checkbox","checkbox"],["Radio","radio"],["File","file"]] }], "message2": "name %1", "args2": [{ "type": "input_value", "name": "NAME", "check": "String" }], "message3": "placeholder %1", "args3": [{ "type": "input_value", "name": "PH", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6680" },
         { "type": "html_button", "message0": "button", "message1": "type %1", "args1": [{ "type": "field_dropdown", "name": "TYPE", "options": [["Button","button"],["Submit","submit"],["Reset","reset"]] }], "message2": "text %1", "args2": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#FF6680" },
@@ -310,8 +298,8 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
     "args0": [
         { "type": "field_number", "name": "R", "value": 4 },
         { "type": "field_number", "name": "C", "value": 20 },
-        { "type": "input_value", "name": "NAME", "check": "String" }, // Was field_input
-        { "type": "input_value", "name": "PH", "check": "String" }    // Was field_input
+        { "type": "input_value", "name": "NAME", "check": "String" },
+        { "type": "input_value", "name": "PH", "check": "String" }
     ],
     "previousStatement": null,
     "nextStatement": null,
@@ -323,13 +311,11 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
         { "type": "html_input_req", "message0": "input", "message1": "name %1", "args1": [{ "type": "input_value", "name": "NAME", "check": "String" }], "message2": "type %1", "args2": [{ "type": "field_dropdown", "name": "TYPE", "options": [["Text","text"],["Email","email"],["Password","password"],["Date","date"]] }], "message3": "required %1", "args3": [{ "type": "field_checkbox", "name": "REQ", "checked": true }], "previousStatement": null, "nextStatement": null, "colour": "#FF6680" },
         { "type": "js_form_submit", "message0": "on form", "message1": "id %1", "args1": [{ "type": "input_value", "name": "ID", "check": "String" }], "message2": "submit %1", "args2": [{ "type": "input_statement", "name": "DO" }], "colour": "#FF6680" },
 
-        // --- MEDIA ---
         { "type": "html_img", "message0": "img", "message1": "src %1", "args1": [{ "type": "input_value", "name": "SRC", "check": "String" }], "message2": "alt %1", "args2": [{ "type": "input_value", "name": "ALT", "check": "String" }], "message3": "width %1", "args3": [{ "type": "input_value", "name": "W", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
         { "type": "html_video", "message0": "video", "message1": "src %1", "args1": [{ "type": "input_value", "name": "SRC", "check": "String" }], "message2": "controls %1", "args2": [{ "type": "field_checkbox", "name": "CTRL", "checked": true }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
         { "type": "html_audio", "message0": "audio", "message1": "src %1", "args1": [{ "type": "input_value", "name": "SRC", "check": "String" }], "message2": "controls %1", "args2": [{ "type": "field_checkbox", "name": "CTRL", "checked": true }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
         { "type": "html_iframe", "message0": "iframe", "message1": "src %1", "args1": [{ "type": "input_value", "name": "SRC", "check": "String" }], "message2": "width %1", "args2": [{ "type": "input_value", "name": "W", "check": "String" }], "message3": "height %1", "args3": [{ "type": "input_value", "name": "H", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
 
-        // --- GRAPHICS ---
         { "type": "html_canvas", "message0": "canvas", "message1": "id %1", "args1": [{ "type": "input_value", "name": "ID", "check": "String" }], "message2": "w %1 h %2", "args2": [{ "type": "field_number", "name": "W", "value": 300 }, { "type": "field_number", "name": "H", "value": 200 }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
         { "type": "js_canvas_draw", "message0": "on canvas", "message1": "id %1", "args1": [{ "type": "input_value", "name": "ID", "check": "String" }], "message2": "draw %1", "args2": [{ "type": "input_statement", "name": "DO" }], "colour": "#9966FF" },
         { "type": "js_canvas_rect", "message0": "rect x %1 y %2 w %3 h %4 color %5 filled %6", "args0": [{ "type": "field_number", "name": "X", "value": 10 }, { "type": "field_number", "name": "Y", "value": 10 }, { "type": "field_number", "name": "W", "value": 50 }, { "type": "field_number", "name": "H", "value": 50 }, { "type": "field_colour", "name": "C", "colour": "#ff0000" }, { "type": "field_checkbox", "name": "FILL", "checked": true }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
@@ -338,18 +324,193 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
         { "type": "svg_circle", "message0": "svg circle cx %1 cy %2 r %3 fill %4", "args0": [{ "type": "field_number", "name": "X", "value": 50 }, { "type": "field_number", "name": "Y", "value": 50 }, { "type": "field_number", "name": "R", "value": 20 }, { "type": "field_colour", "name": "C", "colour": "#00ff00" }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
         {
         "type": "game_draw_rect",
-        "message0": "Draw Rectangle Name %1 x %2 y %3 w %4 h %5 color %6", // Corrected placeholders
+        "message0": "Draw Rectangle Name %1 x %2 y %3 w %4 h %5 color %6",
         "args0": [
-        { "type": "field_input", "name": "NAME", "text": "player" }, // %1
-        { "type": "input_value", "name": "X", "check": "Number" },    // %2
-        { "type": "input_value", "name": "Y", "check": "Number" },    // %3
-        { "type": "input_value", "name": "W", "check": "Number" },    // %4
-        { "type": "input_value", "name": "H", "check": "Number" },    // %5
-        { "type": "input_value", "name": "COL", "check": "String" }   // %6
+        { "type": "field_input", "name": "NAME", "text": "player" },
+        { "type": "input_value", "name": "X", "check": "Number" },
+        { "type": "input_value", "name": "Y", "check": "Number" },
+        { "type": "input_value", "name": "W", "check": "Number" },
+        { "type": "input_value", "name": "H", "check": "Number" },
+        { "type": "input_value", "name": "COL", "check": "String" }
         ],
         "previousStatement": null,
         "nextStatement": null,
         "colour": "#4C97FF"
+    },
+    {
+        "type": "game_draw_circle",
+        "message0": "Draw Circle Name %1 x %2 y %3 radius %4 color %5",
+        "args0": [
+            { "type": "field_input", "name": "NAME", "text": "ball" },
+            { "type": "input_value", "name": "X", "check": "Number" },
+            { "type": "input_value", "name": "Y", "check": "Number" },
+            { "type": "input_value", "name": "R", "check": "Number" },
+            { "type": "input_value", "name": "COL", "check": "String" }
+        ],
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": "#4C97FF",
+        "tooltip": "Draw a circle sprite on the canvas"
+    },
+    {
+        "type": "game_draw_text",
+        "message0": "Draw Text %1 x %2 y %3 size %4 color %5",
+        "args0": [
+            { "type": "input_value", "name": "TEXT", "check": "String" },
+            { "type": "input_value", "name": "X", "check": "Number" },
+            { "type": "input_value", "name": "Y", "check": "Number" },
+            { "type": "field_number", "name": "SIZE", "value": 24, "min": 1 },
+            { "type": "input_value", "name": "COL", "check": "String" }
+        ],
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": "#4C97FF",
+        "tooltip": "Draw text on the canvas"
+    },
+    {
+        "type": "game_draw_line",
+        "message0": "Draw Line from %1 %2 to %3 %4 color %5 width %6",
+        "args0": [
+            { "type": "field_number", "name": "X1", "value": 0 },
+            { "type": "field_number", "name": "Y1", "value": 0 },
+            { "type": "field_number", "name": "X2", "value": 100 },
+            { "type": "field_number", "name": "Y2", "value": 100 },
+            { "type": "field_colour", "name": "COL", "colour": "#ffffff" },
+            { "type": "field_number", "name": "WIDTH", "value": 2, "min": 1 }
+        ],
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": "#4C97FF",
+        "tooltip": "Draw a line on the canvas"
+    },
+    {
+        "type": "game_draw_image",
+        "message0": "Draw Image %1 x %2 y %3 w %4 h %5",
+        "args0": [
+            { "type": "input_value", "name": "URL", "check": "String" },
+            { "type": "input_value", "name": "X", "check": "Number" },
+            { "type": "input_value", "name": "Y", "check": "Number" },
+            { "type": "input_value", "name": "W", "check": "Number" },
+            { "type": "input_value", "name": "H", "check": "Number" }
+        ],
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": "#9966FF",
+        "tooltip": "Draw an image on the canvas (URL, cached automatically)"
+    },
+    {
+        "type": "game_set_background",
+        "message0": "Set Background Color %1",
+        "args0": [
+            { "type": "input_value", "name": "COL", "check": "String" }
+        ],
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": "#FFAB19",
+        "tooltip": "Fill the entire canvas with a color (use in game loop)"
+    },
+    {
+        "type": "game_mouse_x",
+        "message0": "mouse x",
+        "output": "Number",
+        "colour": "#4C97FF",
+        "tooltip": "X position of mouse on the canvas"
+    },
+    {
+        "type": "game_mouse_y",
+        "message0": "mouse y",
+        "output": "Number",
+        "colour": "#4C97FF",
+        "tooltip": "Y position of mouse on the canvas"
+    },
+    {
+        "type": "game_canvas_width",
+        "message0": "stage width",
+        "output": "Number",
+        "colour": "#FFAB19",
+        "tooltip": "Width of the canvas"
+    },
+    {
+        "type": "game_canvas_height",
+        "message0": "stage height",
+        "output": "Number",
+        "colour": "#FFAB19",
+        "tooltip": "Height of the canvas"
+    },
+    {
+        "type": "game_timer",
+        "message0": "game timer",
+        "output": "Number",
+        "colour": "#4C97FF",
+        "tooltip": "Seconds since the game started"
+    },
+    {
+        "type": "game_set_var",
+        "message0": "set game var %1 to %2",
+        "args0": [
+            { "type": "field_input", "name": "VAR", "text": "score" },
+            { "type": "input_value", "name": "VAL" }
+        ],
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": "#FFAB19",
+        "tooltip": "Set a named game variable (e.g., score, lives)"
+    },
+    {
+        "type": "game_get_var",
+        "message0": "game var %1",
+        "args0": [
+            { "type": "field_input", "name": "VAR", "text": "score" }
+        ],
+        "output": "Number",
+        "colour": "#FFAB19",
+        "tooltip": "Get a named game variable"
+    },
+    {
+        "type": "game_collision_rect",
+        "message0": "%1 touching %2 ?",
+        "args0": [
+            { "type": "field_input", "name": "A", "text": "player" },
+            { "type": "field_input", "name": "B", "text": "enemy" }
+        ],
+        "output": "Boolean",
+        "colour": "#4C97FF",
+        "tooltip": "Check if two sprites are overlapping (rectangle collision)"
+    },
+    {
+        "type": "game_sprite_prop",
+        "message0": "%1 of sprite %2",
+        "args0": [
+            { "type": "field_dropdown", "name": "PROP", "options": [["x","x"],["y","y"],["width","w"],["height","h"]] },
+            { "type": "field_input", "name": "NAME", "text": "player" }
+        ],
+        "output": "Number",
+        "colour": "#4C97FF",
+        "tooltip": "Get a property (x, y, width, height) of a sprite"
+    },
+    {
+        "type": "game_set_sprite_prop",
+        "message0": "set %1 of sprite %2 to %3",
+        "args0": [
+            { "type": "field_dropdown", "name": "PROP", "options": [["x","x"],["y","y"],["width","w"],["height","h"]] },
+            { "type": "field_input", "name": "NAME", "text": "player" },
+            { "type": "input_value", "name": "VAL", "check": "Number" }
+        ],
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": "#4C97FF",
+        "tooltip": "Set a property of a sprite"
+    },
+    {
+        "type": "game_distance",
+        "message0": "distance %1 to %2",
+        "args0": [
+            { "type": "field_input", "name": "A", "text": "player" },
+            { "type": "field_input", "name": "B", "text": "enemy" }
+        ],
+        "output": "Number",
+        "colour": "#4C97FF",
+        "tooltip": "Distance in pixels between two sprites"
     },
 {
     "type": "js_key_pressed",
@@ -366,11 +527,9 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
     "tooltip": "Type the key name (e.g., 'a', 'Enter', 'ArrowUp', ' ') to check if it is held down."
 },
 
-        // --- AUDIO API ---
         { "type": "js_audio_play", "message0": "play sound %1", "args0": [{ "type": "input_value", "name": "URL", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#CF63CF" },
         { "type": "js_audio_synth", "message0": "synth note %1 duration %2 ms", "args0": [{ "type": "field_dropdown", "name": "NOTE", "options": [["C4","261.63"],["D4","293.66"],["E4","329.63"],["F4","349.23"],["G4","392.00"],["A4","440.00"],["B4","493.88"]] }, { "type": "field_number", "name": "DUR", "value": 500 }], "previousStatement": null, "nextStatement": null, "colour": "#CF63CF" },
 
-        // --- SCRIPTING ---
         { "type": "js_event", "message0": "on event", "message1": "event %1", "args1": [{ "type": "field_dropdown", "name": "EVT", "options": [["Click","click"],["Hover","mouseenter"],["Input","input"]] }], "message2": "selector %1", "args2": [{ "type": "input_value", "name": "SEL", "check": "String" }], "message3": "%1", "args3": [{ "type": "input_statement", "name": "DO" }], "colour": "#FF8C1A" },
         { "type": "js_alert", "message0": "alert %1", "args0": [{ "type": "input_value", "name": "MSG", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#FF8C1A" },
         { "type": "js_console", "message0": "console log %1", "args0": [{ "type": "input_value", "name": "MSG", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#FF8C1A" },
@@ -389,14 +548,14 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
             "type": "js_mouse_clicked",
             "message0": "mouse clicked?",
             "output": "Boolean",
-            "colour": "#4C97FF", // Blue like sensing
+            "colour": "#4C97FF",
             "tooltip": "Returns true if mouse was just clicked"
         },
         {
             "type": "js_mouse_down",
             "message0": "mouse down?",
             "output": "Boolean",
-            "colour": "#4C97FF", // Blue like sensing
+            "colour": "#4C97FF",
             "tooltip": "Returns true if mouse is currently held down"
         },
         {
@@ -405,10 +564,9 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
             "args0": [{ "type": "input_value", "name": "MSG", "check": "String" }],
             "previousStatement": null,
             "nextStatement": null,
-            "colour": "#FFAB19", // Orange/Yellow like Control
+            "colour": "#FFAB19",
             "tooltip": "Throws a JS Error"
         },
-        // --- API & STORAGE ---
         { "type": "js_geo_get", "message0": "get location", "message1": "lat variable %1", "args1": [{ "type": "field_variable", "name": "LAT", "variable": "lat" }], "message2": "lng variable %1", "args2": [{ "type": "field_variable", "name": "LNG", "variable": "lng" }], "message3": "%1", "args3": [{ "type": "input_statement", "name": "DO" }], "colour": "#FF8C1A" },
         { "type": "js_fetch_json", "message0": "fetch json", "message1": "from %1", "args1": [{ "type": "input_value", "name": "URL", "check": "String" }], "message2": "store in %1", "args2": [{ "type": "field_variable", "name": "DATA", "variable": "data" }], "message3": "%1", "args3": [{ "type": "input_statement", "name": "DO" }], "colour": "#FF8C1A" },
         { "type": "js_localstorage_set", "message0": "storage set %1 = %2", "args0": [{ "type": "input_value", "name": "KEY", "check": "String" }, { "type": "input_value", "name": "VAL", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#FF8C1A" },
@@ -428,7 +586,6 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
             "tooltip": "Container with visual styling"
         },
 
-        // --- VISUAL CSS PROPERTIES ---
         {
             "type": "css_prop_text",
             "message0": "Text color %1 size %2 align %3 weight %4",
@@ -619,7 +776,7 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
         { "type": "input_dummy" },
         { "type": "input_value", "name": "Tb_PLAN", "check": "String" },
         { "type": "input_value", "name": "Tb_PRICE", "check": "String" },
-        { "type": "input_statement", "name": "Kb_KX" }, // Slot for list items
+        { "type": "input_statement", "name": "Kb_KX" },
         { "type": "input_value", "name": "Tb_BTN", "check": "String" }
     ],
     "previousStatement": null,
@@ -651,35 +808,32 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
         { 	"type":"arr_reverse","message0":"reverse %1","args0":[{"type":"input_value","name":"ARR","check":"Array"}],"output":"Array","colour":"#FF6666","extensions":["shape_square"]},
         { 	"type":"arr_join","message0":"join %1 with %2","args0":[{"type":"input_value","name":"ARR","check":"Array"},{"type":"input_value","name":"DELIM","check":"String"}],"output":"String","colour":"#FF6666","extensions":["shape_square"]},
 
-                // --- OBJECTS (JSON) ---
-        { "type": "obj_new", "message0": "blank object", "output": "Object", "colour": "#FFCC33" },
-        { "type": "obj_parse", "message0": "parse %1 as object", "args0": [{ "type": "input_value", "name": "TXT", "check": "String" }], "output": "Object", "colour": "#FFCC33" },
-        { "type": "obj_from_entries", "message0": "from entries %1", "args0": [{ "type": "input_value", "name": "ENTRIES", "check": "Array" }], "output": "Object", "colour": "#FFCC33" },
+        { "type": "obj_new", "message0": "blank object", "output": "Object", "colour": "#FFCC33", "extensions": ["shape_ticket"] },
+        { "type": "obj_parse", "message0": "parse %1 as object", "args0": [{ "type": "input_value", "name": "TXT", "check": "String" }], "output": "Object", "colour": "#FFCC33", "extensions": ["shape_ticket"] },
+        { "type": "obj_from_entries", "message0": "from entries %1", "args0": [{ "type": "input_value", "name": "ENTRIES", "check": "Array" }], "output": "Object", "colour": "#FFCC33", "extensions": ["shape_ticket"] },
 
-        { "type": "obj_builder", "message0": "object builder %1  %2 ", "args0": [{ "type": "input_dummy" },  { "type": "input_statement", "name": "DO" }], "output": "Object", "colour": "#FFCC33" },
-        { "type": "obj_builder_add", "message0": "append key %1 value %2 to builder", "args0": [{ "type": "input_value", "name": "KEY", "check": "String" }, { "type": "input_value", "name": "VAL" }], "previousStatement": null, "nextStatement": null, "colour": "#FFCC33" },
-        { "type": "obj_builder_set", "message0": "set builder to %1", "args0": [{ "type": "input_value", "name": "OBJ", "check": "Object" }], "previousStatement": null, "nextStatement": null, "colour": "#FFCC33" },
+        { "type": "obj_builder", "message0": "object builder %1  %2 ", "args0": [{ "type": "input_dummy" },  { "type": "input_statement", "name": "DO" }], "output": "Object", "colour": "#FFCC33", "extensions": ["shape_ticket"] },
+        { "type": "obj_builder_add", "message0": "append key %1 value %2 to builder", "args0": [{ "type": "input_value", "name": "KEY", "check": "String" }, { "type": "input_value", "name": "VAL" }], "previousStatement": null, "nextStatement": null, "colour": "#FFCC33", "extensions": ["shape_ticket"] },
+        { "type": "obj_builder_set", "message0": "set builder to %1", "args0": [{ "type": "input_value", "name": "OBJ", "check": "Object" }], "previousStatement": null, "nextStatement": null, "colour": "#FFCC33", "extensions": ["shape_ticket"] },
 
-        { "type": "obj_get", "message0": "get %1 in %2", "args0": [{ "type": "input_value", "name": "KEY", "check": "String" }, { "type": "input_value", "name": "OBJ", "check": "Object" }], "output": null, "colour": "#FFCC33" },
-        { "type": "obj_has", "message0": "%1 has key %2 ?", "args0": [{ "type": "input_value", "name": "OBJ", "check": "Object" }, { "type": "input_value", "name": "KEY", "check": "String" }], "output": "Boolean", "colour": "#FFCC33" },
-        { "type": "obj_keys", "message0": "keys of %1", "args0": [{ "type": "input_value", "name": "OBJ", "check": "Object" }], "output": "Array", "colour": "#FFCC33" },
-        { "type": "obj_values", "message0": "values of %1", "args0": [{ "type": "input_value", "name": "OBJ", "check": "Object" }], "output": "Array", "colour": "#FFCC33" },
-        { "type": "obj_entries", "message0": "entries of %1", "args0": [{ "type": "input_value", "name": "OBJ", "check": "Object" }], "output": "Array", "colour": "#FFCC33" },
-        { "type": "obj_stringify", "message0": "stringify %1", "args0": [{ "type": "input_value", "name": "OBJ" }], "output": "String", "colour": "#FFCC33" },
+        { "type": "obj_get", "message0": "get %1 in %2", "args0": [{ "type": "input_value", "name": "KEY", "check": "String" }, { "type": "input_value", "name": "OBJ", "check": "Object" }], "output": null, "colour": "#FFCC33", "extensions": ["shape_ticket"] },
+        { "type": "obj_has", "message0": "%1 has key %2 ?", "args0": [{ "type": "input_value", "name": "OBJ", "check": "Object" }, { "type": "input_value", "name": "KEY", "check": "String" }], "output": "Boolean", "colour": "#FFCC33", "extensions": ["shape_ticket"] },
+        { "type": "obj_keys", "message0": "keys of %1", "args0": [{ "type": "input_value", "name": "OBJ", "check": "Object" }], "output": "Array", "colour": "#FFCC33", "extensions": ["shape_ticket"] },
+        { "type": "obj_values", "message0": "values of %1", "args0": [{ "type": "input_value", "name": "OBJ", "check": "Object" }], "output": "Array", "colour": "#FFCC33", "extensions": ["shape_ticket"] },
+        { "type": "obj_entries", "message0": "entries of %1", "args0": [{ "type": "input_value", "name": "OBJ", "check": "Object" }], "output": "Array", "colour": "#FFCC33", "extensions": ["shape_ticket"] },
+        { "type": "obj_stringify", "message0": "stringify %1", "args0": [{ "type": "input_value", "name": "OBJ" }], "output": "String", "colour": "#FFCC33", "extensions": ["shape_ticket"] },
 
-        { "type": "obj_set", "message0": "set %1 in %2 to %3", "args0": [{ "type": "input_value", "name": "KEY", "check": "String" }, { "type": "input_value", "name": "OBJ", "check": "Object" }, { "type": "input_value", "name": "VAL" }], "previousStatement": null, "nextStatement": null, "colour": "#FFCC33" },
-        { "type": "obj_delete", "message0": "delete key %1 from %2", "args0": [{ "type": "input_value", "name": "KEY", "check": "String" }, { "type": "input_value", "name": "OBJ", "check": "Object" }], "previousStatement": null, "nextStatement": null, "colour": "#FFCC33" },
-        { "type": "obj_merge", "message0": "merge %1 into %2", "args0": [{ "type": "input_value", "name": "SRC", "check": "Object" }, { "type": "input_value", "name": "DEST", "check": "Object" }], "previousStatement": null, "nextStatement": null, "colour": "#FFCC33" },
+        { "type": "obj_set", "message0": "set %1 in %2 to %3", "args0": [{ "type": "input_value", "name": "KEY", "check": "String" }, { "type": "input_value", "name": "OBJ", "check": "Object" }, { "type": "input_value", "name": "VAL" }], "previousStatement": null, "nextStatement": null, "colour": "#FFCC33", "extensions": ["shape_ticket"] },
+        { "type": "obj_delete", "message0": "delete key %1 from %2", "args0": [{ "type": "input_value", "name": "KEY", "check": "String" }, { "type": "input_value", "name": "OBJ", "check": "Object" }], "previousStatement": null, "nextStatement": null, "colour": "#FFCC33", "extensions": ["shape_ticket"] },
+        { "type": "obj_merge", "message0": "merge %1 into %2", "args0": [{ "type": "input_value", "name": "SRC", "check": "Object" }, { "type": "input_value", "name": "DEST", "check": "Object" }], "previousStatement": null, "nextStatement": null, "colour": "#FFCC33", "extensions": ["shape_ticket"] },
 // ill add more later haha
 
-        // --- EXTRA UTILITY BLOCKS ---
         { "type": "text_trim", "message0": "trim %1", "args0": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "output": "String", "colour": "#59C059" },
         { "type": "text_replace", "message0": "replace %1 with %2 in %3", "args0": [{ "type": "input_value", "name": "SEARCH", "check": "String" }, { "type": "input_value", "name": "REPL", "check": "String" }, { "type": "input_value", "name": "TEXT", "check": "String" }], "output": "String", "colour": "#59C059" },
         { "type": "math_random_int", "message0": "random int from %1 to %2", "args0": [{ "type": "input_value", "name": "FROM", "check": "Number" }, { "type": "input_value", "name": "TO", "check": "Number" }], "output": "Number", "colour": "#59C059" },
         { "type": "url_parse", "message0": "parse url %1", "args0": [{ "type": "input_value", "name": "URL", "check": "String" }], "output": "Object", "colour": "#4C97FF", "tooltip": "Returns object with url parts (protocol, host, path, query)" },
         { "type": "is_email", "message0": "is %1 an email?", "args0": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "output": "Boolean", "colour": "#59C059" },
 
-        // --- EASY STYLING BLOCKS ---
         { "type": "style_gradient", "message0": "background gradient from %1 to %2 direction %3", "args0": [ { "type": "input_value", "name": "C1", "check": "String" }, { "type": "input_value", "name": "C2", "check": "String" }, { "type": "field_dropdown", "name": "DIR", "options": [["to right","to right"],["to bottom","to bottom"],["to top","to top"],["to left","to left"]] } ], "output": "String", "colour": "#9966FF", "tooltip": "CSS gradient value" },
         { "type": "style_box_shadow", "message0": "box-shadow x %1 y %2 blur %3 spread %4 color %5 inset %6", "args0": [ { "type": "input_value", "name": "X", "check": "String" }, { "type": "input_value", "name": "Y", "check": "String" }, { "type": "input_value", "name": "B", "check": "String" }, { "type": "input_value", "name": "S", "check": "String" }, { "type": "input_value", "name": "C", "check": "String" }, { "type": "field_checkbox", "name": "IN", "checked": false } ], "output": "String", "colour": "#9966FF", "tooltip": "CSS box-shadow value" },
         { "type": "style_border_radius", "message0": "border-radius %1", "args0": [ { "type": "input_value", "name": "R", "check": "String" } ], "output": "String", "colour": "#9966FF", "tooltip": "CSS border-radius value (e.g., 8px or 50%)" },

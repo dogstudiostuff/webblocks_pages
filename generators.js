@@ -9,9 +9,7 @@ htmlGenerator.scrub_ = (block, code, thisOnly) => {
     return code;
 };
 
-// Helper: Get text from value input (strip quotes if literal)
 function getVal(block, name) {
-    // We check both generators just in case
     let code = "";
     try {
         code = htmlGenerator.valueToCode(block, name, htmlGenerator.ORDER_ATOMIC);
@@ -22,7 +20,6 @@ function getVal(block, name) {
         console.error("Value generation failed for", name, e);
     }
 
-    // Strip quotes if it's a string, or return 0 if empty
     if (!code) return "0";
     if ((code.startsWith("'") && code.endsWith("'")) || (code.startsWith('"') && code.endsWith('"'))) {
         return code.slice(1, -1);
@@ -35,7 +32,6 @@ function wrapJs(block, code) {
     const parent = block.getParent();
     let parentIsJs = false;
     
-    // Check if parent is a JS block or a Control block (loops/ifs) or Array Builder
     if (parent) {
         const type = parent.type;
         if (type.startsWith('js_') || type.startsWith('controls_') || type === 'raw_js' || type === 'arr_builder') {
@@ -58,13 +54,11 @@ htmlGenerator.statementToCode = (block, name) => {
 htmlGenerator.forBlock['evil_block'] = (b) => `<h1 style="color: red;">Eeeevilllll</h1>\n`;
 htmlGenerator.forBlock['hemmy_poop'] = (b) => `<h1 style="color: brown;">Hemmy Poop</h1>\n`;
 
-// --- CUSTOM GENERATORS ---
 htmlGenerator.forBlock['raw_html'] = (b) => b.getFieldValue('CODE') + "\n";
 htmlGenerator.forBlock['raw_css'] = (b) => `<style>${b.getFieldValue('CODE')}</style>\n`;
 htmlGenerator.forBlock['raw_js'] = (b) => `<script>${b.getFieldValue('CODE')}</script>\n`;
 htmlGenerator.forBlock['css_raw'] = (b) => `<style>${b.getFieldValue('CODE')}</style>\n`;
 
-// REPORTERS
 htmlGenerator.forBlock["text_string"] = (b) => {
     return ["'" + b.getFieldValue("TEXT") + "'", htmlGenerator.ORDER_ATOMIC];
 };
@@ -76,7 +70,6 @@ htmlGenerator.forBlock["text_join"] = (b) => {
 htmlGenerator.forBlock["math_num"] = (b) => [b.getFieldValue('NUM'), htmlGenerator.ORDER_ATOMIC];
 htmlGenerator.forBlock["logic_bool"] = (b) => [b.getFieldValue('BOOL'), htmlGenerator.ORDER_ATOMIC];
 
-// META
 htmlGenerator.forBlock['meta_doctype'] = () => `<!DOCTYPE html>\n`;
 htmlGenerator.forBlock['meta_head_wrapper'] = (b) => `<head>${htmlGenerator.statementToCode(b,'CONTENT')}</head>`;
 htmlGenerator.forBlock['meta_title'] = (b) => {
@@ -92,7 +85,6 @@ htmlGenerator.forBlock['meta_favicon'] = (b) => {
 htmlGenerator.forBlock['meta_body'] = (b) => `<body>${htmlGenerator.statementToCode(b, 'CONTENT')}</body>\n`;
 htmlGenerator.forBlock['meta_html_wrapper'] = (b) => `<html>${htmlGenerator.statementToCode(b, 'CONTENT')}</html>\n`;
 
-// LAYOUT
 htmlGenerator.forBlock['layout_div'] = (b) => {
     const id = getVal(b, 'ID');
     const cls = getVal(b, 'CLASS');
@@ -113,7 +105,6 @@ htmlGenerator.forBlock["css_style_wrapper"] = (b) => {
     return `<div style="${css}">\n${content}</div>\n`;
 };
 
-// GRAPHICS
 htmlGenerator.forBlock['html_canvas'] = (b) => `<canvas id="${b.getFieldValue('ID')}" width="${b.getFieldValue('W')}" height="${b.getFieldValue('H')}" style="border:1px solid #000"></canvas>\n`;
 htmlGenerator.forBlock['js_canvas_draw'] = (b) => `<script>(function(){var c=document.getElementById('${b.getFieldValue('ID')}');var ctx=c.getContext('2d');${htmlGenerator.statementToCode(b, 'DO')}})();</script>\n`;
 htmlGenerator.forBlock['js_canvas_rect'] = (b) => `ctx.fillStyle='${b.getFieldValue('C')}';ctx.strokeStyle='${b.getFieldValue('C')}';ctx.${b.getFieldValue('FILL')=='TRUE'?'fillRect':'strokeRect'}(${b.getFieldValue('X')},${b.getFieldValue('Y')},${b.getFieldValue('W')},${b.getFieldValue('H')});\n`;
@@ -122,14 +113,12 @@ htmlGenerator.forBlock['html_svg'] = (b) => `<svg width="${b.getFieldValue('W')}
 htmlGenerator.forBlock['svg_rect'] = (b) => `<rect x="${b.getFieldValue('X')}" y="${b.getFieldValue('Y')}" width="${b.getFieldValue('W')}" height="${b.getFieldValue('H')}" fill="${b.getFieldValue('C')}" />\n`;
 htmlGenerator.forBlock['svg_circle'] = (b) => `<circle cx="${b.getFieldValue('X')}" cy="${b.getFieldValue('Y')}" r="${b.getFieldValue('R')}" fill="${b.getFieldValue('C')}" />\n`;
 
-// AUDIO
 htmlGenerator.forBlock['js_audio_play'] = (b) => {
     const url = htmlGenerator.valueToCode(b, 'URL', htmlGenerator.ORDER_ATOMIC) || "''";
     return `<script>new Audio(${url}).play();</script>\n`;
 };
 htmlGenerator.forBlock['js_audio_synth'] = (b) => `<script>(function(){var a=new (window.AudioContext||window.webkitAudioContext)();var o=a.createOscillator();o.frequency.value=${b.getFieldValue('NOTE')};o.connect(a.destination);o.start();setTimeout(function(){o.stop()},${b.getFieldValue('DUR')});})();</script>\n`;
 
-// APIs
 htmlGenerator.forBlock['js_geo_get'] = (b) => {
     const lat = b.getFieldValue('LAT');
     const lng = b.getFieldValue('LNG');
@@ -141,7 +130,6 @@ htmlGenerator.forBlock['js_fetch_json'] = (b) => {
     return `<script>fetch(${url}).then(r=>r.json()).then(${dataName}=>{${htmlGenerator.statementToCode(b, 'DO')}});</script>\n`;
 };
 
-// STORAGE
 htmlGenerator.forBlock['js_localstorage_set'] = (b) => {
     const key = htmlGenerator.valueToCode(b, 'KEY', htmlGenerator.ORDER_ATOMIC) || "''";
     const val = htmlGenerator.valueToCode(b, 'VAL', htmlGenerator.ORDER_ATOMIC) || "''";
@@ -152,7 +140,6 @@ htmlGenerator.forBlock['js_localstorage_get'] = (b) => {
     return [`localStorage.getItem(${key})`, 0];
 };
 
-// FORMS
 htmlGenerator.forBlock['html_form_adv'] = (b) => {
     const id = getVal(b, 'ID');
     return `<form id="${id}">${htmlGenerator.statementToCode(b, 'CONTENT')}</form>\n`;
@@ -166,7 +153,6 @@ htmlGenerator.forBlock['js_form_submit'] = (b) => {
     return `<script>document.getElementById('${id}').addEventListener('submit',function(e){e.preventDefault();${htmlGenerator.statementToCode(b, 'DO')}});</script>\n`;
 };
 
-// STANDARD
 htmlGenerator.forBlock['html_text'] = (b) => {
     const text = getVal(b, 'TEXT');
     return `${text}\n`;
@@ -174,7 +160,6 @@ htmlGenerator.forBlock['html_text'] = (b) => {
 htmlGenerator.forBlock['html_h'] = (b) => `<h${b.getFieldValue('LVL')}>${getVal(b, 'TEXT')}</h${b.getFieldValue('LVL')}>\n`;
 htmlGenerator.forBlock['html_raw'] = (b) => b.getFieldValue('CODE') + "\n";
 
-// STAGE STUFF
 htmlGenerator.forBlock['game_init'] = function(block) {
     const w = block.getFieldValue('W');
     const h = block.getFieldValue('H');
@@ -186,78 +171,271 @@ htmlGenerator.forBlock['game_init'] = function(block) {
     const canvas = document.getElementById('stage');
     const ctx = canvas.getContext('2d');
     
-    // Define global vars so they are never "undefined"
-    var x = 0; 
-    var y = 0;
+    window.gameVars = window.gameVars || {};
     
-    const keys = {};
-    window.addEventListener('keydown', e => { keys[e.key] = true; });
-    window.addEventListener('keyup', e => { keys[e.key] = false; });
+    window.sprites = window.sprites || {};
+    
+    window.keys = window.keys || {};
+    window.addEventListener('keydown', e => { window.keys[e.key] = true; e.preventDefault(); });
+    window.addEventListener('keyup', e => { window.keys[e.key] = false; });
+    
+    window.mouseX = 0;
+    window.mouseY = 0;
+    window.mouseDown = false;
+    window.mouseClicked = false;
+    window._mouseJustClicked = false;
+    canvas.addEventListener('mousemove', e => {
+        const rect = canvas.getBoundingClientRect();
+        window.mouseX = e.clientX - rect.left;
+        window.mouseY = e.clientY - rect.top;
+    });
+    canvas.addEventListener('mousedown', e => { window.mouseDown = true; window._mouseJustClicked = true; });
+    canvas.addEventListener('mouseup', e => { window.mouseDown = false; });
+    
+    window.gameStartTime = Date.now();
+    
+    window.gameImages = window.gameImages || {};
 </script>\n`;
 };
 
 htmlGenerator.forBlock['colour_picker'] = function(block) {
   const code = block.getFieldValue('COLOUR');
-  // We wrap it in quotes so it's a valid string in JS
   return ["'" + code + "'", htmlGenerator.ORDER_ATOMIC];
 };
 
-// 1. Keep your existing HTML generator for the block
+htmlGenerator.forBlock['game_move_sprite'] = function(block) {
+    const name = block.getFieldValue('NAME');
+    const dx = htmlGenerator.valueToCode(block, 'X', htmlGenerator.ORDER_ATOMIC) || '0';
+    const dy = htmlGenerator.valueToCode(block, 'Y', htmlGenerator.ORDER_ATOMIC) || '0';
+    return `if(window.sprites['${name}']){window.sprites['${name}'].x+=${dx};window.sprites['${name}'].y+=${dy};}
+`;
+};
+if (Blockly.JavaScript) {
+    Blockly.JavaScript.forBlock['game_move_sprite'] = function(block) {
+        return htmlGenerator.forBlock['game_move_sprite'](block);
+    };
+}
+
 htmlGenerator.forBlock['game_draw_rect'] = function(block) {
     const name = block.getFieldValue('NAME');
-    const x = getVal(block, 'X') || 0;
-    const y = getVal(block, 'Y') || 0;
-    const w = getVal(block, 'W') || 50;
-    const h = getVal(block, 'H') || 50;
-    const col = getVal(block, 'COL') || "#ffffff";
+    const x = htmlGenerator.valueToCode(block, 'X', htmlGenerator.ORDER_ATOMIC) || '0';
+    const y = htmlGenerator.valueToCode(block, 'Y', htmlGenerator.ORDER_ATOMIC) || '0';
+    const w = htmlGenerator.valueToCode(block, 'W', htmlGenerator.ORDER_ATOMIC) || '50';
+    const h = htmlGenerator.valueToCode(block, 'H', htmlGenerator.ORDER_ATOMIC) || '50';
+    const col = htmlGenerator.valueToCode(block, 'COL', htmlGenerator.ORDER_ATOMIC) || "'#ffffff'";
     
-    // This is the code that will actually run inside the <script> tags
-    return `ctx.fillStyle = "${col}";\nctx.fillRect(${x}, ${y}, ${w}, ${h});\n`;
+    return `(function(){
+  var _n='${name}',_x=${x},_y=${y},_w=${w},_h=${h},_c=${col};
+  if(!window.sprites[_n])window.sprites[_n]={x:_x,y:_y,w:_w,h:_h,col:_c};
+  var s=window.sprites[_n]; s.w=_w; s.h=_h; s.col=_c;
+  ctx.fillStyle=s.col; ctx.fillRect(s.x,s.y,s.w,s.h);
+})();
+`;
 };
 
-// 2. THE FIX: Register it with the JavaScript generator too
 if (Blockly.JavaScript) {
     Blockly.JavaScript.forBlock['game_draw_rect'] = function(block) {
-        // We reuse the exact same logic as the HTML generator
         return htmlGenerator.forBlock['game_draw_rect'](block);
     };
 }
 
-// Add the key pressed detector
-// 1. Existing HTML Generator (Make sure this exists)
 htmlGenerator.forBlock['js_key_pressed'] = function(block) {
     const key = block.getFieldValue('KEY');
     return [`(window.keys && window.keys["${key}"])`, htmlGenerator.ORDER_ATOMIC];
 };
 
-// 2. THE FIX: Register with the JavaScript Generator
 if (Blockly.JavaScript) {
     Blockly.JavaScript.forBlock['js_key_pressed'] = function(block) {
         const key = block.getFieldValue('KEY');
-        // This returns the exact same code so the logic blocks can read it
         return [`(window.keys && window.keys["${key}"])`, Blockly.JavaScript.ORDER_ATOMIC];
     };
 }
 htmlGenerator.forBlock['game_loop'] = function(block) {
-    // This gets all the blocks you snapped inside the loop
-    const branch = htmlGenerator.statementToCode(block, 'DO'); 
+    let branch = htmlGenerator.statementToCode(block, 'DO');
+    branch = branch.replace(/<\/?script>/g, '').trim();
     
     return `
 <script>
-    // This function runs 60 times per second
     function gameLoop() {
         if (typeof ctx !== 'undefined') {
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the stage
-            ${branch} // This is where your 'if key pressed' logic goes
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            window.mouseClicked = window._mouseJustClicked;
+            window._mouseJustClicked = false;
+            ${branch}
         }
         requestAnimationFrame(gameLoop);
     }
     gameLoop();
 </script>\n`;
 };
+if (Blockly.JavaScript) {
+    Blockly.JavaScript.forBlock['game_loop'] = function(block) {
+        return htmlGenerator.forBlock['game_loop'](block);
+    };
+}
 
+htmlGenerator.forBlock['game_draw_circle'] = function(block) {
+    const name = block.getFieldValue('NAME');
+    const x = htmlGenerator.valueToCode(block, 'X', htmlGenerator.ORDER_ATOMIC) || '0';
+    const y = htmlGenerator.valueToCode(block, 'Y', htmlGenerator.ORDER_ATOMIC) || '0';
+    const r = htmlGenerator.valueToCode(block, 'R', htmlGenerator.ORDER_ATOMIC) || '25';
+    const col = htmlGenerator.valueToCode(block, 'COL', htmlGenerator.ORDER_ATOMIC) || "'#ffffff'";
+    return `(function(){
+  var _n='${name}',_x=${x},_y=${y},_r=${r},_c=${col};
+  if(!window.sprites[_n])window.sprites[_n]={x:_x,y:_y,w:_r*2,h:_r*2,r:_r,col:_c,shape:'circle'};
+  var s=window.sprites[_n]; s.r=_r; s.col=_c;
+  ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+  ctx.fillStyle=s.col; ctx.fill(); ctx.closePath();
+})();
+`;
+};
+if (Blockly.JavaScript) {
+    Blockly.JavaScript.forBlock['game_draw_circle'] = function(block) {
+        return htmlGenerator.forBlock['game_draw_circle'](block);
+    };
+}
 
-// MARKDOWN
+htmlGenerator.forBlock['game_draw_text'] = function(block) {
+    const text = htmlGenerator.valueToCode(block, 'TEXT', htmlGenerator.ORDER_ATOMIC) || "''";
+    const x = htmlGenerator.valueToCode(block, 'X', htmlGenerator.ORDER_ATOMIC) || '0';
+    const y = htmlGenerator.valueToCode(block, 'Y', htmlGenerator.ORDER_ATOMIC) || '0';
+    const size = block.getFieldValue('SIZE');
+    const col = htmlGenerator.valueToCode(block, 'COL', htmlGenerator.ORDER_ATOMIC) || "'#ffffff'";
+    return `ctx.fillStyle=${col}; ctx.font='${size}px sans-serif'; ctx.fillText(${text},${x},${y});\n`;
+};
+if (Blockly.JavaScript) {
+    Blockly.JavaScript.forBlock['game_draw_text'] = function(block) {
+        return htmlGenerator.forBlock['game_draw_text'](block);
+    };
+}
+
+htmlGenerator.forBlock['game_draw_line'] = function(block) {
+    const x1 = block.getFieldValue('X1');
+    const y1 = block.getFieldValue('Y1');
+    const x2 = block.getFieldValue('X2');
+    const y2 = block.getFieldValue('Y2');
+    const col = block.getFieldValue('COL');
+    const width = block.getFieldValue('WIDTH');
+    return `ctx.beginPath();ctx.moveTo(${x1},${y1});ctx.lineTo(${x2},${y2});ctx.strokeStyle='${col}';ctx.lineWidth=${width};ctx.stroke();ctx.closePath();\n`;
+};
+if (Blockly.JavaScript) {
+    Blockly.JavaScript.forBlock['game_draw_line'] = function(block) {
+        return htmlGenerator.forBlock['game_draw_line'](block);
+    };
+}
+
+htmlGenerator.forBlock['game_draw_image'] = function(block) {
+    const url = htmlGenerator.valueToCode(block, 'URL', htmlGenerator.ORDER_ATOMIC) || "''";
+    const x = htmlGenerator.valueToCode(block, 'X', htmlGenerator.ORDER_ATOMIC) || '0';
+    const y = htmlGenerator.valueToCode(block, 'Y', htmlGenerator.ORDER_ATOMIC) || '0';
+    const w = htmlGenerator.valueToCode(block, 'W', htmlGenerator.ORDER_ATOMIC) || '64';
+    const h = htmlGenerator.valueToCode(block, 'H', htmlGenerator.ORDER_ATOMIC) || '64';
+    return `(function(){
+  var _u=${url};
+  if(!window.gameImages[_u]){var _i=new Image();_i.src=_u;window.gameImages[_u]=_i;}
+  var _img=window.gameImages[_u];
+  if(_img.complete)ctx.drawImage(_img,${x},${y},${w},${h});
+})();
+`;
+};
+if (Blockly.JavaScript) {
+    Blockly.JavaScript.forBlock['game_draw_image'] = function(block) {
+        return htmlGenerator.forBlock['game_draw_image'](block);
+    };
+}
+
+htmlGenerator.forBlock['game_set_background'] = function(block) {
+    const col = htmlGenerator.valueToCode(block, 'COL', htmlGenerator.ORDER_ATOMIC) || "'#000000'";
+    return `ctx.fillStyle=${col};ctx.fillRect(0,0,canvas.width,canvas.height);\n`;
+};
+if (Blockly.JavaScript) {
+    Blockly.JavaScript.forBlock['game_set_background'] = function(block) {
+        return htmlGenerator.forBlock['game_set_background'](block);
+    };
+}
+
+htmlGenerator.forBlock['game_mouse_x'] = () => ['(window.mouseX||0)', htmlGenerator.ORDER_ATOMIC];
+htmlGenerator.forBlock['game_mouse_y'] = () => ['(window.mouseY||0)', htmlGenerator.ORDER_ATOMIC];
+if (Blockly.JavaScript) {
+    Blockly.JavaScript.forBlock['game_mouse_x'] = () => ['(window.mouseX||0)', Blockly.JavaScript.ORDER_ATOMIC];
+    Blockly.JavaScript.forBlock['game_mouse_y'] = () => ['(window.mouseY||0)', Blockly.JavaScript.ORDER_ATOMIC];
+}
+
+htmlGenerator.forBlock['game_canvas_width'] = () => ['canvas.width', htmlGenerator.ORDER_ATOMIC];
+htmlGenerator.forBlock['game_canvas_height'] = () => ['canvas.height', htmlGenerator.ORDER_ATOMIC];
+if (Blockly.JavaScript) {
+    Blockly.JavaScript.forBlock['game_canvas_width'] = () => ['canvas.width', Blockly.JavaScript.ORDER_ATOMIC];
+    Blockly.JavaScript.forBlock['game_canvas_height'] = () => ['canvas.height', Blockly.JavaScript.ORDER_ATOMIC];
+}
+
+htmlGenerator.forBlock['game_timer'] = () => ['((Date.now()-window.gameStartTime)/1000)', htmlGenerator.ORDER_ATOMIC];
+if (Blockly.JavaScript) {
+    Blockly.JavaScript.forBlock['game_timer'] = () => ['((Date.now()-window.gameStartTime)/1000)', Blockly.JavaScript.ORDER_ATOMIC];
+}
+
+htmlGenerator.forBlock['game_set_var'] = function(block) {
+    const name = block.getFieldValue('VAR');
+    const val = htmlGenerator.valueToCode(block, 'VAL', htmlGenerator.ORDER_ATOMIC) || '0';
+    return `window.gameVars['${name}']=${val};\n`;
+};
+htmlGenerator.forBlock['game_get_var'] = function(block) {
+    const name = block.getFieldValue('VAR');
+    return [`(window.gameVars['${name}']||0)`, htmlGenerator.ORDER_ATOMIC];
+};
+if (Blockly.JavaScript) {
+    Blockly.JavaScript.forBlock['game_set_var'] = function(block) {
+        return htmlGenerator.forBlock['game_set_var'](block);
+    };
+    Blockly.JavaScript.forBlock['game_get_var'] = function(block) {
+        return htmlGenerator.forBlock['game_get_var'](block);
+    };
+}
+
+htmlGenerator.forBlock['game_collision_rect'] = function(block) {
+    const a = block.getFieldValue('A');
+    const b_name = block.getFieldValue('B');
+    return [`(function(){var a=window.sprites['${a}'],b=window.sprites['${b_name}'];if(!a||!b)return false;return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;})()`, htmlGenerator.ORDER_ATOMIC];
+};
+if (Blockly.JavaScript) {
+    Blockly.JavaScript.forBlock['game_collision_rect'] = function(block) {
+        return htmlGenerator.forBlock['game_collision_rect'](block);
+    };
+}
+
+htmlGenerator.forBlock['game_sprite_prop'] = function(block) {
+    const name = block.getFieldValue('NAME');
+    const prop = block.getFieldValue('PROP');
+    return [`(window.sprites['${name}']&&window.sprites['${name}'].${prop}||0)`, htmlGenerator.ORDER_ATOMIC];
+};
+if (Blockly.JavaScript) {
+    Blockly.JavaScript.forBlock['game_sprite_prop'] = function(block) {
+        return htmlGenerator.forBlock['game_sprite_prop'](block);
+    };
+}
+
+htmlGenerator.forBlock['game_set_sprite_prop'] = function(block) {
+    const name = block.getFieldValue('NAME');
+    const prop = block.getFieldValue('PROP');
+    const val = htmlGenerator.valueToCode(block, 'VAL', htmlGenerator.ORDER_ATOMIC) || '0';
+    return `if(window.sprites['${name}'])window.sprites['${name}'].${prop}=${val};\n`;
+};
+if (Blockly.JavaScript) {
+    Blockly.JavaScript.forBlock['game_set_sprite_prop'] = function(block) {
+        return htmlGenerator.forBlock['game_set_sprite_prop'](block);
+    };
+}
+
+htmlGenerator.forBlock['game_distance'] = function(block) {
+    const a = block.getFieldValue('A');
+    const b_name = block.getFieldValue('B');
+    return [`(function(){var a=window.sprites['${a}'],b=window.sprites['${b_name}'];if(!a||!b)return 9999;var dx=a.x-b.x,dy=a.y-b.y;return Math.sqrt(dx*dx+dy*dy);})()`, htmlGenerator.ORDER_ATOMIC];
+};
+if (Blockly.JavaScript) {
+    Blockly.JavaScript.forBlock['game_distance'] = function(block) {
+        return htmlGenerator.forBlock['game_distance'](block);
+    };
+}
+
 htmlGenerator.forBlock['md_block'] = (b) => {
   let md = b.getFieldValue('MD');
   md = md.replace(/&/g, "&amp;").replace(/<(?!blockquote|strong|em|h1|h2|h3|code|a|hr|br|\/blockquote|\/strong|\/em|\/h1|\/h2|\/h3|\/code|\/a)/g, "&lt;");
@@ -295,7 +473,6 @@ htmlGenerator.forBlock["md_quote"] = (b) => {
 };
 htmlGenerator.forBlock["md_divider"] = () => `<hr>\n`;
 
-// STRUCTURE
 htmlGenerator.forBlock["html_html"] = (b) => {
     const lang = getVal(b, 'LANG');
     return `<!DOCTYPE html><html lang="${lang}">${htmlGenerator.statementToCode(b, 'CONTENT')}</html>`;
@@ -319,7 +496,6 @@ htmlGenerator.forBlock["html_div"] = (b) => {
     return `<div id="${id}" class="${cls}">${htmlGenerator.statementToCode(b, 'CONTENT')}</div>\n`;
 };
 
-// TEXT
 htmlGenerator.forBlock["html_p"] = (b) => `<p>${getVal(b, 'TEXT')}</p>\n`;
 htmlGenerator.forBlock["html_span"] = (b) => `<span>${getVal(b, 'TEXT')}</span>\n`;
 htmlGenerator.forBlock["html_a"] = (b) => {
@@ -335,7 +511,6 @@ htmlGenerator.forBlock["html_format"] = (b) => {
     return `<${tag}>${text}</${tag}>\n`;
 };
 
-// LISTS
 htmlGenerator.forBlock["html_ul"] = (b) => `<ul>${htmlGenerator.statementToCode(b, 'CONTENT')}</ul>\n`;
 htmlGenerator.forBlock["html_ol"] = (b) => `<ol>${htmlGenerator.statementToCode(b, 'CONTENT')}</ol>\n`;
 htmlGenerator.forBlock["html_li"] = (b) => {
@@ -343,7 +518,6 @@ htmlGenerator.forBlock["html_li"] = (b) => {
     return `<li>${text}</li>\n`;
 };
 
-// TABLES
 htmlGenerator.forBlock["html_table"] = (b) => `<table border="${b.getFieldValue('BORDER')}">${htmlGenerator.statementToCode(b, 'CONTENT')}</table>\n`;
 htmlGenerator.forBlock["html_tr"] = (b) => `<tr>${htmlGenerator.statementToCode(b, 'CONTENT')}</tr>\n`;
 htmlGenerator.forBlock["html_td"] = (b) => {
@@ -355,7 +529,6 @@ htmlGenerator.forBlock["html_th"] = (b) => {
     return `<th>${text}</th>\n`;
 };
 
-// FORMS
 htmlGenerator.forBlock["html_form"] = (b) => {
     const act = getVal(b, 'ACT');
     return `<form action="${act}">${htmlGenerator.statementToCode(b, 'CONTENT')}</form>\n`;
@@ -373,8 +546,8 @@ htmlGenerator.forBlock["html_label"] = (b) => {
 htmlGenerator.forBlock["html_textarea"] = (b) => {
     const rows = b.getFieldValue('R');
     const cols = b.getFieldValue('C');
-    const name = getVal(b, 'NAME'); // Helper function handles quotes
-    const ph = getVal(b, 'PH');     // Helper function handles quotes
+    const name = getVal(b, 'NAME');
+    const ph = getVal(b, 'PH');
     
     return `<textarea rows="${rows}" cols="${cols}" name="${name}" placeholder="${ph}"></textarea>\n`;
 };
@@ -388,7 +561,6 @@ htmlGenerator.forBlock["html_option"] = (b) => {
     return `<option value="${val}">${text}</option>\n`;
 };
 
-// MEDIA
 htmlGenerator.forBlock["html_img"] = (b) => {
     const src = getVal(b, 'SRC');
     const alt = getVal(b, 'ALT');
@@ -410,7 +582,6 @@ htmlGenerator.forBlock["html_iframe"] = (b) => {
     return `<iframe src="${src}" width="${w}" height="${h}"></iframe>\n`;
 };
 
-// SCRIPTING
 htmlGenerator.forBlock["js_event"] = (b) => {
     const sel = getVal(b, 'SEL');
     const evt = b.getFieldValue('EVT');
@@ -439,8 +610,12 @@ htmlGenerator.forBlock["js_clipboard"] = (b) => {
     const text = htmlGenerator.valueToCode(b, "TEXT", htmlGenerator.ORDER_ATOMIC) || "''";
     return `navigator.clipboard.writeText(${text});\n`;
 };
-htmlGenerator.forBlock["js_mouse_clicked"] = (b) => ["false", htmlGenerator.ORDER_ATOMIC];
-htmlGenerator.forBlock["js_mouse_down"] = (b) => ["false", htmlGenerator.ORDER_ATOMIC];
+htmlGenerator.forBlock["js_mouse_clicked"] = (b) => ["(!!window.mouseClicked)", htmlGenerator.ORDER_ATOMIC];
+htmlGenerator.forBlock["js_mouse_down"] = (b) => ["(!!window.mouseDown)", htmlGenerator.ORDER_ATOMIC];
+if (Blockly.JavaScript) {
+    Blockly.JavaScript.forBlock["js_mouse_clicked"] = (b) => ["(!!window.mouseClicked)", Blockly.JavaScript.ORDER_ATOMIC];
+    Blockly.JavaScript.forBlock["js_mouse_down"] = (b) => ["(!!window.mouseDown)", Blockly.JavaScript.ORDER_ATOMIC];
+}
 htmlGenerator.forBlock["js_throw_error"] = (b) => {
     const msg = htmlGenerator.valueToCode(b, "MSG", htmlGenerator.ORDER_ATOMIC) || "'Error'";
     return `throw new Error(${msg});\n`;
@@ -452,7 +627,6 @@ htmlGenerator.forBlock["html_button_js"] = (b) => {
     return `<button onclick="${jsCode}">${text}</button>\n`;
 };
 
-// --- EASY STYLING ---
 htmlGenerator.forBlock["html_styled_div"] = (b) => {
     const styles = htmlGenerator.statementToCode(b, 'STYLES').replace(/\n/g, ' ').trim();
     const content = htmlGenerator.statementToCode(b, 'CONTENT');
@@ -472,7 +646,6 @@ htmlGenerator.forBlock["css_prop_margin_padding"] = (b) =>
 htmlGenerator.forBlock["css_prop_flex_layout"] = (b) => 
     `display:flex;flex-direction:${b.getFieldValue('DIR')};align-items:${b.getFieldValue('ALIGN')};justify-content:${b.getFieldValue('JUSTIFY')};`;
 
-// CSS HELPERS
 htmlGenerator.forBlock['css_id_class'] = (b) => {
     const id = getVal(b, 'ID');
     const cls = getVal(b, 'CLASS');
@@ -484,7 +657,6 @@ htmlGenerator.forBlock['css_inline_style'] = (b) => {
     return `style="${prop}:${val}"`;
 };
 
-// REPORTERS
 htmlGenerator.forBlock["js_get_form_data"] = (b) => {
     const id = htmlGenerator.valueToCode(b, 'ID', htmlGenerator.ORDER_ATOMIC) || "''";
     return [`Object.fromEntries(new FormData(document.getElementById(${id})))`, htmlGenerator.ORDER_ATOMIC];
@@ -530,7 +702,6 @@ htmlGenerator.forBlock["ui_hero_section"] = (b) => {
     const title = htmlGenerator.valueToCode(b, 'TITLE', htmlGenerator.ORDER_ATOMIC) || "'Title'";
     const sub = htmlGenerator.valueToCode(b, 'SUB', htmlGenerator.ORDER_ATOMIC) || "'Subtitle'";
     const btnText = b.getFieldValue('BTN_TEXT');
-    // JS Logic for button
     let jsCode = htmlGenerator.statementToCode(b, 'DO');
     jsCode = jsCode.replace(/<script>/g, '').replace(/<\/script>/g, '').trim().replace(/"/g, '&quot;');
 
@@ -590,7 +761,6 @@ htmlGenerator.forBlock["ui_pricing_card"] = (b) => {
     `;
 };
 
-// generators.js
 htmlGenerator.forBlock['meta_tailwind_cdn'] = function(block) {
   return '<script src="https://cdn.tailwindcss.com"></script>\n';
 };
@@ -600,7 +770,6 @@ htmlGenerator.forBlock['ui_tailwind_box'] = function(block) {
     var classes = htmlGenerator.valueToCode(block, 'CLASSES', htmlGenerator.ORDER_ATOMIC) || "''";
     var content = htmlGenerator.statementToCode(block, 'CONTENT');
     
-    // Clean up quotes from the input
     classes = classes.replace(/^'(.*)'$/, '$1');
 
     return `<div class="${classes}">\n${content}\n</div>\n`;
@@ -611,18 +780,15 @@ htmlGenerator.forBlock['ui_page_link'] = function(block) {
     const text = htmlGenerator.valueToCode(block, 'TEXT', htmlGenerator.ORDER_ATOMIC) || "'Link'";
     const cleanText = text.replace(/'/g, "");
     
-    // When exported, index.wbk becomes index.html
     return `<a href="${page}.html" class="nav-link">${cleanText}</a>`;
 };
 
-// --- ARRAYS ---
 htmlGenerator.forBlock["arr_new_empty"] = () => ["[]", htmlGenerator.ORDER_ATOMIC];
 htmlGenerator.forBlock["arr_new_length"] = (b) => [`new Array(${htmlGenerator.valueToCode(b, 'LEN', 0) || 0})`, 0];
 htmlGenerator.forBlock["arr_parse"] = (b) => [`JSON.parse(${htmlGenerator.valueToCode(b, 'TXT', 0) || '[]'})`, 0];
 htmlGenerator.forBlock["arr_split"] = (b) => [`(${htmlGenerator.valueToCode(b, 'TXT', 0) || "''"}).split(${htmlGenerator.valueToCode(b, 'DELIM', 0) || "''"})`, 0];
 
 htmlGenerator.forBlock["arr_builder"] = (b) => {
-    // This wraps the internal statements in an IIFE to return the built array
     const code = htmlGenerator.statementToCode(b, 'DO');
     return [`(function(){ var _arr = []; ${code} return _arr; })()`, htmlGenerator.ORDER_ATOMIC];
 };
@@ -643,7 +809,6 @@ htmlGenerator.forBlock["arr_join"] = (b) => [`${htmlGenerator.valueToCode(b, 'AR
 
 // tuff json tools
 
-// --- OBJECTS ---
 htmlGenerator.forBlock["obj_new"] = () => ["{}", htmlGenerator.ORDER_ATOMIC];
 htmlGenerator.forBlock["obj_parse"] = (b) => [`JSON.parse(${htmlGenerator.valueToCode(b, 'TXT', htmlGenerator.ORDER_ATOMIC) || "'{}'"})`, htmlGenerator.ORDER_ATOMIC];
 htmlGenerator.forBlock["obj_from_entries"] = (b) => [`Object.fromEntries(${htmlGenerator.valueToCode(b, 'ENTRIES', htmlGenerator.ORDER_ATOMIC) || "[]"})`, htmlGenerator.ORDER_ATOMIC];
@@ -666,7 +831,6 @@ htmlGenerator.forBlock["obj_set"] = (b) => wrapJs(b, `${htmlGenerator.valueToCod
 htmlGenerator.forBlock["obj_delete"] = (b) => wrapJs(b, `delete ${htmlGenerator.valueToCode(b, 'OBJ', htmlGenerator.ORDER_ATOMIC)}[${htmlGenerator.valueToCode(b, 'KEY', htmlGenerator.ORDER_ATOMIC)}];`);
 htmlGenerator.forBlock["obj_merge"] = (b) => wrapJs(b, `Object.assign(${htmlGenerator.valueToCode(b, 'DEST', htmlGenerator.ORDER_ATOMIC)}, ${htmlGenerator.valueToCode(b, 'SRC', htmlGenerator.ORDER_ATOMIC)});`);
 
-// --- JAVASCRIPT GENERATORS FOR CUSTOM OBJECT BLOCKS ---
 Blockly.JavaScript.forBlock = Blockly.JavaScript.forBlock || {};
 Blockly.JavaScript.forBlock["obj_new"] = () => ["{}", Blockly.JavaScript.ORDER_ATOMIC];
 Blockly.JavaScript.forBlock["obj_parse"] = (b) => [`JSON.parse(${Blockly.JavaScript.valueToCode(b, 'TXT', Blockly.JavaScript.ORDER_ATOMIC) || '{}'})`, Blockly.JavaScript.ORDER_ATOMIC];
@@ -694,15 +858,11 @@ htmlGenerator.forBlock['math_number'] = function(block) {
   return [code, htmlGenerator.ORDER_ATOMIC];
 };
 
-// 1. Tell your HTML generator how to handle it
 htmlGenerator.forBlock['colour_picker'] = function(block) {
   const code = block.getFieldValue('COLOUR');
-  // Return as a quoted string so it works in CSS/Canvas styles
   return ["'" + code + "'", htmlGenerator.ORDER_ATOMIC];
 };
 
-// 2. Tell the internal JavaScript generator how to handle it 
-// (This prevents the 'JavaScript generator does not know how to generate' error)
 if (Blockly.JavaScript) {
     Blockly.JavaScript.forBlock['colour_picker'] = function(block) {
         const code = block.getFieldValue('COLOUR');
@@ -710,7 +870,6 @@ if (Blockly.JavaScript) {
     };
 }
 
-// --- BRIDGE TO STANDARD BLOCKLY JS GENERATOR ---
 const standardBlocks = [
     'controls_if', 'controls_repeat_ext', 'controls_whileUntil', 'controls_for', 'controls_forEach', 'controls_flow_statements',
     'logic_compare', 'logic_operation', 'logic_negate', 'logic_boolean', 'logic_null', 'logic_ternary',
@@ -731,11 +890,9 @@ standardBlocks.forEach(type => {
 
 
 htmlGenerator.forBlock['math_change'] = function(block) {
-    // Get the variable name and the amount to change it by
     const argument0 = htmlGenerator.valueToCode(block, 'DELTA', htmlGenerator.ORDER_ADDITION) || '0';
     const varName = block.getFieldValue('VAR');
     
-    // Returns the actual JS code to increment the variable
     return varName + ' = (typeof ' + varName + ' === "number" ? ' + varName + ' : 0) + ' + argument0 + ';\n';
 };
 
@@ -748,16 +905,12 @@ htmlGenerator.forBlock['math_change'] = function(block) {
     'controls_if'
 ];
 
-// A stronger bridge for internal variable and math blocks
 const bridgeBlock = (name) => {
     htmlGenerator.forBlock[name] = function(block) {
-        // We MUST use Blockly.JavaScript specifically here 
-        // to avoid the 'Cannot read properties of undefined' error
         return Blockly.JavaScript.forBlock[name].call(Blockly.JavaScript, block);
     };
 };
 
-// List every standard block type you are using in your workspace
 ['variables_get', 'variables_set', 'math_change', 'math_number', 'logic_boolean', 'controls_if'].forEach(bridgeBlock);
 });
 

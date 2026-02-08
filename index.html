@@ -6,14 +6,12 @@
     <title>WebBlocks Local</title>
     <link rel="stylesheet" href="styles.css">
 
-    <!-- 1. CORE: Load Blockly First -->
     <script src="./node_modules/blockly/blockly_compressed.js"></script>
     <script src="./node_modules/blockly/blocks_compressed.js"></script>
     <script src="./node_modules/blockly/javascript_compressed.js"></script>
     <script src="./node_modules/blockly/msg/en.js"></script>
     <script src="./node_modules/jszip/dist/jszip.min.js"></script>
 
-    <!-- 2. ROBUST SHIM: Make plugins think they are in Node.js -->
     <script>
         // Define 'global' for the plugins
         window.global = window;
@@ -44,7 +42,6 @@
         }
     </script>
 
-    <!-- 3. LOAD PLUGINS VIA SHIM -->
         <script>
         // Load Multiline Input
         loadPlugin('./node_modules/@blockly/field-multilineinput/dist/index.js', function(pkg) {
@@ -100,11 +97,11 @@
         <div class="titlebar">
             <span class="titlebar-title">WebBlocks Ultimate</span>
             <div class="titlebar-buttons">
-    <button class="toolbar-btn" id="btnSave">Save (.wbk, .json)</button>
-    <button class="toolbar-btn" id="btnLoad">Load (.wbk, .json)</button>
+    <button class="toolbar-btn" id="btnSave">Save (.wbk)</button>
+    <button class="toolbar-btn" id="btnLoad">Load (.wbk)</button>
     <button class="toolbar-btn" id="btnExport">Export HTML</button>
-    
-    <button class="toolbar-btn" id="btnZip">Download Project (.zip)</button>
+    <button class="toolbar-btn" id="btnZip">Export All (.zip)</button>
+    <button class="toolbar-btn primary" id="btnPreview">&#9654; Preview</button>
 </div>
         </div>
 
@@ -130,26 +127,28 @@
                 <div class="resize-handle"></div>
             </div>
 
-            <div class="panel panel-preview" id="panelPreview">
-                <div class="panel-titlebar">
-                    <span class="panel-title">Live Preview</span>
-                    <div class="panel-tabs">
-                        <button class="size-btn active" id="btnDesktop">Desktop</button>
-                        <button class="size-btn" id="btnMobile">Mobile</button>
-                    </div>
-                </div>
-                <div class="panel-content preview-content">
-                    <div class="preview-frame" id="previewFrame">
-                        <iframe id="previewIframe"></iframe>
-                    </div>
-                </div>
-            </div>
+
         </div>
     </div>
 
     <div class="toast" id="toast"></div>
+
+    <div id="blockSearchOverlay" class="block-search-overlay" style="display:none;">
+        <div class="block-search-dialog">
+            <div class="block-search-header">
+                <span class="block-search-icon">&#128269;</span>
+                <input type="text" id="blockSearchInput" class="block-search-input" placeholder="Search blocks... (Esc to close)" autocomplete="off" spellcheck="false">
+            </div>
+            <div id="blockSearchResults" class="block-search-results"></div>
+            <div class="block-search-footer">
+                <span><kbd>&#8593;</kbd><kbd>&#8595;</kbd> navigate</span>
+                <span><kbd>Enter</kbd> insert</span>
+                <span><kbd>Esc</kbd> close</span>
+            </div>
+        </div>
+    </div>
     <input type="file" id="fileInput" style="display: none;" accept=".wbk ,.json">
-    <!-- 4. APP LOGIC (Loaded normally, will run after DOM content loaded) -->
+    <script src="customrender.js"></script>
     <script src="generators.js"></script>
     <script src="blocks.js"></script>
     <script src="app.js"></script>

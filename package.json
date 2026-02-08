@@ -1,19 +1,67 @@
 {
-  "name": "powerful-visual-website-builder",
-  "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
+  "name": "webblocks",
+  "version": "0.4.1beta",
+  "description": "A visual website builder powered by Blockly",
+  "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "electron .",
+    "dev": "electron . --enable-logging",
+    "build": "electron-builder --win",
+    "build:portable": "electron-builder --win portable",
+    "build:installer": "electron-builder --win nsis"
   },
-  "keywords": [],
-  "author": "",
+  "author": "áéfarkalibastafinfein",
   "license": "ISC",
+  "build": {
+    "appId": "com.webblocks.app",
+    "productName": "WebBlocks",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "index.html",
+      "app.js",
+      "blocks.js",
+      "generators.js",
+      "customrender.js",
+      "styles.css",
+      "favicon.ico",
+      "node_modules/blockly/**/*",
+      "node_modules/@blockly/**/*",
+      "node_modules/jszip/**/*"
+    ],
+    "win": {
+      "icon": "favicon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "favicon.ico",
+      "uninstallerIcon": "favicon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  },
   "dependencies": {
     "@blockly/continuous-toolbox": "^7.0.8",
     "@blockly/field-colour": "^6.0.11",
     "@blockly/field-multilineinput": "^6.0.8",
     "blockly": "^12.3.1",
     "jszip": "^3.10.1"
+  },
+  "devDependencies": {
+    "electron": "^40.2.1",
+    "electron-builder": "^26.7.0"
   }
 }
