@@ -1,5 +1,5 @@
 {
-  "name": "webblocks",
+  "name": "poo-ide",
   "version": "0.4.1beta",
   "description": "A visual website builder powered by Blockly",
   "main": "main.js",
@@ -13,8 +13,8 @@
   "author": "áéfarkalibastafinfein",
   "license": "ISC",
   "build": {
-    "appId": "com.webblocks.app",
-    "productName": "WebBlocks",
+    "appId": "com.pooide.app",
+    "productName": "Poo IDE",
     "directories": {
       "output": "dist"
     },
@@ -25,8 +25,10 @@
       "blocks.js",
       "generators.js",
       "customrender.js",
+      "extensions.js",
       "styles.css",
       "favicon.ico",
+      "pooide.svg",
       "node_modules/blockly/**/*",
       "node_modules/@blockly/**/*",
       "node_modules/jszip/**/*"

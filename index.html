@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebBlocks Local</title>
+    <title>Poo IDE</title>
     <link rel="stylesheet" href="styles.css">
 
     <script src="./node_modules/blockly/blockly_compressed.js"></script>
@@ -95,13 +95,18 @@
 <body>
     <div class="app">
         <div class="titlebar">
-            <span class="titlebar-title">WebBlocks Ultimate</span>
+            <div class="titlebar-brand">
+                <img src="pooide.svg" alt="Poo IDE" class="titlebar-logo">
+                <span class="titlebar-title">Poo IDE</span>
+            </div>
             <div class="titlebar-buttons">
     <button class="toolbar-btn" id="btnSave">Save (.wbk)</button>
     <button class="toolbar-btn" id="btnLoad">Load (.wbk)</button>
     <button class="toolbar-btn" id="btnExport">Export HTML</button>
     <button class="toolbar-btn" id="btnZip">Export All (.zip)</button>
     <button class="toolbar-btn primary" id="btnPreview">&#9654; Preview</button>
+    <button class="toolbar-btn" id="btnExtensions" title="Extensions">Ext</button>
+    <button class="toolbar-btn" id="btnSettings" title="Settings">&#9881;</button>
 </div>
         </div>
 
@@ -132,6 +137,93 @@
     </div>
 
     <div class="toast" id="toast"></div>
+
+    <!-- Settings Dialog -->
+    <div id="settingsOverlay" class="block-search-overlay" style="display:none;">
+        <div class="settings-dialog">
+            <div class="settings-header">
+                <span>&#9881; Settings</span>
+                <button id="settingsClose" class="settings-close">&#10005;</button>
+            </div>
+            <div class="settings-body">
+                <div class="settings-section">Workspace</div>
+                <label class="settings-row">
+                    <span>Grid snap</span>
+                    <input type="checkbox" id="setGridSnap" checked>
+                </label>
+                <label class="settings-row">
+                    <span>Grid spacing</span>
+                    <select id="setGridSpacing">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                    </select>
+                </label>
+                <label class="settings-row">
+                    <span>Show trashcan</span>
+                    <input type="checkbox" id="setTrashcan" checked>
+                </label>
+                <label class="settings-row">
+                    <span>Sounds</span>
+                    <input type="checkbox" id="setSounds" checked>
+                </label>
+
+                <div class="settings-section">Export</div>
+                <label class="settings-row">
+                    <span>Include watermark</span>
+                    <input type="checkbox" id="setWatermark" checked>
+                </label>
+                <label class="settings-row">
+                    <span>Minify HTML output</span>
+                    <input type="checkbox" id="setMinify">
+                </label>
+
+                <div class="settings-section">Editor</div>
+                <label class="settings-row">
+                    <span>Zoom speed</span>
+                    <select id="setZoomSpeed">
+                        <option value="1.05">Slow</option>
+                        <option value="1.2" selected>Normal</option>
+                        <option value="1.5">Fast</option>
+                    </select>
+                </label>
+                <label class="settings-row">
+                    <span>Code font size</span>
+                    <select id="setCodeFontSize">
+                        <option value="11px">Small</option>
+                        <option value="13px" selected>Medium</option>
+                        <option value="16px">Large</option>
+                        <option value="20px">X-Large</option>
+                    </select>
+                </label>
+                <label class="settings-row">
+                    <span>Auto-save reminder</span>
+                    <input type="checkbox" id="setAutoRemind">
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Dialog -->
+    <div id="saveOverlay" class="block-search-overlay" style="display:none;">
+        <div class="block-search-dialog" style="max-width:380px;">
+            <div class="block-search-header">
+                <span style="font-weight:bold; color: #fff;">Save Project</span>
+            </div>
+            <div style="padding:12px;display:flex;flex-direction:column;gap:8px;">
+                <button id="saveCurrent" class="toolbar-btn" style="width:100%;padding:8px;text-align:left;font-size:13px;">
+                     Save current page (<span id="saveCurrentName">index</span>.wbk)
+                </button>
+                <button id="saveAll" class="toolbar-btn" style="width:100%;padding:8px;text-align:left;font-size:13px;">
+                     Save entire project (all pages in one .wbk)
+                </button>
+            </div>
+            <div style="padding:0 12px 12px;display:flex;gap:8px;justify-content:flex-end;">
+                <button id="saveCancel" class="toolbar-btn" style="background:#555;">Cancel</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Custom New Page Dialog (prompt() doesn't work in Electron) -->
     <div id="newPageOverlay" class="block-search-overlay" style="display:none;">
@@ -164,9 +256,48 @@
         </div>
     </div>
     <input type="file" id="fileInput" style="display: none;" accept=".wbk ,.json">
+    <input type="file" id="extFileInput" style="display: none;" accept=".wbx">
+
+    <!-- Extensions Dialog -->
+    <div id="extOverlay" class="block-search-overlay" style="display:none;">
+        <div class="ext-dialog">
+            <div class="ext-header">
+                <span>&#129513; Extensions</span>
+                <button id="extClose" class="settings-close">&#10005;</button>
+            </div>
+            <div class="ext-body">
+                <div class="ext-actions">
+                    <button id="extImportBtn" class="toolbar-btn" style="background:#3060a0;color:#fff;">Import .wbx</button>
+                    <button id="extNewBtn" class="toolbar-btn" style="background:#008000;color:#fff;">New Extension</button>
+                </div>
+                <div id="extList" class="ext-list">
+                    <div class="ext-empty">No extensions loaded. Import a .wbx file to get started.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Extension Editor Dialog -->
+    <div id="extEditorOverlay" class="block-search-overlay" style="display:none;">
+        <div class="ext-editor-dialog">
+            <div class="ext-header">
+                <span>&#9998; Extension Editor</span>
+                <button id="extEditorClose" class="settings-close">&#10005;</button>
+            </div>
+            <div class="ext-editor-body">
+                <textarea id="extEditorCode" class="ext-editor-textarea" spellcheck="false" placeholder="settings{ author: &quot;Your Name&quot;; version: 1.0.0; name: &quot;My Extension&quot;; colour: &quot;#FF6600&quot;; }&#10;&#10;shapes{&#10;// Register a diamond shape&#10;WEBBLOCKS_SHAPES.register('diamond', function(c) {&#10;  var cr = c.CORNER_RADIUS;&#10;  return {&#10;    isDynamic: true,&#10;    width:  function(h) { return h / 2; },&#10;    height: function(h) { return h; },&#10;    connectionOffsetY: function(h) { return h / 2; },&#10;    connectionOffsetX: function(w) { return -w; },&#10;    // textPadding controls how far text is inset from left/right&#10;    // Return a number (symmetric) or { left: px, right: px }&#10;    textPadding: function(h) { return h / 4; },&#10;    pathDown: function(h) {&#10;      var half = h / 2;&#10;      return 'l ' + (-half/2) + ' ' + half + ' l ' + (half/2) + ' ' + half;&#10;    },&#10;    pathUp: function(h) {&#10;      var half = h / 2;&#10;      return 'l ' + (-half/2) + ' ' + (-half) + ' l ' + (half/2) + ' ' + (-half);&#10;    },&#10;    pathRightDown: function(h) {&#10;      var half = h / 2;&#10;      return 'l ' + (half/2) + ' ' + half + ' l ' + (-half/2) + ' ' + half;&#10;    },&#10;    pathRightUp: function(h) {&#10;      var half = h / 2;&#10;      return 'l ' + (half/2) + ' ' + half + ' l ' + (-half/2) + ' ' + half;&#10;    }&#10;  };&#10;});&#10;}&#10;&#10;blockdef{&#10;[&#10;  {&#10;    &quot;type&quot;: &quot;my_block&quot;,&#10;    &quot;message0&quot;: &quot;My Block %1&quot;,&#10;    &quot;args0&quot;: [{ &quot;type&quot;: &quot;input_value&quot;, &quot;name&quot;: &quot;VAL&quot; }],&#10;    &quot;output&quot;: null,&#10;    &quot;colour&quot;: &quot;#FF6600&quot;,&#10;    &quot;extensions&quot;: [&quot;shape_diamond&quot;]&#10;  }&#10;]&#10;}&#10;&#10;gen{&#10;htmlGenerator.forBlock['my_block'] = function(b) {&#10;  var val = getVal(b, 'VAL');&#10;  return ['&lt;div&gt;' + val + '&lt;/div&gt;', htmlGenerator.ORDER_ATOMIC];&#10;};&#10;}"></textarea>
+                <div class="ext-editor-actions">
+                    <button id="extEditorSave" class="toolbar-btn" style="background:#008000;color:#fff;">Load Extension</button>
+                    <button id="extEditorExport" class="toolbar-btn">Export .wbx</button>
+                    <button id="extEditorCancel" class="toolbar-btn" style="background:#555;color:#fff;">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="customrender.js"></script>
     <script src="generators.js"></script>
     <script src="blocks.js"></script>
+    <script src="extensions.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

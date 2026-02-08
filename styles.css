@@ -4,6 +4,8 @@ body { background: #008080; }
 
 .app { height: 100%; display: flex; flex-direction: column; }
 .titlebar { height: 36px; background: linear-gradient(180deg, #0a0a6a, #0000a0); border-bottom: 2px solid #000; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; flex-shrink: 0; }
+.titlebar-brand { display: flex; align-items: center; gap: 8px; }
+.titlebar-logo { height: 24px; width: auto; }
 .titlebar-title { color: #fff; font-weight: bold; font-size: 14px; text-shadow: 1px 1px #000; }
 .titlebar-buttons { display: flex; gap: 6px; }
 
@@ -56,6 +58,19 @@ body { background: #008080; }
 .block-search-empty { text-align: center; padding: 30px; color: #808080; font-size: 12px; }
 .block-search-footer { display: flex; gap: 12px; padding: 4px 6px; background: #ece9d8; font-size: 11px; color: #555; justify-content: center; }
 .block-search-footer kbd { display: inline-block; background: #c0c0c0; color: #000; padding: 0px 4px; font-family: inherit; margin: 0 2px; border: 2px solid; border-color: #fff #808080 #808080 #fff; }
+
+/* Settings dialog */
+.settings-dialog { width: 380px; background: #ece9d8; border: 2px solid; border-color: #fff #808080 #808080 #fff; box-shadow: 4px 4px 0 rgba(0,0,0,0.3); display: flex; flex-direction: column; font-family: "Segoe UI", Tahoma, sans-serif; font-size: 12px; }
+.settings-header { display: flex; align-items: center; justify-content: space-between; padding: 4px 8px; background: linear-gradient(180deg, #0a246a, #3a6ea5); color: #fff; font-weight: bold; font-size: 13px; }
+.settings-close { background: none; border: none; color: #fff; font-size: 14px; cursor: pointer; padding: 0 4px; }
+.settings-close:hover { background: rgba(255,255,255,0.2); }
+.settings-body { padding: 8px 12px 12px; max-height: 450px; overflow-y: auto; }
+.settings-section { font-weight: bold; color: #0a246a; border-bottom: 1px solid #808080; padding: 8px 0 3px; margin-top: 8px; margin-bottom: 6px; font-size: 12px; }
+.settings-section:first-child { margin-top: 0; }
+.settings-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; cursor: pointer; }
+.settings-row span { flex: 1; }
+.settings-row select { width: 100px; padding: 2px; font-family: inherit; font-size: 12px; border: 2px inset #808080; background: #fff; }
+.settings-row input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
 
 .blocklyToolboxDiv { background-color: #f9f9f9 !important; border-right: 1px solid #ddd !important; width: 120px !important; }
 .blocklyFlyoutBackground { fill: #e8e8e8 !important; }
@@ -120,3 +135,28 @@ body { background: #008080; }
     background: #008000; 
     color: white;
 }
+
+/* Extensions dialog */
+.ext-dialog { width: 480px; max-height: 520px; background: #ece9d8; border: 2px solid; border-color: #fff #808080 #808080 #fff; box-shadow: 4px 4px 0 rgba(0,0,0,0.3); display: flex; flex-direction: column; font-family: "Segoe UI", Tahoma, sans-serif; font-size: 12px; }
+.ext-header { display: flex; align-items: center; justify-content: space-between; padding: 4px 8px; background: linear-gradient(180deg, #0a246a, #3a6ea5); color: #fff; font-weight: bold; font-size: 13px; }
+.ext-body { padding: 8px; overflow-y: auto; max-height: 460px; }
+.ext-actions { display: flex; gap: 6px; margin-bottom: 8px; }
+.ext-list { display: flex; flex-direction: column; gap: 4px; }
+.ext-empty { text-align: center; padding: 30px 10px; color: #808080; font-style: italic; }
+.ext-card { display: flex; align-items: center; gap: 8px; padding: 8px; background: #fff; border: 2px solid; border-color: #fff #808080 #808080 #fff; }
+.ext-card-colour { width: 12px; height: 36px; flex-shrink: 0; border: 1px solid #808080; }
+.ext-card-info { flex: 1; min-width: 0; }
+.ext-card-name { font-weight: bold; font-size: 13px; color: #000; }
+.ext-card-meta { font-size: 11px; color: #666; margin-top: 2px; }
+.ext-card-blocks { font-size: 11px; color: #0a246a; }
+.ext-card-actions { display: flex; gap: 4px; flex-shrink: 0; }
+.ext-btn-sm { padding: 2px 8px; font-size: 11px; font-family: inherit; font-weight: bold; background: #c0c0c0; border: 2px solid; border-color: #fff #808080 #808080 #fff; cursor: pointer; }
+.ext-btn-sm:active { border-color: #808080 #fff #fff #808080; }
+.ext-btn-sm.danger { background: #cc3333; color: #fff; }
+
+/* Extension editor */
+.ext-editor-dialog { width: 620px; max-height: 600px; background: #ece9d8; border: 2px solid; border-color: #fff #808080 #808080 #fff; box-shadow: 4px 4px 0 rgba(0,0,0,0.3); display: flex; flex-direction: column; font-family: "Segoe UI", Tahoma, sans-serif; font-size: 12px; }
+.ext-editor-body { padding: 8px; display: flex; flex-direction: column; gap: 8px; }
+.ext-editor-textarea { width: 100%; height: 380px; background: #1a1a2e; color: #0f0; font-family: "Cascadia Code", "Consolas", monospace; font-size: 13px; padding: 10px; border: 2px inset #808080; resize: vertical; white-space: pre; tab-size: 2; box-sizing: border-box; }
+.ext-editor-textarea::placeholder { color: #555; }
+.ext-editor-actions { display: flex; gap: 6px; justify-content: flex-end; }

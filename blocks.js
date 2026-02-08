@@ -4,7 +4,7 @@ window.registerWebBlocks = function() {
 
 if (!Blockly.Extensions.isRegistered('shape_square')) {
     Blockly.Extensions.register('shape_square', function() {
-        if (this.outputConnection) this.setOutputShape(Blockly.OUTPUT_SHAPE_SQUARE);
+        if (this.outputConnection) this.setOutputShape(window.WEBBLOCKS_OUTPUT_SHAPE_SQUARE || 3);
         this._isBoxShape = true;
     });
 }
@@ -530,6 +530,7 @@ if (!Blockly.Extensions.isRegistered('shape_ticket')) {
         { "type": "js_audio_play", "message0": "play sound %1", "args0": [{ "type": "input_value", "name": "URL", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#CF63CF" },
         { "type": "js_audio_synth", "message0": "synth note %1 duration %2 ms", "args0": [{ "type": "field_dropdown", "name": "NOTE", "options": [["C4","261.63"],["D4","293.66"],["E4","329.63"],["F4","349.23"],["G4","392.00"],["A4","440.00"],["B4","493.88"]] }, { "type": "field_number", "name": "DUR", "value": 500 }], "previousStatement": null, "nextStatement": null, "colour": "#CF63CF" },
 
+        { "type": "js_page_loaded", "message0": "when page loaded %1 %2", "args0": [{ "type": "input_dummy" }, { "type": "input_statement", "name": "DO" }], "colour": "#FF8C1A" },
         { "type": "js_event", "message0": "on event", "message1": "event %1", "args1": [{ "type": "field_dropdown", "name": "EVT", "options": [["Click","click"],["Hover","mouseenter"],["Input","input"]] }], "message2": "selector %1", "args2": [{ "type": "input_value", "name": "SEL", "check": "String" }], "message3": "%1", "args3": [{ "type": "input_statement", "name": "DO" }], "colour": "#FF8C1A" },
         { "type": "js_alert", "message0": "alert %1", "args0": [{ "type": "input_value", "name": "MSG", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#FF8C1A" },
         { "type": "js_console", "message0": "console log %1", "args0": [{ "type": "input_value", "name": "MSG", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#FF8C1A" },
@@ -809,7 +810,7 @@ if (!Blockly.Extensions.isRegistered('shape_ticket')) {
         { 	"type":"arr_join","message0":"join %1 with %2","args0":[{"type":"input_value","name":"ARR","check":"Array"},{"type":"input_value","name":"DELIM","check":"String"}],"output":"String","colour":"#FF6666","extensions":["shape_square"]},
 
         { "type": "obj_new", "message0": "blank object", "output": "Object", "colour": "#FFCC33", "extensions": ["shape_ticket"] },
-        { "type": "obj_parse", "message0": "parse %1 as object", "args0": [{ "type": "input_value", "name": "TXT", "check": "String" }], "output": "Object", "colour": "#FFCC33", "extensions": ["shape_ticket"] },
+        { "type": "obj_parse", "message0": "parse %1 as object", "args0": [{ "type": "input_value", "name": "TXT" }], "output": "Object", "colour": "#FFCC33", "extensions": ["shape_ticket"] },
         { "type": "obj_from_entries", "message0": "from entries %1", "args0": [{ "type": "input_value", "name": "ENTRIES", "check": "Array" }], "output": "Object", "colour": "#FFCC33", "extensions": ["shape_ticket"] },
 
         { "type": "obj_builder", "message0": "object builder %1  %2 ", "args0": [{ "type": "input_dummy" },  { "type": "input_statement", "name": "DO" }], "output": "Object", "colour": "#FFCC33", "extensions": ["shape_ticket"] },
@@ -827,6 +828,44 @@ if (!Blockly.Extensions.isRegistered('shape_ticket')) {
         { "type": "obj_delete", "message0": "delete key %1 from %2", "args0": [{ "type": "input_value", "name": "KEY", "check": "String" }, { "type": "input_value", "name": "OBJ", "check": "Object" }], "previousStatement": null, "nextStatement": null, "colour": "#FFCC33", "extensions": ["shape_ticket"] },
         { "type": "obj_merge", "message0": "merge %1 into %2", "args0": [{ "type": "input_value", "name": "SRC", "check": "Object" }, { "type": "input_value", "name": "DEST", "check": "Object" }], "previousStatement": null, "nextStatement": null, "colour": "#FFCC33", "extensions": ["shape_ticket"] },
 // ill add more later haha
+
+        // ─── HTTP Request Blocks ───
+        // State
+        { "type": "http_clear", "message0": "clear current data", "previousStatement": null, "nextStatement": null, "colour": "#2196F3" },
+
+        // Response reporters
+        { "type": "http_response", "message0": "response", "output": "String", "colour": "#2196F3" },
+        { "type": "http_error", "message0": "error", "output": "String", "colour": "#2196F3" },
+        { "type": "http_status", "message0": "status", "output": "Number", "colour": "#2196F3" },
+        { "type": "http_status_text", "message0": "status text", "output": "String", "colour": "#2196F3" },
+        { "type": "http_response_headers", "message0": "response headers as json", "output": "String", "colour": "#2196F3" },
+        { "type": "http_get_header", "message0": "%1 from response headers", "args0": [{ "type": "input_value", "name": "NAME" }], "output": "String", "colour": "#2196F3" },
+
+        // Response booleans
+        { "type": "http_responded", "message0": "site responded?", "output": "Boolean", "colour": "#2196F3" },
+        { "type": "http_failed", "message0": "request failed?", "output": "Boolean", "colour": "#2196F3" },
+        { "type": "http_succeeded", "message0": "request succeeded?", "output": "Boolean", "colour": "#2196F3" },
+
+        // Event hat blocks
+        { "type": "http_on_response", "message0": "when a site responds %1 %2", "args0": [{ "type": "input_dummy" }, { "type": "input_statement", "name": "DO" }], "previousStatement": null, "nextStatement": null, "colour": "#2196F3" },
+        { "type": "http_on_error", "message0": "when a request fails %1 %2", "args0": [{ "type": "input_dummy" }, { "type": "input_statement", "name": "DO" }], "previousStatement": null, "nextStatement": null, "colour": "#2196F3" },
+
+        // Request configuration
+        { "type": "http_set_content_type", "message0": "set request content type to %1", "args0": [{ "type": "field_dropdown", "name": "TYPE", "options": [["text/plain", "text/plain"], ["application/json", "application/json"], ["application/x-www-form-urlencoded", "application/x-www-form-urlencoded"], ["multipart/form-data", "multipart/form-data"]] }], "previousStatement": null, "nextStatement": null, "colour": "#2196F3" },
+        { "type": "http_set_method", "message0": "set request method to %1", "args0": [{ "type": "field_dropdown", "name": "METHOD", "options": [["GET", "GET"], ["POST", "POST"], ["PUT", "PUT"], ["PATCH", "PATCH"], ["DELETE", "DELETE"], ["HEAD", "HEAD"], ["OPTIONS", "OPTIONS"]] }], "previousStatement": null, "nextStatement": null, "colour": "#2196F3" },
+        { "type": "http_set_header", "message0": "in request headers set %1 to %2", "args0": [{ "type": "input_value", "name": "KEY" }, { "type": "input_value", "name": "VAL" }], "previousStatement": null, "nextStatement": null, "colour": "#2196F3" },
+        { "type": "http_set_headers_json", "message0": "set request headers to json %1", "args0": [{ "type": "input_value", "name": "JSON" }], "previousStatement": null, "nextStatement": null, "colour": "#2196F3" },
+        { "type": "http_set_body", "message0": "set request body to %1", "args0": [{ "type": "input_value", "name": "BODY" }], "previousStatement": null, "nextStatement": null, "colour": "#2196F3" },
+
+        // Multipart form
+        { "type": "http_set_body_form", "message0": "set request body to multipart form", "previousStatement": null, "nextStatement": null, "colour": "#2196F3" },
+        { "type": "http_form_get", "message0": "%1 in multipart form", "args0": [{ "type": "input_value", "name": "NAME" }], "output": "String", "colour": "#2196F3" },
+        { "type": "http_form_set", "message0": "set %1 to %2 in multipart form", "args0": [{ "type": "input_value", "name": "NAME" }, { "type": "input_value", "name": "VAL" }], "previousStatement": null, "nextStatement": null, "colour": "#2196F3" },
+        { "type": "http_form_delete", "message0": "delete %1 from multipart form", "args0": [{ "type": "input_value", "name": "NAME" }], "previousStatement": null, "nextStatement": null, "colour": "#2196F3" },
+
+        // Send
+        { "type": "http_send", "message0": "send request to %1", "args0": [{ "type": "input_value", "name": "URL" }], "previousStatement": null, "nextStatement": null, "colour": "#2196F3" },
+
 
         { "type": "text_trim", "message0": "trim %1", "args0": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "output": "String", "colour": "#59C059" },
         { "type": "text_replace", "message0": "replace %1 with %2 in %3", "args0": [{ "type": "input_value", "name": "SEARCH", "check": "String" }, { "type": "input_value", "name": "REPL", "check": "String" }, { "type": "input_value", "name": "TEXT", "check": "String" }], "output": "String", "colour": "#59C059" },

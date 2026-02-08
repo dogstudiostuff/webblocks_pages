@@ -6,6 +6,30 @@ let project = {
     }
 };
 
+// Settings with defaults (persisted to localStorage)
+let settings = {
+    gridSnap: true,
+    gridSpacing: 20,
+    trashcan: true,
+    sounds: true,
+    watermark: true,
+    minify: false,
+    zoomSpeed: 1.2,
+    codeFontSize: '13px',
+    autoRemind: false
+};
+
+function loadSettings() {
+    try {
+        const saved = localStorage.getItem('pooide_settings');
+        if (saved) Object.assign(settings, JSON.parse(saved));
+    } catch(e) {}
+}
+function saveSettings() {
+    try { localStorage.setItem('pooide_settings', JSON.stringify(settings)); } catch(e) {}
+}
+loadSettings();
+
 const toolbox = {
     kind: "categoryToolbox",
     contents: [
@@ -226,6 +250,7 @@ const toolbox = {
                     name: "Events & Interaction",
                     colour: "#FF6680",
                     contents: [
+                        { kind: "block", type: "js_page_loaded" },
                         { kind: "block", type: "js_event" },
                         { kind: "block", type: "js_alert" },
                         { kind: "block", type: "js_console" },
@@ -398,6 +423,56 @@ const toolbox = {
         ]
     },
 
+        {
+            kind: "category",
+            name: "HTTP",
+            colour: "#2196F3",
+            contents: [
+                {
+                    kind: "category",
+                    name: "State",
+                    colour: "#2196F3",
+                    contents: [
+                        { kind: "block", type: "http_clear" }
+                    ]
+                },
+                {
+                    kind: "category",
+                    name: "Response",
+                    colour: "#2196F3",
+                    contents: [
+                        { kind: "block", type: "http_response" },
+                        { kind: "block", type: "http_error" },
+                        { kind: "block", type: "http_status" },
+                        { kind: "block", type: "http_status_text" },
+                        { kind: "block", type: "http_response_headers" },
+                        { kind: "block", type: "http_get_header", inputs: { NAME: { shadow: { type: "text_string", fields: { TEXT: "Content-Type" } } } } },
+                        { kind: "block", type: "http_responded" },
+                        { kind: "block", type: "http_failed" },
+                        { kind: "block", type: "http_succeeded" },
+                        { kind: "block", type: "http_on_response" },
+                        { kind: "block", type: "http_on_error" }
+                    ]
+                },
+                {
+                    kind: "category",
+                    name: "Request",
+                    colour: "#2196F3",
+                    contents: [
+                        { kind: "block", type: "http_set_content_type" },
+                        { kind: "block", type: "http_set_method" },
+                        { kind: "block", type: "http_set_header", inputs: { KEY: { shadow: { type: "text_string", fields: { TEXT: "Content-Type" } } }, VAL: { shadow: { type: "text_string", fields: { TEXT: "application/json" } } } } },
+                        { kind: "block", type: "http_set_headers_json", inputs: { JSON: { shadow: { type: "text_string", fields: { TEXT: '{"Content-Type": "application/json"}' } } } } },
+                        { kind: "block", type: "http_set_body" },
+                        { kind: "block", type: "http_set_body_form" },
+                        { kind: "block", type: "http_form_get", inputs: { NAME: { shadow: { type: "text_string", fields: { TEXT: "name" } } } } },
+                        { kind: "block", type: "http_form_set", inputs: { NAME: { shadow: { type: "text_string", fields: { TEXT: "name" } } }, VAL: { shadow: { type: "text_string", fields: { TEXT: "value" } } } } },
+                        { kind: "block", type: "http_form_delete", inputs: { NAME: { shadow: { type: "text_string", fields: { TEXT: "name" } } } } },
+                        { kind: "block", type: "http_send", inputs: { URL: { shadow: { type: "text_string", fields: { TEXT: "https://api.example.com/data" } } } } }
+                    ]
+                }
+            ]
+        },
 
         {
             kind: "category",
@@ -587,8 +662,14 @@ function generateFullHtml() {
         workspace.getTopBlocks(true).forEach(b => html += htmlGenerator.blockToCode(b));
     }
     
-    const watermark = `<div style="position:fixed;bottom:10px;right:10px;background:#fff;padding:5px 10px;border:1px solid #000;font-family:sans-serif;font-size:12px;z-index:9999;box-shadow:2px 2px 0 #000;">Made with WebBlocks</div>`;
-    return html + watermark;
+    if (settings.watermark) {
+        const watermark = `<div style="position:fixed;bottom:10px;right:10px;background:#fff;padding:5px 10px;border:1px solid #000;font-family:sans-serif;font-size:12px;z-index:9999;box-shadow:2px 2px 0 #000;">Made with Poo IDE</div>`;
+        html += watermark;
+    }
+    if (settings.minify) {
+        html = html.replace(/\n\s*/g, '').replace(/\s{2,}/g, ' ');
+    }
+    return html;
 }
 
 function init() {
@@ -673,14 +754,50 @@ function init() {
     };
 
     document.getElementById("btnSave").onclick = () => {
+        document.getElementById("saveCurrentName").textContent = project.activePage;
+        document.getElementById("saveOverlay").style.display = "flex";
+    };
+
+    function closeSaveDialog() {
+        document.getElementById("saveOverlay").style.display = "none";
+    }
+
+    document.getElementById("saveCancel").onclick = closeSaveDialog;
+    document.getElementById("saveOverlay").addEventListener("click", (e) => {
+        if (e.target.id === "saveOverlay") closeSaveDialog();
+    });
+
+    // Save current page only
+    document.getElementById("saveCurrent").onclick = () => {
+        closeSaveDialog();
         const state = Blockly.serialization.workspaces.save(workspace);
-        const fileContent = { app: "WebBlocks", version: "1.0", blocks: state };
+        const fileContent = { app: "Poo IDE", version: "1.0", type: "page", blocks: state };
         const blob = new Blob([JSON.stringify(fileContent, null, 2)], { type: "application/json" });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         link.download = project.activePage + ".wbk";
         link.click();
-        showToast("Project Saved!");
+        showToast("Saved " + project.activePage + ".wbk");
+    };
+
+    // Save all pages as one project file
+    document.getElementById("saveAll").onclick = () => {
+        closeSaveDialog();
+        // Snapshot current page state
+        project.pages[project.activePage] = Blockly.serialization.workspaces.save(workspace);
+        const fileContent = {
+            app: "Poo IDE",
+            version: "1.0",
+            type: "project",
+            activePage: project.activePage,
+            // this bit talks about sigma skibidi toilet poop
+        };
+        const blob = new Blob([JSON.stringify(fileContent, null, 2)], { type: "application/json" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "project.wbk";
+        link.click();
+        showToast("Saved full project (" + Object.keys(project.pages).length + " pages)");
     };
 
     document.getElementById("btnLoad").onclick = () => document.getElementById("fileInput").click();
@@ -691,9 +808,24 @@ function init() {
         const reader = new FileReader();
         reader.onload = (event) => {
             const data = JSON.parse(event.target.result);
-            const blocks = data.app === "WebBlocks" ? data.blocks : data;
-            workspace.clear();
-            Blockly.serialization.workspaces.load(blocks, workspace);
+
+            // Full project file (multiple pages)
+            if (data.type === "project" && data.pages) {
+                project.pages = data.pages;
+                project.activePage = data.activePage || Object.keys(data.pages)[0];
+                workspace.clear();
+                if (project.pages[project.activePage]) {
+                    Blockly.serialization.workspaces.load(project.pages[project.activePage], workspace);
+                }
+                renderTabs();
+                showToast("Loaded project (" + Object.keys(project.pages).length + " pages)");
+            } else {
+                // Single page file (legacy or single-page save)
+                const blocks = (data.app === "Poo IDE" || data.app === "Poo Ider" || data.app === "WebBlocks") ? data.blocks : data;
+                workspace.clear();
+                Blockly.serialization.workspaces.load(blocks, workspace);
+                showToast("Loaded " + file.name);
+            }
         };
         reader.readAsText(file);
     };
@@ -770,31 +902,304 @@ function init() {
         
         if (window.electronAPI) {
             const base64 = await zip.generateAsync({ type: "base64" });
-            const saved = await window.electronAPI.saveFile({ defaultName: "webblocks_site.zip", content: base64, mimeType: 'application/zip' });
+            const saved = await window.electronAPI.saveFile({ defaultName: "poo_ide_site.zip", content: base64, mimeType: 'application/zip' });
             if (saved) showToast("Exported " + Object.keys(project.pages).length + " pages as .zip");
         } else {
             const content = await zip.generateAsync({ type: "blob" });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(content);
-            link.download = "webblocks_site.zip";
+            link.download = "poo_ide_site.zip";
             link.click();
             showToast("Exported " + Object.keys(project.pages).length + " pages as .zip");
         }
     };
 
-    document.getElementById("btnPreview").onclick = () => {
+    document.getElementById("btnPreview").onclick = async () => {
         const html = generateFullHtml();
         const notice = `<div id="wb-preview-notice" style="position:fixed;top:0;left:0;right:0;background:#1a1a2e;color:#fff;font-family:system-ui,sans-serif;font-size:13px;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;z-index:99999;box-shadow:0 2px 8px rgba(0,0,0,0.3);">
-            <span>&#9888; <strong>WebBlocks Preview</strong> &mdash; This URL is local to your browser and won't work for anyone else. Use <em>Export HTML</em> to share.</span>
+            <span>&#9888; <strong>Poo IDE Preview</strong> &mdash; This URL is local to your browser and won't work for anyone else. Use <em>Export HTML</em> to share.</span>
             <button onclick="this.parentElement.remove()" style="background:none;border:1px solid rgba(255,255,255,0.3);color:#fff;padding:2px 10px;cursor:pointer;border-radius:3px;font-size:12px;">✕</button>
         </div><div style="height:36px;"></div>`;
         const fullHtml = notice + html;
-        const blob = new Blob([fullHtml], { type: "text/html" });
-        const url = URL.createObjectURL(blob);
-        window.open(url, '_blank');
+        if (window.electronAPI && window.electronAPI.previewHtml) {
+            await window.electronAPI.previewHtml(fullHtml);
+        } else {
+            const blob = new Blob([fullHtml], { type: "text/html" });
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
+        }
     };
 
+    // ─── Settings panel ───
+    function applySettings() {
+        if (!workspace) return;
+        // Update grid snap without triggering a full workspace re-render
+        workspace.options.gridOptions = workspace.options.gridOptions || {};
+        workspace.options.gridOptions.snap = settings.gridSnap;
+        workspace.options.gridOptions.spacing = settings.gridSpacing;
+
+        // Update the SVG grid pattern directly
+        const grid = workspace.getGrid && workspace.getGrid();
+        if (grid && grid.gridPattern_) {
+            grid.gridPattern_.setAttribute('width', settings.gridSpacing);
+            grid.gridPattern_.setAttribute('height', settings.gridSpacing);
+            var children = grid.gridPattern_.children;
+            for (var i = 0; i < children.length; i++) {
+                var line = children[i];
+                if (line.getAttribute('x1') !== '0' || line.getAttribute('x2') == settings.gridSpacing) {
+                    line.setAttribute('x2', settings.gridSpacing);
+                }
+                if (line.getAttribute('y1') !== '0' || line.getAttribute('y2') == settings.gridSpacing) {
+                    line.setAttribute('y2', settings.gridSpacing);
+                }
+            }
+            grid.snapToGrid = settings.gridSnap;
+            grid.spacing = settings.gridSpacing;
+        }
+
+        const trashEl = workspace.trashcan && workspace.trashcan.svgGroup;
+        if (trashEl) trashEl.style.display = settings.trashcan ? '' : 'none';
+        document.getElementById('codeArea').style.fontSize = settings.codeFontSize;
+        saveSettings();
+    }
+
+    function syncSettingsUI() {
+        document.getElementById('setGridSnap').checked = settings.gridSnap;
+        document.getElementById('setGridSpacing').value = settings.gridSpacing;
+        document.getElementById('setTrashcan').checked = settings.trashcan;
+        document.getElementById('setSounds').checked = settings.sounds;
+        document.getElementById('setWatermark').checked = settings.watermark;
+        document.getElementById('setMinify').checked = settings.minify;
+        document.getElementById('setZoomSpeed').value = settings.zoomSpeed;
+        document.getElementById('setCodeFontSize').value = settings.codeFontSize;
+        document.getElementById('setAutoRemind').checked = settings.autoRemind;
+    }
+
+    document.getElementById('btnSettings').onclick = () => {
+        syncSettingsUI();
+        document.getElementById('settingsOverlay').style.display = 'flex';
+    };
+    document.getElementById('settingsClose').onclick = () => {
+        document.getElementById('settingsOverlay').style.display = 'none';
+    };
+    document.getElementById('settingsOverlay').addEventListener('click', (e) => {
+        if (e.target.id === 'settingsOverlay') document.getElementById('settingsOverlay').style.display = 'none';
+    });
+
+    // Bind each setting control
+    document.getElementById('setGridSnap').onchange = function() { settings.gridSnap = this.checked; applySettings(); };
+    document.getElementById('setGridSpacing').onchange = function() { settings.gridSpacing = parseInt(this.value); applySettings(); };
+    document.getElementById('setTrashcan').onchange = function() { settings.trashcan = this.checked; applySettings(); };
+    document.getElementById('setSounds').onchange = function() {
+        settings.sounds = this.checked;
+        if (Blockly.WorkspaceAudio) {
+            workspace.getAudioManager && workspace.getAudioManager().setEnabled(this.checked);
+        }
+        saveSettings();
+    };
+    document.getElementById('setWatermark').onchange = function() { settings.watermark = this.checked; saveSettings(); };
+    document.getElementById('setMinify').onchange = function() { settings.minify = this.checked; saveSettings(); };
+    document.getElementById('setZoomSpeed').onchange = function() {
+        settings.zoomSpeed = parseFloat(this.value);
+        workspace.options.zoomOptions.scaleSpeed = settings.zoomSpeed;
+        saveSettings();
+    };
+    document.getElementById('setCodeFontSize').onchange = function() { settings.codeFontSize = this.value; applySettings(); };
+    document.getElementById('setAutoRemind').onchange = function() { settings.autoRemind = this.checked; saveSettings(); };
+
+    // Apply loaded settings on startup
+    applySettings();
+    if (settings.sounds === false && workspace.getAudioManager) {
+        workspace.getAudioManager().setEnabled(false);
+    }
+    if (settings.zoomSpeed !== 1.2) {
+        workspace.options.zoomOptions.scaleSpeed = settings.zoomSpeed;
+    }
+
+    // Auto-save reminder
+    let _autoRemindInterval;
+    function startAutoRemind() {
+        clearInterval(_autoRemindInterval);
+        if (settings.autoRemind) {
+            _autoRemindInterval = setInterval(() => {
+                if (settings.autoRemind) showToast('Reminder: Save your work! (Ctrl+S)');
+            }, 5 * 60 * 1000);
+        }
+    }
+    startAutoRemind();
+    document.getElementById('setAutoRemind').addEventListener('change', startAutoRemind);
+
     window.addEventListener('resize', () => Blockly.svgResize(workspace));
+
+    // ─── Extensions panel ───
+    function renderExtList() {
+        const list = document.getElementById('extList');
+        const exts = PooExtensions.loaded;
+        if (exts.length === 0) {
+            list.innerHTML = '<div class="ext-empty">No extensions loaded. Import a .wbx file to get started.</div>';
+            return;
+        }
+        list.innerHTML = '';
+        exts.forEach(ext => {
+            const colour = ext.settings.colour || ext.settings.color || '#888';
+            const card = document.createElement('div');
+            card.className = 'ext-card';
+            card.innerHTML = `
+                <div class="ext-card-colour" style="background:${colour}"></div>
+                <div class="ext-card-info">
+                    <div class="ext-card-name">${ext.settings.name || ext.id}</div>
+                    <div class="ext-card-meta">
+                        ${ext.settings.author ? 'by ' + ext.settings.author : ''}
+                        ${ext.settings.version ? ' &middot; v' + ext.settings.version : ''}
+                    </div>
+                    <div class="ext-card-blocks">${ext.blockTypes.length} block${ext.blockTypes.length !== 1 ? 's' : ''}${ext.shapeNames && ext.shapeNames.length ? ' &middot; ' + ext.shapeNames.length + ' shape' + (ext.shapeNames.length !== 1 ? 's' : '') : ''}: ${ext.blockTypes.join(', ')}</div>
+                </div>
+                <div class="ext-card-actions">
+                    <button class="ext-btn-sm" data-ext-edit="${ext.id}" title="Edit">&#9998;</button>
+                    <button class="ext-btn-sm" data-ext-export="${ext.id}" title="Export">&#128190;</button>
+                    <button class="ext-btn-sm danger" data-ext-remove="${ext.id}" title="Remove">&#10005;</button>
+                </div>`;
+            list.appendChild(card);
+        });
+
+        // Bind card buttons
+        list.querySelectorAll('[data-ext-remove]').forEach(btn => {
+            btn.onclick = () => {
+                const id = btn.dataset.extRemove;
+                PooExtensions.removeExtension(id);
+                PooExtensions.refreshToolbox(workspace, toolbox);
+                renderExtList();
+                showToast('Extension removed');
+            };
+        });
+        list.querySelectorAll('[data-ext-export]').forEach(btn => {
+            btn.onclick = () => {
+                const id = btn.dataset.extExport;
+                const ext = PooExtensions.loaded.find(e => e.id === id);
+                if (!ext) return;
+                const blob = new Blob([ext.raw], { type: 'text/plain' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = (ext.settings.name || ext.id).replace(/\s+/g, '_') + '.wbx';
+                link.click();
+                showToast('Exported ' + link.download);
+            };
+        });
+        list.querySelectorAll('[data-ext-edit]').forEach(btn => {
+            btn.onclick = () => {
+                const id = btn.dataset.extEdit;
+                const ext = PooExtensions.loaded.find(e => e.id === id);
+                if (!ext) return;
+                document.getElementById('extEditorCode').value = ext.raw;
+                document.getElementById('extEditorOverlay').style.display = 'flex';
+                document.getElementById('extEditorCode').focus();
+            };
+        });
+    }
+
+    document.getElementById('btnExtensions').onclick = () => {
+        renderExtList();
+        document.getElementById('extOverlay').style.display = 'flex';
+    };
+    document.getElementById('extClose').onclick = () => {
+        document.getElementById('extOverlay').style.display = 'none';
+    };
+    document.getElementById('extOverlay').addEventListener('click', (e) => {
+        if (e.target.id === 'extOverlay') document.getElementById('extOverlay').style.display = 'none';
+    });
+
+    // Import .wbx file
+    document.getElementById('extImportBtn').onclick = () => {
+        document.getElementById('extFileInput').click();
+    };
+    document.getElementById('extFileInput').onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            try {
+                PooExtensions.loadExtension(ev.target.result);
+                PooExtensions.refreshToolbox(workspace, toolbox);
+                renderExtList();
+                showToast('Loaded extension: ' + file.name);
+            } catch (err) {
+                showToast('Error: ' + err.message);
+                console.error('Extension load error:', err);
+            }
+        };
+        reader.readAsText(file);
+        e.target.value = ''; // reset
+    };
+
+    // New extension (open editor)
+    document.getElementById('extNewBtn').onclick = () => {
+        document.getElementById('extEditorCode').value = '';
+        document.getElementById('extEditorOverlay').style.display = 'flex';
+        document.getElementById('extEditorCode').focus();
+    };
+
+    // Extension editor
+    document.getElementById('extEditorClose').onclick = () => {
+        document.getElementById('extEditorOverlay').style.display = 'none';
+    };
+    document.getElementById('extEditorOverlay').addEventListener('click', (e) => {
+        if (e.target.id === 'extEditorOverlay') document.getElementById('extEditorOverlay').style.display = 'none';
+    });
+    document.getElementById('extEditorCancel').onclick = () => {
+        document.getElementById('extEditorOverlay').style.display = 'none';
+    };
+    document.getElementById('extEditorSave').onclick = () => {
+        const code = document.getElementById('extEditorCode').value.trim();
+        if (!code) { showToast('Extension code is empty'); return; }
+        try {
+            // If editing an existing extension, remove the old one first
+            const parsed = PooExtensions.parse(code);
+            const existingId = (parsed.settings.name || '').replace(/\s+/g, '_').toLowerCase();
+            if (existingId && PooExtensions.loaded.find(e => e.id === existingId)) {
+                PooExtensions.removeExtension(existingId);
+            }
+            PooExtensions.loadExtension(code);
+            PooExtensions.refreshToolbox(workspace, toolbox);
+            renderExtList();
+            document.getElementById('extEditorOverlay').style.display = 'none';
+            showToast('Extension loaded!');
+        } catch (err) {
+            showToast('Error: ' + err.message);
+            console.error('Extension error:', err);
+        }
+    };
+    document.getElementById('extEditorExport').onclick = () => {
+        const code = document.getElementById('extEditorCode').value.trim();
+        if (!code) { showToast('Nothing to export'); return; }
+        try {
+            const parsed = PooExtensions.parse(code);
+            const name = (parsed.settings.name || 'extension').replace(/\s+/g, '_');
+            const blob = new Blob([code], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = name + '.wbx';
+            link.click();
+            showToast('Exported ' + link.download);
+        } catch (err) {
+            showToast('Error: ' + err.message);
+        }
+    };
+    // Allow Tab key in the editor textarea
+    document.getElementById('extEditorCode').addEventListener('keydown', (e) => {
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            const ta = e.target;
+            const start = ta.selectionStart;
+            ta.value = ta.value.substring(0, start) + '  ' + ta.value.substring(ta.selectionEnd);
+            ta.selectionStart = ta.selectionEnd = start + 2;
+        }
+    });
+
+    // Restore previously loaded extensions from localStorage
+    PooExtensions.loadFromStorage();
+    if (PooExtensions.loaded.length > 0) {
+        PooExtensions.refreshToolbox(workspace, toolbox);
+    }
 
     const blockSearchIndex = buildBlockSearchIndex(toolbox.contents);
     initBlockSearch(blockSearchIndex);

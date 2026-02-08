@@ -582,6 +582,10 @@ htmlGenerator.forBlock["html_iframe"] = (b) => {
     return `<iframe src="${src}" width="${w}" height="${h}"></iframe>\n`;
 };
 
+htmlGenerator.forBlock["js_page_loaded"] = (b) => {
+    const code = htmlGenerator.statementToCode(b, 'DO');
+    return `<script>window.addEventListener('DOMContentLoaded',function(){ ${code} });</script>\n`;
+};
 htmlGenerator.forBlock["js_event"] = (b) => {
     const sel = getVal(b, 'SEL');
     const evt = b.getFieldValue('EVT');
@@ -859,6 +863,84 @@ Blockly.JavaScript.forBlock["obj_stringify"] = (b) => [`JSON.stringify(${Blockly
 Blockly.JavaScript.forBlock["obj_set"] = (b) => `${Blockly.JavaScript.valueToCode(b, 'OBJ', Blockly.JavaScript.ORDER_ATOMIC)}[${Blockly.JavaScript.valueToCode(b, 'KEY', Blockly.JavaScript.ORDER_ATOMIC)}] = ${Blockly.JavaScript.valueToCode(b, 'VAL', Blockly.JavaScript.ORDER_ATOMIC)};`;
 Blockly.JavaScript.forBlock["obj_delete"] = (b) => `delete ${Blockly.JavaScript.valueToCode(b, 'OBJ', Blockly.JavaScript.ORDER_ATOMIC)}[${Blockly.JavaScript.valueToCode(b, 'KEY', Blockly.JavaScript.ORDER_ATOMIC)}];`;
 Blockly.JavaScript.forBlock["obj_merge"] = (b) => `Object.assign(${Blockly.JavaScript.valueToCode(b, 'DEST', Blockly.JavaScript.ORDER_ATOMIC)}, ${Blockly.JavaScript.valueToCode(b, 'SRC', Blockly.JavaScript.ORDER_ATOMIC)});`;
+
+// ─── HTTP Request Block Generators ───
+htmlGenerator.forBlock['http_clear'] = () => wrapJs(null, `window._http = { method:'GET', headers:{}, body:null, contentType:'text/plain', form:null, res:null, err:null, status:0, statusText:'', resHeaders:{}, responded:false, failed:false, succeeded:false };`);
+
+htmlGenerator.forBlock['http_response'] = () => [`(window._http&&window._http.res||'')`, htmlGenerator.ORDER_ATOMIC];
+htmlGenerator.forBlock['http_error'] = () => [`(window._http&&window._http.err||'')`, htmlGenerator.ORDER_ATOMIC];
+htmlGenerator.forBlock['http_status'] = () => [`(window._http&&window._http.status||0)`, htmlGenerator.ORDER_ATOMIC];
+htmlGenerator.forBlock['http_status_text'] = () => [`(window._http&&window._http.statusText||'')`, htmlGenerator.ORDER_ATOMIC];
+htmlGenerator.forBlock['http_response_headers'] = () => [`JSON.stringify(window._http&&window._http.resHeaders||{})`, htmlGenerator.ORDER_ATOMIC];
+htmlGenerator.forBlock['http_get_header'] = (b) => {
+    const name = htmlGenerator.valueToCode(b, 'NAME', htmlGenerator.ORDER_ATOMIC) || "''";
+    return [`(window._http&&window._http.resHeaders&&window._http.resHeaders[${name}]||'')`, htmlGenerator.ORDER_ATOMIC];
+};
+
+htmlGenerator.forBlock['http_responded'] = () => [`(!!window._http&&!!window._http.responded)`, htmlGenerator.ORDER_ATOMIC];
+htmlGenerator.forBlock['http_failed'] = () => [`(!!window._http&&!!window._http.failed)`, htmlGenerator.ORDER_ATOMIC];
+htmlGenerator.forBlock['http_succeeded'] = () => [`(!!window._http&&!!window._http.succeeded)`, htmlGenerator.ORDER_ATOMIC];
+
+htmlGenerator.forBlock['http_on_response'] = (b) => {
+    const code = htmlGenerator.statementToCode(b, 'DO');
+    return `<script>window._httpOnResponse = function(){ ${code} };</script>\n`;
+};
+htmlGenerator.forBlock['http_on_error'] = (b) => {
+    const code = htmlGenerator.statementToCode(b, 'DO');
+    return `<script>window._httpOnError = function(){ ${code} };</script>\n`;
+};
+
+htmlGenerator.forBlock['http_set_content_type'] = (b) => {
+    const type = b.getFieldValue('TYPE');
+    return wrapJs(b, `window._http = window._http||{}; window._http.contentType = '${type}';`);
+};
+htmlGenerator.forBlock['http_set_method'] = (b) => {
+    const method = b.getFieldValue('METHOD');
+    return wrapJs(b, `window._http = window._http||{}; window._http.method = '${method}';`);
+};
+htmlGenerator.forBlock['http_set_header'] = (b) => {
+    const key = htmlGenerator.valueToCode(b, 'KEY', htmlGenerator.ORDER_ATOMIC) || "''";
+    const val = htmlGenerator.valueToCode(b, 'VAL', htmlGenerator.ORDER_ATOMIC) || "''";
+    return wrapJs(b, `window._http = window._http||{}; window._http.headers = window._http.headers||{}; window._http.headers[${key}] = ${val};`);
+};
+htmlGenerator.forBlock['http_set_headers_json'] = (b) => {
+    const json = htmlGenerator.valueToCode(b, 'JSON', htmlGenerator.ORDER_ATOMIC) || "'{}'";
+    return wrapJs(b, `window._http = window._http||{}; try{ window._http.headers = JSON.parse(${json}); }catch(e){ window._http.headers = {}; }`);
+};
+htmlGenerator.forBlock['http_set_body'] = (b) => {
+    const body = htmlGenerator.valueToCode(b, 'BODY', htmlGenerator.ORDER_ATOMIC) || "''";
+    return wrapJs(b, `window._http = window._http||{}; window._http.body = ${body};`);
+};
+htmlGenerator.forBlock['http_set_body_form'] = () => wrapJs(null, `window._http = window._http||{}; window._http.form = new FormData(); window._http.body = null;`);
+htmlGenerator.forBlock['http_form_get'] = (b) => {
+    const name = htmlGenerator.valueToCode(b, 'NAME', htmlGenerator.ORDER_ATOMIC) || "''";
+    return [`(window._http&&window._http.form?window._http.form.get(${name}):'')`, htmlGenerator.ORDER_ATOMIC];
+};
+htmlGenerator.forBlock['http_form_set'] = (b) => {
+    const name = htmlGenerator.valueToCode(b, 'NAME', htmlGenerator.ORDER_ATOMIC) || "''";
+    const val = htmlGenerator.valueToCode(b, 'VAL', htmlGenerator.ORDER_ATOMIC) || "''";
+    return wrapJs(b, `if(window._http&&window._http.form) window._http.form.set(${name}, ${val});`);
+};
+htmlGenerator.forBlock['http_form_delete'] = (b) => {
+    const name = htmlGenerator.valueToCode(b, 'NAME', htmlGenerator.ORDER_ATOMIC) || "''";
+    return wrapJs(b, `if(window._http&&window._http.form) window._http.form.delete(${name});`);
+};
+htmlGenerator.forBlock['http_send'] = (b) => {
+    const url = htmlGenerator.valueToCode(b, 'URL', htmlGenerator.ORDER_ATOMIC) || "''";
+    return `<script>(function(){
+  var h = window._http||{};
+  var opts = { method: h.method||'GET', headers: Object.assign({}, h.headers||{}) };
+  if(h.form){ opts.body = h.form; }
+  else if(h.body!=null){ opts.body = h.body; if(h.contentType) opts.headers['Content-Type'] = h.contentType; }
+  h.responded=false; h.failed=false; h.succeeded=false; h.res=null; h.err=null; h.status=0; h.statusText='';
+  fetch(${url}, opts).then(function(r){
+    h.status=r.status; h.statusText=r.statusText; h.responded=true; h.succeeded=r.ok;
+    h.resHeaders={}; r.headers.forEach(function(v,k){h.resHeaders[k]=v;});
+    return r.text();
+  }).then(function(t){ h.res=t; if(window._httpOnResponse) window._httpOnResponse(); })
+  .catch(function(e){ h.err=String(e); h.failed=true; h.responded=true; if(window._httpOnError) window._httpOnError(); });
+})();</script>\n`;
+};
 htmlGenerator.forBlock['math_number'] = function(block) {
   const code = String(block.getFieldValue('NUM'));
   return [code, htmlGenerator.ORDER_ATOMIC];

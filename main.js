@@ -11,7 +11,7 @@ function createWindow() {
     minWidth: 900,
     minHeight: 600,
     icon: path.join(__dirname, 'favicon.ico'),
-    title: 'WebBlocks',
+    title: 'Poo IDE',
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -46,6 +46,22 @@ function createWindow() {
       return true;
     }
     return false;
+  });
+
+  // Handle HTML preview in a new window
+  ipcMain.handle('preview-html', async (event, html) => {
+    const previewWin = new BrowserWindow({
+      width: 1024,
+      height: 768,
+      title: 'Poo IDE — Preview',
+      icon: path.join(__dirname, 'favicon.ico'),
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true
+      }
+    });
+    previewWin.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html));
+    return true;
   });
 
   // Build the application menu
@@ -136,12 +152,12 @@ function createWindow() {
       label: 'Help',
       submenu: [
         {
-          label: 'About WebBlocks',
+          label: 'About Poo IDE',
           click: () => {
             dialog.showMessageBox(mainWindow, {
               type: 'info',
-              title: 'About WebBlocks',
-              message: 'WebBlocks',
+              title: 'About Poo IDE',
+              message: 'Poo IDE',
               detail: 'A visual website builder powered by Blockly.\nVersion 1.0.0'
             });
           }

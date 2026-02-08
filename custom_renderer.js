@@ -1,5 +1,5 @@
 (function(){
-    // Custom renderer scaffold for WebBlocks — builds on top of Zel os if available.
+    // Custom renderer scaffold for Poo IDE — builds on top of Zel os if available.
     if (!window.Blockly || !Blockly.blockRendering) {
         console.warn('Blockly or blockRendering API not present — skipping custom renderer registration.');
         return;
