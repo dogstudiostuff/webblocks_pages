@@ -685,33 +685,36 @@ htmlGenerator.forBlock["ui_page_wrapper"] = (b) => {
 };
 
 htmlGenerator.forBlock["ui_navbar_simple"] = (b) => {
+    const logo = (htmlGenerator.valueToCode(b, 'LOGO', htmlGenerator.ORDER_ATOMIC) || "'Logo'").replace(/^'|'$/g, '');
     const links = htmlGenerator.statementToCode(b, 'LINKS');
     return `
     <nav style="display:flex;justify-content:space-between;align-items:center;padding:20px 40px;border-bottom:1px solid rgba(255,255,255,0.1);">
-        <div style="font-weight:900;font-size:20px;letter-spacing:-1px;">${b.getFieldValue('LOGO')}</div>
+        <div style="font-weight:900;font-size:20px;letter-spacing:-1px;">${logo}</div>
         <div style="display:flex;gap:20px;">${links}</div>
     </nav>
     `;
 };
 
 htmlGenerator.forBlock["ui_nav_link"] = (b) => {
-    return `<a href="${b.getFieldValue('URL')}" style="text-decoration:none;color:inherit;opacity:0.8;font-weight:500;font-size:14px;">${b.getFieldValue('TEXT')}</a>`;
+    const text = (htmlGenerator.valueToCode(b, 'TEXT', htmlGenerator.ORDER_ATOMIC) || "'Link'").replace(/^'|'$/g, '');
+    const url = (htmlGenerator.valueToCode(b, 'URL', htmlGenerator.ORDER_ATOMIC) || "'#'").replace(/^'|'$/g, '');
+    return `<a href="${url}" style="text-decoration:none;color:inherit;opacity:0.8;font-weight:500;font-size:14px;">${text}</a>`;
 };
 
 htmlGenerator.forBlock["ui_hero_section"] = (b) => {
-    const title = htmlGenerator.valueToCode(b, 'TITLE', htmlGenerator.ORDER_ATOMIC) || "'Title'";
-    const sub = htmlGenerator.valueToCode(b, 'SUB', htmlGenerator.ORDER_ATOMIC) || "'Subtitle'";
-    const btnText = b.getFieldValue('BTN_TEXT');
+    const title = (htmlGenerator.valueToCode(b, 'TITLE', htmlGenerator.ORDER_ATOMIC) || "'Title'").replace(/^'|'$/g, '');
+    const sub = (htmlGenerator.valueToCode(b, 'SUB', htmlGenerator.ORDER_ATOMIC) || "'Subtitle'").replace(/^'|'$/g, '');
+    const btnText = (htmlGenerator.valueToCode(b, 'BTN_TEXT', htmlGenerator.ORDER_ATOMIC) || "'Click'").replace(/^'|'$/g, '');
     let jsCode = htmlGenerator.statementToCode(b, 'DO');
     jsCode = jsCode.replace(/<script>/g, '').replace(/<\/script>/g, '').trim().replace(/"/g, '&quot;');
 
     return `
     <section style="text-align:center;padding:100px 20px;max-width:800px;margin:0 auto;">
         <h1 style="font-size:60px;font-weight:800;margin-bottom:20px;letter-spacing:-2px;background:linear-gradient(to right, #fff, #888);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">
-            \${${title}}
+            ${title}
         </h1>
         <p style="font-size:20px;opacity:0.7;line-height:1.6;margin-bottom:40px;">
-            \${${sub}}
+            ${sub}
         </p>
         <button onclick="${jsCode}" style="padding:15px 30px;background:#fff;color:#000;border:none;border-radius:50px;font-weight:bold;font-size:16px;cursor:pointer;transition:transform 0.2s;">
             ${btnText}
@@ -730,11 +733,14 @@ htmlGenerator.forBlock["ui_feature_grid"] = (b) => {
 };
 
 htmlGenerator.forBlock["ui_feature_card"] = (b) => {
-    const title = htmlGenerator.valueToCode(b, 'TITLE', htmlGenerator.ORDER_ATOMIC) || "'Feature'";
-    const text = htmlGenerator.valueToCode(b, 'TEXT', htmlGenerator.ORDER_ATOMIC) || "'Description'";
+    const title = (htmlGenerator.valueToCode(b, 'TITLE', htmlGenerator.ORDER_ATOMIC) || "'Feature'").replace(/^'|'$/g, '');
+    const text = (htmlGenerator.valueToCode(b, 'TEXT', htmlGenerator.ORDER_ATOMIC) || "'Description'").replace(/^'|'$/g, '');
+    const iconMap = { star: '&#9733;', code: '&#60;/&#62;', zap: '&#9889;', heart: '&#9829;' };
+    const iconKey = b.getFieldValue('ICON') || 'star';
+    const icon = iconMap[iconKey] || '&#9733;';
     return `
     <div style="padding:30px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:16px;">
-        <div style="font-size:24px;margin-bottom:15px;">✨</div>
+        <div style="font-size:24px;margin-bottom:15px;">${icon}</div>
         <h3 style="margin:0 0 10px 0;font-size:18px;">${title}</h3>
         <p style="margin:0;opacity:0.6;font-size:14px;line-height:1.5;">${text}</p>
     </div>

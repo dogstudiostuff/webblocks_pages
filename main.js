@@ -1,5 +1,6 @@
-const { app, BrowserWindow, Menu, dialog, shell } = require('electron');
+const { app, BrowserWindow, Menu, dialog, shell, ipcMain, session } = require('electron');
 const path = require('path');
+const fs = require('fs');
 
 let mainWindow;
 
@@ -13,11 +14,39 @@ function createWindow() {
     title: 'WebBlocks',
     webPreferences: {
       nodeIntegration: false,
-      contextIsolation: true
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js')
     }
   });
 
   mainWindow.loadFile('index.html');
+
+  // Allow window.open for blob: URLs (Preview button)
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('blob:')) {
+      return { action: 'allow' };
+    }
+    // External URLs open in system browser
+    shell.openExternal(url);
+    return { action: 'deny' };
+  });
+
+  // Handle file save requests from renderer
+  ipcMain.handle('save-file', async (event, { defaultName, content, mimeType }) => {
+    const filters = defaultName.endsWith('.zip')
+      ? [{ name: 'ZIP Archive', extensions: ['zip'] }]
+      : [{ name: 'HTML File', extensions: ['html'] }];
+    const result = await dialog.showSaveDialog(mainWindow, {
+      defaultPath: defaultName,
+      filters: filters
+    });
+    if (!result.canceled && result.filePath) {
+      const buf = Buffer.from(content, mimeType.includes('zip') ? 'base64' : 'utf-8');
+      fs.writeFileSync(result.filePath, buf);
+      return true;
+    }
+    return false;
+  });
 
   // Build the application menu
   const menuTemplate = [
@@ -124,7 +153,10 @@ function createWindow() {
   const menu = Menu.buildFromTemplate(menuTemplate);
   Menu.setApplicationMenu(menu);
 
-  mainWindow.on('closed', () => { mainWindow = null; });
+  mainWindow.on('closed', () => {
+    ipcMain.removeHandler('save-file');
+    mainWindow = null;
+  });
 }
 
 app.whenReady().then(createWindow);

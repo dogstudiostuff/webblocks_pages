@@ -603,6 +603,47 @@ function init() {
     if (window.registerWebBlocks) window.registerWebBlocks();
     renderTabs();
 
+    // ─── Toolbox zoom isolation ───
+    // Prevent Blockly's native wheel-zoom from affecting the toolbox/flyout.
+    // Only Ctrl+scroll over the toolbox will resize it.
+    (function() {
+        var toolboxScale = 1.0;
+        var TOOLBOX_MIN = 0.5, TOOLBOX_MAX = 1.5;
+
+        // Wait a tick so the flyout DOM is ready
+        setTimeout(function() {
+            var flyoutSvg = document.querySelector('.blocklyFlyoutScrollbar');
+            var flyoutBg  = document.querySelector('.blocklyFlyout');
+            // Attach to the flyout's parent SVG so we catch events before Blockly
+            var flyoutContainer = flyoutBg ? flyoutBg.closest('svg') : null;
+            var toolboxDiv = document.querySelector('.blocklyToolboxDiv');
+
+            function handleToolboxWheel(e) {
+                if (e.ctrlKey) {
+                    // Ctrl+scroll → zoom the flyout
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var delta = e.deltaY > 0 ? -0.05 : 0.05;
+                    toolboxScale = Math.max(TOOLBOX_MIN, Math.min(TOOLBOX_MAX, toolboxScale + delta));
+                    var flyout = workspace.getFlyout();
+                    if (flyout) {
+                        flyout.getWorkspace().setScale(toolboxScale);
+                    }
+                } else {
+                    // Plain scroll → just scroll the flyout normally (don't zoom)
+                    e.stopPropagation(); // stop Blockly zoom from firing
+                }
+            }
+
+            if (flyoutContainer) {
+                flyoutContainer.addEventListener('wheel', handleToolboxWheel, { passive: false, capture: true });
+            }
+            if (toolboxDiv) {
+                toolboxDiv.addEventListener('wheel', handleToolboxWheel, { passive: false, capture: true });
+            }
+        }, 200);
+    })();
+
     let renderTimeout;
     workspace.addChangeListener((e) => {
         if (e.isUiEvent) return;
@@ -658,21 +699,57 @@ function init() {
     };
 
     document.getElementById("btnAddPage").onclick = () => {
-        const newName = prompt("New Page Name?");
-        if (newName && !project.pages[newName]) {
-            project.pages[newName] = null;
-            switchPage(newName);
+        const overlay = document.getElementById("newPageOverlay");
+        const input = document.getElementById("newPageInput");
+        input.value = "";
+        overlay.style.display = "flex";
+        input.focus();
+
+        function close() {
+            overlay.style.display = "none";
+            cleanup();
         }
+        function submit() {
+            const newName = input.value.trim();
+            if (newName && !project.pages[newName]) {
+                project.pages[newName] = null;
+                switchPage(newName);
+            }
+            close();
+        }
+        function onKey(e) {
+            if (e.key === "Enter") submit();
+            if (e.key === "Escape") close();
+        }
+        function onOverlayClick(e) {
+            if (e.target === overlay) close();
+        }
+        function cleanup() {
+            document.getElementById("newPageOk").removeEventListener("click", submit);
+            document.getElementById("newPageCancel").removeEventListener("click", close);
+            input.removeEventListener("keydown", onKey);
+            overlay.removeEventListener("click", onOverlayClick);
+        }
+        document.getElementById("newPageOk").addEventListener("click", submit);
+        document.getElementById("newPageCancel").addEventListener("click", close);
+        input.addEventListener("keydown", onKey);
+        overlay.addEventListener("click", onOverlayClick);
     };
 
-    document.getElementById("btnExport").onclick = () => {
+    document.getElementById("btnExport").onclick = async () => {
         const html = generateFullHtml();
-        const blob = new Blob([html], { type: "text/html" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = project.activePage + ".html";
-        link.click();
-        showToast("Exported " + project.activePage + ".html");
+        const fileName = project.activePage + ".html";
+        if (window.electronAPI) {
+            const saved = await window.electronAPI.saveFile({ defaultName: fileName, content: html, mimeType: 'text/html' });
+            if (saved) showToast("Exported " + fileName);
+        } else {
+            const blob = new Blob([html], { type: "text/html" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            link.click();
+            showToast("Exported " + fileName);
+        }
     };
 
     document.getElementById("btnZip").onclick = async () => {
@@ -691,12 +768,18 @@ function init() {
             Blockly.serialization.workspaces.load(project.pages[currentPage], workspace);
         }
         
-        const content = await zip.generateAsync({ type: "blob" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(content);
-        link.download = "webblocks_site.zip";
-        link.click();
-        showToast("Exported " + Object.keys(project.pages).length + " pages as .zip");
+        if (window.electronAPI) {
+            const base64 = await zip.generateAsync({ type: "base64" });
+            const saved = await window.electronAPI.saveFile({ defaultName: "webblocks_site.zip", content: base64, mimeType: 'application/zip' });
+            if (saved) showToast("Exported " + Object.keys(project.pages).length + " pages as .zip");
+        } else {
+            const content = await zip.generateAsync({ type: "blob" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(content);
+            link.download = "webblocks_site.zip";
+            link.click();
+            showToast("Exported " + Object.keys(project.pages).length + " pages as .zip");
+        }
     };
 
     document.getElementById("btnPreview").onclick = () => {

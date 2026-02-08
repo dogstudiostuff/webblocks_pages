@@ -133,6 +133,22 @@
 
     <div class="toast" id="toast"></div>
 
+    <!-- Custom New Page Dialog (prompt() doesn't work in Electron) -->
+    <div id="newPageOverlay" class="block-search-overlay" style="display:none;">
+        <div class="block-search-dialog" style="max-width:360px;">
+            <div class="block-search-header">
+                <span style="font-weight:bold; color: #fff;">New Page Name</span>
+            </div>
+            <div style="padding:12px;">
+                <input type="text" id="newPageInput" style="width:100%;padding:8px;font-size:14px;border:1px solid #555;border-radius:4px;background:#1e1e1e;color:#fff;box-sizing:border-box;" placeholder="e.g. about" autocomplete="off" spellcheck="false">
+            </div>
+            <div style="padding:0 12px 12px;display:flex;gap:8px;justify-content:flex-end;">
+                <button id="newPageCancel" class="toolbar-btn" style="background:#555;">Cancel</button>
+                <button id="newPageOk" class="toolbar-btn" style="background:#008000;color:white;">Create</button>
+            </div>
+        </div>
+    </div>
+
     <div id="blockSearchOverlay" class="block-search-overlay" style="display:none;">
         <div class="block-search-dialog">
             <div class="block-search-header">
