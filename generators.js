@@ -10,9 +10,20 @@ htmlGenerator.scrub_ = (block, code, thisOnly) => {
 };
 
 // Helper: Get text from value input (strip quotes if literal)
-function getVal(b, name) {
-    let code = htmlGenerator.valueToCode(b, name, htmlGenerator.ORDER_ATOMIC) || "";
-    // Strip quotes if it's a simple string literal, otherwise keep as-is (e.g. variable concatenation)
+function getVal(block, name) {
+    // We check both generators just in case
+    let code = "";
+    try {
+        code = htmlGenerator.valueToCode(block, name, htmlGenerator.ORDER_ATOMIC);
+        if (!code && Blockly.JavaScript) {
+            code = Blockly.JavaScript.valueToCode(block, name, Blockly.JavaScript.ORDER_ATOMIC);
+        }
+    } catch (e) {
+        console.error("Value generation failed for", name, e);
+    }
+
+    // Strip quotes if it's a string, or return 0 if empty
+    if (!code) return "0";
     if ((code.startsWith("'") && code.endsWith("'")) || (code.startsWith('"') && code.endsWith('"'))) {
         return code.slice(1, -1);
     }
@@ -167,14 +178,17 @@ htmlGenerator.forBlock['html_raw'] = (b) => b.getFieldValue('CODE') + "\n";
 htmlGenerator.forBlock['game_init'] = function(block) {
     const w = block.getFieldValue('W');
     const h = block.getFieldValue('H');
-    // This is where the error was happening because 'COL' didn't exist in the block
-    const col = getVal(block, 'COL') || "#000000"; 
+    const col = getVal(block, 'COL') || "#000000";
     
     return `
-<canvas id="stage" width="${w}" height="${h}" style="background:${col}; display:block; margin:auto; border: 4px solid #808080;"></canvas>
+<canvas id="stage" width="${w}" height="${h}" style="background:${col}; display:block; margin:auto;"></canvas>
 <script>
     const canvas = document.getElementById('stage');
     const ctx = canvas.getContext('2d');
+    
+    // Define global vars so they are never "undefined"
+    var x = 0; 
+    var y = 0;
     
     const keys = {};
     window.addEventListener('keydown', e => { keys[e.key] = true; });
@@ -210,24 +224,36 @@ if (Blockly.JavaScript) {
 }
 
 // Add the key pressed detector
+// 1. Existing HTML Generator (Make sure this exists)
 htmlGenerator.forBlock['js_key_pressed'] = function(block) {
-    let key = block.getFieldValue('KEY');
-    
-    // Logic to handle common naming mistakes
-    if (key.toLowerCase() === "space") key = " ";
-    
-    // Returns the check against our global 'keys' object
-    return [`keys["${key}"]`, htmlGenerator.ORDER_ATOMIC];
+    const key = block.getFieldValue('KEY');
+    return [`(window.keys && window.keys["${key}"])`, htmlGenerator.ORDER_ATOMIC];
 };
-htmlGenerator.forBlock['game_loop'] = function(block) {
-    const branch = htmlGenerator.statementToCode(block, 'DO');
-    return `
-function update() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear screen
-    ${branch}
-    requestAnimationFrame(update);
+
+// 2. THE FIX: Register with the JavaScript Generator
+if (Blockly.JavaScript) {
+    Blockly.JavaScript.forBlock['js_key_pressed'] = function(block) {
+        const key = block.getFieldValue('KEY');
+        // This returns the exact same code so the logic blocks can read it
+        return [`(window.keys && window.keys["${key}"])`, Blockly.JavaScript.ORDER_ATOMIC];
+    };
 }
-update();\n`;
+htmlGenerator.forBlock['game_loop'] = function(block) {
+    // This gets all the blocks you snapped inside the loop
+    const branch = htmlGenerator.statementToCode(block, 'DO'); 
+    
+    return `
+<script>
+    // This function runs 60 times per second
+    function gameLoop() {
+        if (typeof ctx !== 'undefined') {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the stage
+            ${branch} // This is where your 'if key pressed' logic goes
+        }
+        requestAnimationFrame(gameLoop);
+    }
+    gameLoop();
+</script>\n`;
 };
 
 
@@ -544,6 +570,51 @@ htmlGenerator.forBlock["ui_feature_card"] = (b) => {
     `;
 };
 
+htmlGenerator.forBlock["ui_pricing_card"] = (b) => {
+    const plan = htmlGenerator.valueToCode(b, 'Tb_PLAN', htmlGenerator.ORDER_ATOMIC) || "'Basic'";
+    const price = htmlGenerator.valueToCode(b, 'Tb_PRICE', htmlGenerator.ORDER_ATOMIC) || "'$10'";
+    const btnText = htmlGenerator.valueToCode(b, 'Tb_BTN', htmlGenerator.ORDER_ATOMIC) || "'Buy Now'";
+    const features = htmlGenerator.statementToCode(b, 'Kb_KX');
+
+    return `
+    <div style="border:1px solid #ddd; border-radius:12px; padding:30px; text-align:center; background:#fff; color:#333; box-shadow:0 4px 6px rgba(0,0,0,0.1); max-width:300px; margin:10px;">
+        <h3 style="margin:0; font-size:1.2rem; opacity:0.7;">${plan.replace(/'/g, "")}</h3>
+        <div style="font-size:3rem; font-weight:800; margin:10px 0;">${price.replace(/'/g, "")}</div>
+        <ul style="list-style:none; padding:0; margin:20px 0; text-align:left; line-height:1.8;">
+            ${features}
+        </ul>
+        <button style="width:100%; padding:12px; background:#000; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">
+            ${btnText.replace(/'/g, "")}
+        </button>
+    </div>
+    `;
+};
+
+// generators.js
+htmlGenerator.forBlock['meta_tailwind_cdn'] = function(block) {
+  return '<script src="https://cdn.tailwindcss.com"></script>\n';
+};
+
+
+htmlGenerator.forBlock['ui_tailwind_box'] = function(block) {
+    var classes = htmlGenerator.valueToCode(block, 'CLASSES', htmlGenerator.ORDER_ATOMIC) || "''";
+    var content = htmlGenerator.statementToCode(block, 'CONTENT');
+    
+    // Clean up quotes from the input
+    classes = classes.replace(/^'(.*)'$/, '$1');
+
+    return `<div class="${classes}">\n${content}\n</div>\n`;
+};
+
+htmlGenerator.forBlock['ui_page_link'] = function(block) {
+    const page = block.getFieldValue('PAGE');
+    const text = htmlGenerator.valueToCode(block, 'TEXT', htmlGenerator.ORDER_ATOMIC) || "'Link'";
+    const cleanText = text.replace(/'/g, "");
+    
+    // When exported, index.wbk becomes index.html
+    return `<a href="${page}.html" class="nav-link">${cleanText}</a>`;
+};
+
 // --- ARRAYS ---
 htmlGenerator.forBlock["arr_new_empty"] = () => ["[]", htmlGenerator.ORDER_ATOMIC];
 htmlGenerator.forBlock["arr_new_length"] = (b) => [`new Array(${htmlGenerator.valueToCode(b, 'LEN', 0) || 0})`, 0];
@@ -618,17 +689,34 @@ Blockly.JavaScript.forBlock["obj_stringify"] = (b) => [`JSON.stringify(${Blockly
 Blockly.JavaScript.forBlock["obj_set"] = (b) => `${Blockly.JavaScript.valueToCode(b, 'OBJ', Blockly.JavaScript.ORDER_ATOMIC)}[${Blockly.JavaScript.valueToCode(b, 'KEY', Blockly.JavaScript.ORDER_ATOMIC)}] = ${Blockly.JavaScript.valueToCode(b, 'VAL', Blockly.JavaScript.ORDER_ATOMIC)};`;
 Blockly.JavaScript.forBlock["obj_delete"] = (b) => `delete ${Blockly.JavaScript.valueToCode(b, 'OBJ', Blockly.JavaScript.ORDER_ATOMIC)}[${Blockly.JavaScript.valueToCode(b, 'KEY', Blockly.JavaScript.ORDER_ATOMIC)}];`;
 Blockly.JavaScript.forBlock["obj_merge"] = (b) => `Object.assign(${Blockly.JavaScript.valueToCode(b, 'DEST', Blockly.JavaScript.ORDER_ATOMIC)}, ${Blockly.JavaScript.valueToCode(b, 'SRC', Blockly.JavaScript.ORDER_ATOMIC)});`;
+htmlGenerator.forBlock['math_number'] = function(block) {
+  const code = String(block.getFieldValue('NUM'));
+  return [code, htmlGenerator.ORDER_ATOMIC];
+};
 
+// 1. Tell your HTML generator how to handle it
+htmlGenerator.forBlock['colour_picker'] = function(block) {
+  const code = block.getFieldValue('COLOUR');
+  // Return as a quoted string so it works in CSS/Canvas styles
+  return ["'" + code + "'", htmlGenerator.ORDER_ATOMIC];
+};
 
+// 2. Tell the internal JavaScript generator how to handle it 
+// (This prevents the 'JavaScript generator does not know how to generate' error)
+if (Blockly.JavaScript) {
+    Blockly.JavaScript.forBlock['colour_picker'] = function(block) {
+        const code = block.getFieldValue('COLOUR');
+        return ["'" + code + "'", Blockly.JavaScript.ORDER_ATOMIC];
+    };
+}
 
 // --- BRIDGE TO STANDARD BLOCKLY JS GENERATOR ---
 const standardBlocks = [
     'controls_if', 'controls_repeat_ext', 'controls_whileUntil', 'controls_for', 'controls_forEach', 'controls_flow_statements',
     'logic_compare', 'logic_operation', 'logic_negate', 'logic_boolean', 'logic_null', 'logic_ternary',
-    'math_number', 'math_arithmetic', 'math_single', 'math_trig', 'math_constant', 'math_number_property', 'math_round', 'math_on_list', 'math_modulo', 'math_constrain', 'math_random_int', 'math_random_float',
+     'math_arithmetic', 'math_single', 'math_trig', 'math_constant', 'math_number_property', 'math_round', 'math_on_list', 'math_modulo', 'math_constrain', 'math_random_int', 'math_random_float',
     'text', 'text_join', 'text_append', 'text_length', 'text_isEmpty', 'text_indexOf', 'text_charAt', 'text_getSubstring', 'text_changeCase', 'text_trim', 'text_print', 'text_prompt_ext',
-    'lists_create_with', 'lists_repeat', 'lists_length', 'lists_isEmpty', 'lists_indexOf', 'lists_getIndex', 'lists_setIndex', 'lists_getSublist', 'lists_split', 'lists_sort',
-    'colour_picker', 'colour_random', 'colour_rgb', 'colour_blend',
+    'lists_create_with', 'lists_repeat', 'lists_length', 'lists_isEmpty', 'lists_indexOf', 'lists_getIndex', 'lists_setIndex', 'lists_getSublist', 'lists_split', 'lists_sort', 'colour_random', 'colour_rgb', 'colour_blend',
     'variables_get', 'variables_set',
     'procedures_defreturn', 'procedures_defnoreturn', 'procedures_callreturn', 'procedures_callnoreturn', 'procedures_ifreturn'
 ];
@@ -640,4 +728,36 @@ standardBlocks.forEach(type => {
         if(!jsGen.nameDB_) jsGen.init(block.workspace);
         return jsGen.blockToCode(block);
     };
+
+
+htmlGenerator.forBlock['math_change'] = function(block) {
+    // Get the variable name and the amount to change it by
+    const argument0 = htmlGenerator.valueToCode(block, 'DELTA', htmlGenerator.ORDER_ADDITION) || '0';
+    const varName = block.getFieldValue('VAR');
+    
+    // Returns the actual JS code to increment the variable
+    return varName + ' = (typeof ' + varName + ' === "number" ? ' + varName + ' : 0) + ' + argument0 + ';\n';
+};
+
+    const standardBlocks = [
+    'math_number', 
+    'math_change', 
+    'variables_set', 
+    'variables_get', 
+    'logic_boolean', 
+    'controls_if'
+];
+
+// A stronger bridge for internal variable and math blocks
+const bridgeBlock = (name) => {
+    htmlGenerator.forBlock[name] = function(block) {
+        // We MUST use Blockly.JavaScript specifically here 
+        // to avoid the 'Cannot read properties of undefined' error
+        return Blockly.JavaScript.forBlock[name].call(Blockly.JavaScript, block);
+    };
+};
+
+// List every standard block type you are using in your workspace
+['variables_get', 'variables_set', 'math_change', 'math_number', 'logic_boolean', 'controls_if'].forEach(bridgeBlock);
 });
+

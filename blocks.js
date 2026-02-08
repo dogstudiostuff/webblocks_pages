@@ -12,6 +12,114 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
 
 
     defineBlocks([
+        // stage stuff
+        // The "Stage" where the game lives
+   {
+    "type": "game_init",
+    "message0": "Create Stage Width %1 Height %2 Color %3", 
+    "args0": [
+        { "type": "field_number", "name": "W", "value": 800 }, // %1
+        { "type": "field_number", "name": "H", "value": 600 }, // %2
+        { "type": "input_value", "name": "COL", "check": "String" } // %3 - THE MISSING PART
+    ],
+    "nextStatement": null,
+    "colour": "#FFAB19",
+    "tooltip": "Initialize the game canvas."
+},
+    // The Update Loop (Runs 60 times per second)
+    {
+        "type": "game_loop",
+        "message0": "Every Frame (60fps) %1",
+        "args0": [{ "type": "input_statement", "name": "DO" }],
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": "#FFAB19"
+    },
+    // Simple Movement
+    {
+        "type": "game_move_sprite",
+        "message0": "Move Sprite %1 x: %2 y: %3",
+        "args0": [
+            { "type": "field_input", "name": "NAME", "text": "player" },
+            { "type": "input_value", "name": "X", "check": "Number" },
+            { "type": "input_value", "name": "Y", "check": "Number" }
+        ],
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": "#4C97FF"
+    },
+    //end of stage stuff
+    // colour thingy
+    {
+  "type": "colour_picker",
+  "message0": "%1",
+  "args0": [
+    {
+      "type": "field_colour",
+      "name": "COLOUR",
+      "colour": "#ff0000"
+    }
+  ],
+  "output": "String",
+  "colour": "#A6745C",
+  "tooltip": "Pick a color"
+},
+
+{
+  "type": "math_number",
+  "message0": "%1",
+  "args0": [{ "type": "field_number", "name": "NUM", "value": 0 }],
+  "output": "Number",
+  "colour": "#5b67a5"
+},
+
+{
+    "type": "ui_append",
+    "message0": "append %1 to builder",
+    "args0": [{ "type": "input_value", "name": "VAL" }],
+    "previousStatement": null, // This adds the notch on top
+    "nextStatement": null,     // This adds the bump on the bottom
+    "colour": "#FF6666"
+},
+        {
+
+
+
+
+    "type": "ui_page_link",
+    "message0": "Link to Page %1 Text %2",
+    "args0": [
+        { "type": "field_input", "name": "PAGE", "text": "about" },
+        { "type": "input_value", "name": "TEXT", "check": "String" }
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "#4C97FF"
+},
+
+        {
+    "type": "meta_tailwind_cdn",
+    "message0": "Initialize Tailwind CSS",
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "#38bdf8",
+    "tooltip": "Adds Tailwind CSS to your page"
+},
+
+{
+    "type": "ui_tailwind_box",
+    "message0": "Tailwind Box %1 Classes %2 %3 Content %4",
+    "args0": [
+        { "type": "input_dummy" },
+        { "type": "input_value", "name": "CLASSES", "check": "String" },
+        { "type": "input_dummy" },
+        { "type": "input_statement", "name": "CONTENT" }
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "#38bdf8",
+    "tooltip": "A div container using Tailwind classes (e.g., 'bg-blue-500 p-4')"
+},
         // --- REPORTERS ---
 { 
     "type": "text_string", 
@@ -228,6 +336,35 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
         { "type": "html_svg", "message0": "svg", "message1": "width %1", "args1": [{ "type": "field_number", "name": "W", "value": 100 }], "message2": "height %1", "args2": [{ "type": "field_number", "name": "H", "value": 100 }], "message3": "%1", "args3": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
         { "type": "svg_rect", "message0": "svg rect x %1 y %2 w %3 h %4 fill %5", "args0": [{ "type": "field_number", "name": "X", "value": 0 }, { "type": "field_number", "name": "Y", "value": 0 }, { "type": "field_number", "name": "W", "value": 50 }, { "type": "field_number", "name": "H", "value": 50 }, { "type": "field_colour", "name": "C", "colour": "#0000ff" }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
         { "type": "svg_circle", "message0": "svg circle cx %1 cy %2 r %3 fill %4", "args0": [{ "type": "field_number", "name": "X", "value": 50 }, { "type": "field_number", "name": "Y", "value": 50 }, { "type": "field_number", "name": "R", "value": 20 }, { "type": "field_colour", "name": "C", "colour": "#00ff00" }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
+        {
+        "type": "game_draw_rect",
+        "message0": "Draw Rectangle Name %1 x %2 y %3 w %4 h %5 color %6", // Corrected placeholders
+        "args0": [
+        { "type": "field_input", "name": "NAME", "text": "player" }, // %1
+        { "type": "input_value", "name": "X", "check": "Number" },    // %2
+        { "type": "input_value", "name": "Y", "check": "Number" },    // %3
+        { "type": "input_value", "name": "W", "check": "Number" },    // %4
+        { "type": "input_value", "name": "H", "check": "Number" },    // %5
+        { "type": "input_value", "name": "COL", "check": "String" }   // %6
+        ],
+        "previousStatement": null,
+        "nextStatement": null,
+        "colour": "#4C97FF"
+    },
+{
+    "type": "js_key_pressed",
+    "message0": "key %1 is pressed?",
+    "args0": [
+        {
+            "type": "field_input",
+            "name": "KEY",
+            "text": "w" 
+        }
+    ],
+    "output": "Boolean",
+    "colour": "#4C97FF",
+    "tooltip": "Type the key name (e.g., 'a', 'Enter', 'ArrowUp', ' ') to check if it is held down."
+},
 
         // --- AUDIO API ---
         { "type": "js_audio_play", "message0": "play sound %1", "args0": [{ "type": "input_value", "name": "URL", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#CF63CF" },
@@ -475,6 +612,21 @@ if (!Blockly.Extensions.isRegistered('shape_square')) {
         "nextStatement": null,
         "colour": "#555555"
     },
+    {
+    "type": "ui_pricing_card",
+    "message0": "Pricing Card %1 Plan Name %2 Price %3 Features %4 Button Text %5",
+    "args0": [
+        { "type": "input_dummy" },
+        { "type": "input_value", "name": "Tb_PLAN", "check": "String" },
+        { "type": "input_value", "name": "Tb_PRICE", "check": "String" },
+        { "type": "input_statement", "name": "Kb_KX" }, // Slot for list items
+        { "type": "input_value", "name": "Tb_BTN", "check": "String" }
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": "#4C97FF",
+    "tooltip": "A modern pricing table card"
+},
 
     // array stuff
 

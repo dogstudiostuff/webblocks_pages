@@ -11,6 +11,7 @@
     <script src="./node_modules/blockly/blocks_compressed.js"></script>
     <script src="./node_modules/blockly/javascript_compressed.js"></script>
     <script src="./node_modules/blockly/msg/en.js"></script>
+    <script src="./node_modules/jszip/dist/jszip.min.js"></script>
 
     <!-- 2. ROBUST SHIM: Make plugins think they are in Node.js -->
     <script>
@@ -99,11 +100,12 @@
         <div class="titlebar">
             <span class="titlebar-title">WebBlocks Ultimate</span>
             <div class="titlebar-buttons">
-                <button class="toolbar-btn" id="btnNew">New</button>
-                <button class="toolbar-btn" id="btnSave">Save</button>
-                <button class="toolbar-btn" id="btnLoad">Load</button>
-                <button class="toolbar-btn primary" id="btnExport">Export HTML</button>
-            </div>
+    <button class="toolbar-btn" id="btnSave">Save (.wbk, .json)</button>
+    <button class="toolbar-btn" id="btnLoad">Load (.wbk, .json)</button>
+    <button class="toolbar-btn" id="btnExport">Export HTML</button>
+    
+    <button class="toolbar-btn" id="btnZip">Download Project (.zip)</button>
+</div>
         </div>
 
         <div class="main-area">
@@ -115,10 +117,16 @@
                         <button class="panel-tab" id="tabCode">Code</button>
                     </div>
                 </div>
-                <div class="panel-content">
-                    <div id="blocklyArea"></div>
-                    <div id="codeArea"></div>
-                </div>
+               <div class="panel-content">
+    <div class="page-manager">
+        <div id="pageTabs" class="page-tabs">
+            </div>
+        <button id="btnAddPage" class="toolbar-btn" style="background: #008000; color: white; margin-left: 8px;">+ New Page</button>
+    </div>
+    
+    <div id="blocklyArea"></div>
+    <div id="codeArea"></div>
+</div>
                 <div class="resize-handle"></div>
             </div>
 
@@ -140,7 +148,7 @@
     </div>
 
     <div class="toast" id="toast"></div>
-
+    <input type="file" id="fileInput" style="display: none;" accept=".wbk ,.json">
     <!-- 4. APP LOGIC (Loaded normally, will run after DOM content loaded) -->
     <script src="generators.js"></script>
     <script src="blocks.js"></script>

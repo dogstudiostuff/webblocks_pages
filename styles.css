@@ -59,3 +59,42 @@ body { background: #008080; }
 /* Custom overlays for webblocks shapes */
 .wb-shape-overlay { pointer-events: none; }
 .wb-shape-overlay path { vector-effect: non-scaling-stroke; }
+
+.page-manager {
+    background: #c0c0c0;
+    padding: 4px 4px 0 4px;
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    border-bottom: 2px solid #808080;
+}
+
+.tab {
+    padding: 4px 12px;
+    background: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #808080 #c0c0c0 #ffffff; 
+    cursor: pointer;
+    font-weight: bold;
+    margin-bottom: -2px; 
+    z-index: 1;
+}
+
+.tab.active {
+    background: #ece9d8; 
+    border-bottom: none;
+    padding-bottom: 6px;
+    z-index: 2;
+    margin-bottom: -2px;
+}
+
+.tab:hover:not(.active) {
+    background: #e0e0e0;
+}
+
+#btnAddPage {
+    margin-left: 10px;
+    margin-bottom: 4px;
+    background: #008000; 
+    color: white;
+}
