@@ -1,42 +1,42 @@
 settings{ name: "Diamond Blocks"; colour: "#FF6600"; },
 
 shapes{
-WEBBLOCKS_SHAPES.register('diamond', function(c) {
-  var half;
-  return {
-    isDynamic: true,
-    width:  function(h) { return h / 4; },
-    height: function(h) { return h; },
-    connectionOffsetY: function(h) { return h / 4; },
-    connectionOffsetX: function(w) { return -w; },
-    textPadding: function(h) { return h / 5; },
-    pathDown: function(h) {
-      half = h / 2;
-      return 'l ' + (-half/2) + ' ' + half + ' l ' + (half/2) + ' ' + half;
-    },
-    pathUp: function(h) {
-      half = h / 2;
-      return 'l ' + (-half/2) + ' ' + (-half) + ' l ' + (half/2) + ' ' + (-half);
-    },
-    pathRightDown: function(h) {
-      half = h / 2;
-      return 'l ' + (half/2) + ' ' + half + ' l ' + (-half/2) + ' ' + half;
-    },
-    pathRightUp: function(h) {
-      half = h / 2;
-      return 'l ' + (half/2) + ' ' + half + ' l ' + (-half/2) + ' ' + half;
-    }
-  };
-});
+  WEBBLOCKS_SHAPES.register('diamond', function(c) {
+    var half;
+    return {
+      isDynamic: true,
+      width:  function(h) { return h / 4; },
+      height: function(h) { return h; },
+      connectionOffsetY: function(h) { return h / 4; },
+      connectionOffsetX: function(w) { return -w; },
+      textPadding: function(h) { return h / 5; },
+      pathDown: function(h) {
+        half = h / 2;
+        return 'l ' + (-half/2) + ' ' + half + ' l ' + (half/2) + ' ' + half;
+      },
+      pathUp: function(h) {
+        half = h / 2;
+        return 'l ' + (-half/2) + ' ' + (-half) + ' l ' + (half/2) + ' ' + (-half);
+      },
+      pathRightDown: function(h) {
+        half = h / 2;
+        return 'l ' + (half/2) + ' ' + half + ' l ' + (-half/2) + ' ' + half;
+      },
+      pathRightUp: function(h) {
+        half = h / 2;
+        return 'l ' + (half/2) + ' ' + half + ' l ' + (-half/2) + ' ' + half;
+      }
+    };
+  });
 },
 
 blockdef{
-[{
-  "type": "my_diamond_block",
-  "message0": "Diamond %1",
-  "args0": [{ "type": "input_value", "name": "VAL" }],
-  "output": null,
-  "colour": "#FF6600",
-  "extensions": ["shape_diamond"]
-}]
+  [{
+      "type": "my_diamond_block",
+      "message0": "Diamond %1",
+      "args0": [{ "type": "input_value", "name": "VAL" }],
+      "output": null,
+      "colour": "#FF6600",
+      "extensions": ["shape_diamond"]
+    }]
 }

@@ -5,11 +5,11 @@ WEBBLOCKS_SHAPES.register('chevron', function(c) {
   var cr = c.CORNER_RADIUS;
   return {
     isDynamic: true,
-    width: function(h) { return h / 3; },
+    width: function(h) { return 0; },
     height: function(h) { return h; },
     connectionOffsetY: function(h) { return h / 2; },
     connectionOffsetX: function(w) { return -w; },
-    textPadding: function(h) { return { left: h / 3, right: h / 3 }; },
+    textPadding: function(h) { return { left: h * 1.2, right: h * 1.2 }; },
     pathDown: function(h) {
       // Left side going down — inward arrow point (mirror of right)
       var pw = h / 3;
