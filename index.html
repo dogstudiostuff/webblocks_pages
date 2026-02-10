@@ -268,6 +268,8 @@
             <div class="ext-body">
                 <div class="ext-actions">
                     <button id="extImportBtn" class="toolbar-btn" style="background:#3060a0;color:#fff;">Import .wbx</button>
+                    <button id="extReimportBtn" class="toolbar-btn" style="background:#8a6a2a;color:#fff;">Reimport .wbx</button>
+                    <button id="extMakerBtn" class="toolbar-btn" style="background:#6a2e8a;color:#fff;">WBX Maker</button>
                     <button id="extNewBtn" class="toolbar-btn" style="background:#008000;color:#fff;">New Extension</button>
                 </div>
                 <div id="extList" class="ext-list">
@@ -290,6 +292,88 @@
                     <button id="extEditorSave" class="toolbar-btn" style="background:#008000;color:#fff;">Load Extension</button>
                     <button id="extEditorExport" class="toolbar-btn">Export .wbx</button>
                     <button id="extEditorCancel" class="toolbar-btn" style="background:#555;color:#fff;">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visual WBX Maker Dialog -->
+    <div id="wbxMakerOverlay" class="block-search-overlay" style="display:none;">
+        <div class="wbx-maker-dialog">
+            <div class="ext-header">
+                <span>&#128295; Visual WBX Maker</span>
+                <button id="wbxMakerClose" class="settings-close">&#10005;</button>
+            </div>
+            <div class="wbx-maker-body">
+                <div class="wbx-maker-panel">
+                    <div class="wbx-maker-title">Extension</div>
+                    <label class="wbx-maker-row">
+                        <span>Name</span>
+                        <input id="wbxMakerName" type="text" value="My Extension" spellcheck="false">
+                    </label>
+                    <label class="wbx-maker-row">
+                        <span>Author</span>
+                        <input id="wbxMakerAuthor" type="text" value="" spellcheck="false">
+                    </label>
+                    <label class="wbx-maker-row">
+                        <span>Colour</span>
+                        <input id="wbxMakerColor" type="text" value="#FF6600" spellcheck="false">
+                    </label>
+
+                    <div class="wbx-maker-title">Block</div>
+                    <label class="wbx-maker-row">
+                        <span>Block type</span>
+                        <input id="wbxMakerBlockType" type="text" value="my_diamond_block" spellcheck="false">
+                    </label>
+                    <label class="wbx-maker-row">
+                        <span>Label</span>
+                        <input id="wbxMakerBlockLabel" type="text" value="Diamond" spellcheck="false">
+                    </label>
+
+                    <div class="wbx-maker-title">Shape</div>
+                    <label class="wbx-maker-row">
+                        <span>Shape type</span>
+                        <select id="wbxMakerShapeType">
+                            <option value="diamond" selected>Diamond</option>
+                            <option value="chevron">Chevron</option>
+                        </select>
+                    </label>
+                    <label class="wbx-maker-row">
+                        <span>Shape name</span>
+                        <input id="wbxMakerShapeName" type="text" value="diamond" spellcheck="false">
+                    </label>
+                    <label class="wbx-maker-row" data-shape="diamond">
+                        <span>Width factor</span>
+                        <input id="wbxMakerWidth" type="number" step="0.05" min="0.2" max="1.2" value="0.5">
+                    </label>
+                    <label class="wbx-maker-row" data-shape="diamond">
+                        <span>Offset Y factor</span>
+                        <input id="wbxMakerOffsetY" type="number" step="0.05" min="0.2" max="1" value="0.5">
+                    </label>
+                    <label class="wbx-maker-row" data-shape="chevron">
+                        <span>Point width</span>
+                        <input id="wbxMakerPointWidth" type="number" step="0.05" min="0.15" max="0.8" value="0.33">
+                    </label>
+                    <label class="wbx-maker-row">
+                        <span>Text padding</span>
+                        <input id="wbxMakerPadding" type="number" step="0.05" min="0" max="1" value="0.25">
+                    </label>
+                </div>
+
+                <div class="wbx-maker-panel">
+                    <div class="wbx-maker-title">Preview</div>
+                    <div class="wbx-maker-preview">
+                        <svg id="wbxMakerPreview" viewBox="0 0 220 90" width="100%" height="100%" aria-hidden="true">
+                            <polygon id="wbxMakerPreviewShape" points="" fill="#FF6600" stroke="#ffffff" stroke-width="2"></polygon>
+                            <text id="wbxMakerPreviewText" x="110" y="52" text-anchor="middle" font-size="18" fill="#ffffff" font-family="Segoe UI, Tahoma, sans-serif">Diamond</text>
+                        </svg>
+                    </div>
+                    <div class="wbx-maker-title">WBX Output</div>
+                    <textarea id="wbxMakerOutput" class="wbx-maker-output" spellcheck="false" readonly></textarea>
+                    <div class="wbx-maker-actions">
+                        <button id="wbxMakerDownload" class="toolbar-btn" style="background:#3060a0;color:#fff;">Download .wbx</button>
+                        <button id="wbxMakerCloseBottom" class="toolbar-btn" style="background:#555;color:#fff;">Close</button>
+                    </div>
                 </div>
             </div>
         </div>

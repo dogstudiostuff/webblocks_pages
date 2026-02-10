@@ -480,6 +480,11 @@ const toolbox = {
             colour: "#5C81A6",
             contents: [
                 { kind: "block", type: "controls_if" },
+                { kind: "block", type: "controls_switch", inputs: {
+                    CASE0: { block: { type: "controls_switch_case" } }
+                }},
+                { kind: "block", type: "controls_switch_case" },
+                { kind: "block", type: "controls_switch_default" },
                 { kind: "block", type: "logic_compare" },
                 { kind: "block", type: "logic_operation" },
                 { kind: "block", type: "logic_negate" },
@@ -1032,6 +1037,14 @@ function init() {
     window.addEventListener('resize', () => Blockly.svgResize(workspace));
 
     // ─── Extensions panel ───
+    let extImportMode = 'import';
+
+    function getExtensionIdFromSettings(settings) {
+        const rawName = settings && settings.name ? settings.name : '';
+        if (!rawName) return null;
+        return rawName.replace(/\s+/g, '_').toLowerCase();
+    }
+
     function renderExtList() {
         const list = document.getElementById('extList');
         const exts = PooExtensions.loaded;
@@ -1110,18 +1123,32 @@ function init() {
 
     // Import .wbx file
     document.getElementById('extImportBtn').onclick = () => {
+        extImportMode = 'import';
+        document.getElementById('extFileInput').click();
+    };
+    document.getElementById('extReimportBtn').onclick = () => {
+        extImportMode = 'reimport';
         document.getElementById('extFileInput').click();
     };
     document.getElementById('extFileInput').onchange = (e) => {
+        const mode = extImportMode;
+        extImportMode = 'import';
         const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = (ev) => {
             try {
+                if (mode === 'reimport') {
+                    const parsed = PooExtensions.parse(ev.target.result);
+                    const existingId = getExtensionIdFromSettings(parsed.settings);
+                    if (existingId && PooExtensions.loaded.find(e => e.id === existingId)) {
+                        PooExtensions.removeExtension(existingId);
+                    }
+                }
                 PooExtensions.loadExtension(ev.target.result);
                 PooExtensions.refreshToolbox(workspace, toolbox);
                 renderExtList();
-                showToast('Loaded extension: ' + file.name);
+                showToast((mode === 'reimport' ? 'Reimported extension: ' : 'Loaded extension: ') + file.name);
             } catch (err) {
                 showToast('Error: ' + err.message);
                 console.error('Extension load error:', err);
@@ -1193,6 +1220,264 @@ function init() {
             ta.value = ta.value.substring(0, start) + '  ' + ta.value.substring(ta.selectionEnd);
             ta.selectionStart = ta.selectionEnd = start + 2;
         }
+    });
+
+    // Visual WBX maker
+    const wbxMakerOverlay = document.getElementById('wbxMakerOverlay');
+    const wbxMakerOutput = document.getElementById('wbxMakerOutput');
+    const wbxMakerPreviewShape = document.getElementById('wbxMakerPreviewShape');
+    const wbxMakerPreviewText = document.getElementById('wbxMakerPreviewText');
+    const wbxMakerInputs = {
+        name: document.getElementById('wbxMakerName'),
+        author: document.getElementById('wbxMakerAuthor'),
+        color: document.getElementById('wbxMakerColor'),
+        blockType: document.getElementById('wbxMakerBlockType'),
+        blockLabel: document.getElementById('wbxMakerBlockLabel'),
+        shapeType: document.getElementById('wbxMakerShapeType'),
+        shapeName: document.getElementById('wbxMakerShapeName'),
+        width: document.getElementById('wbxMakerWidth'),
+        offsetY: document.getElementById('wbxMakerOffsetY'),
+        pointWidth: document.getElementById('wbxMakerPointWidth'),
+        padding: document.getElementById('wbxMakerPadding')
+    };
+
+    function sanitizeName(value, fallback) {
+        const raw = (value || '').trim();
+        const base = raw || fallback;
+        return base.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '').toLowerCase();
+    }
+
+    function escapeJson(value) {
+        return String(value || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    }
+
+    function buildSettingsLine() {
+        const parts = [];
+        const name = wbxMakerInputs.name.value.trim() || 'My Extension';
+        parts.push('name: "' + escapeJson(name) + '"');
+        const author = wbxMakerInputs.author.value.trim();
+        if (author) parts.push('author: "' + escapeJson(author) + '"');
+        const color = wbxMakerInputs.color.value.trim() || '#FF6600';
+        parts.push('colour: "' + escapeJson(color) + '"');
+        return parts.join('; ') + ';';
+    }
+
+    function buildShapeCode(shapeName) {
+        const shapeType = wbxMakerInputs.shapeType.value;
+        const widthFactor = parseFloat(wbxMakerInputs.width.value || '0.5');
+        const offsetYFactor = parseFloat(wbxMakerInputs.offsetY.value || '0.5');
+        const pointWidth = parseFloat(wbxMakerInputs.pointWidth.value || '0.33');
+        const paddingFactor = parseFloat(wbxMakerInputs.padding.value || '0.25');
+
+        if (shapeType === 'chevron') {
+            return [
+                "WEBBLOCKS_SHAPES.register('" + shapeName + "', function(c) {",
+                "  return {",
+                "    isDynamic: true,",
+                "    width: function(h) { return 0; },",
+                "    height: function(h) { return h; },",
+                "    connectionOffsetY: function(h) { return h / 2; },",
+                "    connectionOffsetX: function(w) { return -w; },",
+                "    textPadding: function(h) { return h * " + paddingFactor + "; },",
+                "    pathDown: function(h) {",
+                "      var pw = h * " + pointWidth + ";",
+                "      return ' l ' + pw + ',' + (h / 2) + ' l ' + (-pw) + ',' + (h / 2);",
+                "    },",
+                "    pathUp: function(h) {",
+                "      var pw = h * " + pointWidth + ";",
+                "      return ' l ' + pw + ',' + (-(h / 2)) + ' l ' + (-pw) + ',' + (-(h / 2));",
+                "    },",
+                "    pathRightDown: function(h) {",
+                "      var pw = h * " + pointWidth + ";",
+                "      return ' l ' + pw + ',' + (h / 2) + ' l ' + (-pw) + ',' + (h / 2);",
+                "    },",
+                "    pathRightUp: function(h) {",
+                "      var pw = h * " + pointWidth + ";",
+                "      return ' l ' + pw + ',' + (-(h / 2)) + ' l ' + (-pw) + ',' + (-(h / 2));",
+                "    }",
+                "  };",
+                "});"
+            ].join('\n');
+        }
+
+        return [
+            "WEBBLOCKS_SHAPES.register('" + shapeName + "', function(c) {",
+            "  var half;",
+            "  return {",
+            "    isDynamic: true,",
+            "    width: function(h) { return h * " + widthFactor + "; },",
+            "    height: function(h) { return h; },",
+            "    connectionOffsetY: function(h) { return h * " + offsetYFactor + "; },",
+            "    connectionOffsetX: function(w) { return -w; },",
+            "    textPadding: function(h) { return h * " + paddingFactor + "; },",
+            "    pathDown: function(h) {",
+            "      half = h / 2;",
+            "      return 'l ' + (-half/2) + ' ' + half + ' l ' + (half/2) + ' ' + half;",
+            "    },",
+            "    pathUp: function(h) {",
+            "      half = h / 2;",
+            "      return 'l ' + (-half/2) + ' ' + (-half) + ' l ' + (half/2) + ' ' + (-half);",
+            "    },",
+            "    pathRightDown: function(h) {",
+            "      half = h / 2;",
+            "      return 'l ' + (half/2) + ' ' + half + ' l ' + (-half/2) + ' ' + half;",
+            "    },",
+            "    pathRightUp: function(h) {",
+            "      half = h / 2;",
+            "      return 'l ' + (half/2) + ' ' + (-half) + ' l ' + (-half/2) + ' ' + (-half);",
+            "    }",
+            "  };",
+            "});"
+        ].join('\n');
+    }
+
+    function buildWbxOutput() {
+        const shapeName = sanitizeName(wbxMakerInputs.shapeName.value, 'diamond');
+        const blockType = sanitizeName(wbxMakerInputs.blockType.value, 'my_block');
+        const blockLabel = escapeJson(wbxMakerInputs.blockLabel.value.trim() || 'Block');
+        const color = escapeJson(wbxMakerInputs.color.value.trim() || '#FF6600');
+        const settingsLine = buildSettingsLine();
+        const shapeCode = buildShapeCode(shapeName);
+
+        return [
+            'settings{ ' + settingsLine + ' }',
+            '',
+            'shapes{',
+            shapeCode,
+            '}',
+            '',
+            'blockdef{',
+            '[',
+            '  {',
+            '    "type": "' + blockType + '",',
+            '    "message0": "' + blockLabel + ' %1",',
+            '    "args0": [{ "type": "input_value", "name": "VAL" }],',
+            '    "output": null,',
+            '    "colour": "' + color + '",',
+            '    "extensions": ["shape_' + shapeName + '"]',
+            '  }',
+            ']',
+            '}',
+            '',
+            'gen{',
+            "htmlGenerator.forBlock['" + blockType + "'] = function(b) {",
+            "  var val = getVal(b, 'VAL') || '';",
+            "  return ['<div>' + val + '</div>', htmlGenerator.ORDER_ATOMIC];",
+            "};",
+            '}'
+        ].join('\n');
+    }
+
+    function updateShapeVisibility() {
+        const shapeType = wbxMakerInputs.shapeType.value;
+        document.querySelectorAll('[data-shape="diamond"]').forEach(el => {
+            el.style.display = shapeType === 'diamond' ? 'flex' : 'none';
+        });
+        document.querySelectorAll('[data-shape="chevron"]').forEach(el => {
+            el.style.display = shapeType === 'chevron' ? 'flex' : 'none';
+        });
+    }
+
+    function updatePreview() {
+        const shapeType = wbxMakerInputs.shapeType.value;
+        const color = wbxMakerInputs.color.value.trim() || '#FF6600';
+        const label = wbxMakerInputs.blockLabel.value.trim() || 'Block';
+        wbxMakerPreviewText.textContent = label;
+        wbxMakerPreviewShape.setAttribute('fill', color);
+
+        const h = 70;
+        if (shapeType === 'chevron') {
+            const pw = Math.max(10, Math.min(40, h * parseFloat(wbxMakerInputs.pointWidth.value || '0.33')));
+            const w = 200;
+            const points = [
+                '0,0',
+                (w - pw) + ',0',
+                w + ',' + (h / 2),
+                (w - pw) + ',' + h,
+                '0,' + h,
+                pw + ',' + (h / 2)
+            ].join(' ');
+            wbxMakerPreviewShape.setAttribute('points', points);
+        } else {
+            const widthFactor = parseFloat(wbxMakerInputs.width.value || '0.5');
+            const w = Math.max(120, Math.min(220, h * widthFactor * 2));
+            const left = (220 - w) / 2;
+            const points = [
+                (left) + ',' + (h / 2),
+                (left + w / 2) + ',0',
+                (left + w) + ',' + (h / 2),
+                (left + w / 2) + ',' + h
+            ].join(' ');
+            wbxMakerPreviewShape.setAttribute('points', points);
+        }
+    }
+
+    function saveMakerDraft() {
+        const draft = {
+            name: wbxMakerInputs.name.value,
+            author: wbxMakerInputs.author.value,
+            color: wbxMakerInputs.color.value,
+            blockType: wbxMakerInputs.blockType.value,
+            blockLabel: wbxMakerInputs.blockLabel.value,
+            shapeType: wbxMakerInputs.shapeType.value,
+            shapeName: wbxMakerInputs.shapeName.value,
+            width: wbxMakerInputs.width.value,
+            offsetY: wbxMakerInputs.offsetY.value,
+            pointWidth: wbxMakerInputs.pointWidth.value,
+            padding: wbxMakerInputs.padding.value
+        };
+        try {
+            localStorage.setItem('pooide_wbx_maker_draft', JSON.stringify(draft));
+        } catch (e) {}
+    }
+
+    function loadMakerDraft() {
+        try {
+            const raw = localStorage.getItem('pooide_wbx_maker_draft');
+            if (!raw) return;
+            const draft = JSON.parse(raw);
+            Object.keys(wbxMakerInputs).forEach(key => {
+                if (draft[key] !== undefined) wbxMakerInputs[key].value = draft[key];
+            });
+        } catch (e) {}
+    }
+
+    function refreshMaker() {
+        updateShapeVisibility();
+        updatePreview();
+        wbxMakerOutput.value = buildWbxOutput();
+        saveMakerDraft();
+    }
+
+    document.getElementById('extMakerBtn').onclick = () => {
+        loadMakerDraft();
+        refreshMaker();
+        wbxMakerOverlay.style.display = 'flex';
+    };
+    document.getElementById('wbxMakerClose').onclick = () => {
+        wbxMakerOverlay.style.display = 'none';
+    };
+    document.getElementById('wbxMakerCloseBottom').onclick = () => {
+        wbxMakerOverlay.style.display = 'none';
+    };
+    wbxMakerOverlay.addEventListener('click', (e) => {
+        if (e.target.id === 'wbxMakerOverlay') wbxMakerOverlay.style.display = 'none';
+    });
+    document.getElementById('wbxMakerDownload').onclick = () => {
+        const text = buildWbxOutput();
+        const name = (wbxMakerInputs.name.value || 'extension').trim();
+        const fileName = name.replace(/\s+/g, '_') + '.wbx';
+        const blob = new Blob([text], { type: 'text/plain' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+        showToast('Downloaded ' + fileName);
+    };
+
+    Object.keys(wbxMakerInputs).forEach(key => {
+        wbxMakerInputs[key].addEventListener('input', refreshMaker);
+        wbxMakerInputs[key].addEventListener('change', refreshMaker);
     });
 
     // Restore previously loaded extensions from localStorage

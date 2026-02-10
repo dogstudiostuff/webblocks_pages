@@ -1,13 +1,13 @@
-settings{ name: "Diamond Blocks"; colour: "#FF6600"; },
+settings{ name: "Diamond Blocks"; colour: "#FF6600"; }
 
 shapes{
   WEBBLOCKS_SHAPES.register('diamond', function(c) {
     var half;
     return {
       isDynamic: true,
-      width:  function(h) { return h / 4; },
+      width:  function(h) { return h / 2; },
       height: function(h) { return h; },
-      connectionOffsetY: function(h) { return h / 4; },
+      connectionOffsetY: function(h) { return h / 2; },
       connectionOffsetX: function(w) { return -w; },
       textPadding: function(h) { return h / 5; },
       pathDown: function(h) {
@@ -24,11 +24,11 @@ shapes{
       },
       pathRightUp: function(h) {
         half = h / 2;
-        return 'l ' + (half/2) + ' ' + half + ' l ' + (-half/2) + ' ' + half;
+        return 'l ' + (half/2) + ' ' + (-half) + ' l ' + (-half/2) + ' ' + (-half);
       }
     };
   });
-},
+  }
 
 blockdef{
   [{

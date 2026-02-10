@@ -879,4 +879,222 @@ if (!Blockly.Extensions.isRegistered('shape_ticket')) {
         { "type": "style_spacing_shorthand", "message0": "spacing m/p %1 %2 %3 %4", "args0": [ { "type": "field_dropdown", "name": "TYPE", "options": [["margin","margin"],["padding","padding"]] }, { "type": "input_value", "name": "A", "check": "String" }, { "type": "input_value", "name": "B", "check": "String" }, { "type": "input_value", "name": "C", "check": "String" } ], "previousStatement": "CSS_PROP", "nextStatement": "CSS_PROP", "colour": "#9966FF", "tooltip": "Adds shorthand margin/padding rules (A B C optional)" },
         { "type": "style_font_size", "message0": "font-size %1 unit %2", "args0": [ { "type": "input_value", "name": "SIZE", "check": "Number" }, { "type": "field_dropdown", "name": "UNIT", "options": [["px","px"],["em","em"],["rem","rem"],["%","%"]] } ], "output": "String", "colour": "#9966FF", "tooltip": "Produces a font-size value" }
     ]);
+
+    // ─── Switch/Case mutator mixin (Blockly v10+ API) ───
+    var CONTROLS_SWITCH_MUTATOR_MIXIN = {
+        caseCount_: 1,
+        defaultCount_: 0,
+
+        mutationToDom: function() {
+            var container = Blockly.utils.xml.createElement('mutation');
+            container.setAttribute('cases', this.caseCount_);
+            container.setAttribute('default', this.defaultCount_);
+            return container;
+        },
+        domToMutation: function(xmlElement) {
+            this.caseCount_ = parseInt(xmlElement.getAttribute('cases'), 10) || 0;
+            this.defaultCount_ = parseInt(xmlElement.getAttribute('default'), 10) || 0;
+            this.updateShape_();
+        },
+        saveExtraState: function() {
+            return { cases: this.caseCount_, 'default': this.defaultCount_ };
+        },
+        loadExtraState: function(state) {
+            this.caseCount_ = state['cases'] || 0;
+            this.defaultCount_ = state['default'] || 0;
+            this.updateShape_();
+        },
+        decompose: function(workspace) {
+            var containerBlock = workspace.newBlock('controls_switch_mutatorcontainer');
+            containerBlock.initSvg();
+            var connection = containerBlock.getInput('STACK').connection;
+            for (var i = 0; i < this.caseCount_; i++) {
+                var caseBlock = workspace.newBlock('controls_switch_case_mutator');
+                caseBlock.initSvg();
+                connection.connect(caseBlock.previousConnection);
+                connection = caseBlock.nextConnection;
+            }
+            if (this.defaultCount_) {
+                var defaultBlock = workspace.newBlock('controls_switch_default_mutator');
+                defaultBlock.initSvg();
+                connection.connect(defaultBlock.previousConnection);
+            }
+            return containerBlock;
+        },
+        compose: function(containerBlock) {
+            var clauseBlock = containerBlock.getInputTargetBlock('STACK');
+            var caseConnections = [];
+            var defaultConnection = null;
+            var caseCount = 0;
+            var hasDefault = false;
+            while (clauseBlock) {
+                if (clauseBlock.type === 'controls_switch_case_mutator') {
+                    caseConnections.push(clauseBlock.statementConnection_);
+                    caseCount++;
+                } else if (clauseBlock.type === 'controls_switch_default_mutator') {
+                    hasDefault = true;
+                    if (!defaultConnection) defaultConnection = clauseBlock.statementConnection_;
+                }
+                clauseBlock = clauseBlock.nextConnection && clauseBlock.nextConnection.targetBlock();
+            }
+
+            this.caseCount_ = caseCount;
+            this.defaultCount_ = hasDefault ? 1 : 0;
+            this.updateShape_();
+
+            // Reconnect child blocks
+            for (var i = 0; i < caseConnections.length; i++) {
+                var inputConn = this.getInput('CASE' + i);
+                if (inputConn && caseConnections[i]) {
+                    inputConn.connection.connect(caseConnections[i]);
+                }
+            }
+            if (defaultConnection) {
+                var defInput = this.getInput('DEFAULT');
+                if (defInput) defInput.connection.connect(defaultConnection);
+            }
+
+            // Auto-fill empty CASE slots with a controls_switch_case block
+            for (var j = 0; j < this.caseCount_; j++) {
+                var caseInput = this.getInput('CASE' + j);
+                if (caseInput && !caseInput.connection.targetConnection) {
+                    var newCase = this.workspace.newBlock('controls_switch_case');
+                    newCase.initSvg();
+                    newCase.render();
+                    caseInput.connection.connect(newCase.previousConnection);
+                }
+            }
+            // Auto-fill empty DEFAULT slot with a controls_switch_default block
+            if (this.defaultCount_) {
+                var defSlot = this.getInput('DEFAULT');
+                if (defSlot && !defSlot.connection.targetConnection) {
+                    var newDef = this.workspace.newBlock('controls_switch_default');
+                    newDef.initSvg();
+                    newDef.render();
+                    defSlot.connection.connect(newDef.previousConnection);
+                }
+            }
+        },
+        saveConnections: function(containerBlock) {
+            var clauseBlock = containerBlock.getInputTargetBlock('STACK');
+            var i = 0;
+            while (clauseBlock) {
+                if (clauseBlock.type === 'controls_switch_case_mutator') {
+                    var input = this.getInput('CASE' + i);
+                    clauseBlock.statementConnection_ = input && input.connection.targetConnection;
+                    i++;
+                } else if (clauseBlock.type === 'controls_switch_default_mutator') {
+                    var defaultInput = this.getInput('DEFAULT');
+                    clauseBlock.statementConnection_ = defaultInput && defaultInput.connection.targetConnection;
+                }
+                clauseBlock = clauseBlock.nextConnection && clauseBlock.nextConnection.targetBlock();
+            }
+        },
+        updateShape_: function() {
+            var i = 0;
+            while (this.getInput('CASE' + i)) {
+                this.removeInput('CASE' + i);
+                i++;
+            }
+            if (this.getInput('DEFAULT')) {
+                this.removeInput('DEFAULT');
+            }
+
+            for (i = 0; i < this.caseCount_; i++) {
+                var input = this.appendStatementInput('CASE' + i)
+                    .setCheck('SwitchCase');
+                if (i === 0) input.appendField('cases');
+            }
+            if (this.defaultCount_) {
+                this.appendStatementInput('DEFAULT')
+                    .setCheck('SwitchCase')
+                    .appendField('default');
+            }
+        }
+    };
+
+    if (Blockly.Extensions.isRegistered('controls_switch_mutator')) {
+        Blockly.Extensions.unregister('controls_switch_mutator');
+    }
+    Blockly.Extensions.registerMutator(
+        'controls_switch_mutator',
+        CONTROLS_SWITCH_MUTATOR_MIXIN,
+        null,
+        ['controls_switch_case_mutator', 'controls_switch_default_mutator']
+    );
+
+    // Define switch block with mutator via jsonInit
+    Blockly.Blocks['controls_switch'] = {
+        init: function() {
+            this.jsonInit({
+                "type": "controls_switch",
+                "message0": "switch %1 cases %2",
+                "args0": [
+                    {"type": "input_value", "name": "SWITCH"},
+                    {"type": "input_statement", "name": "CASE0", "check": "SwitchCase"}
+                ],
+                "previousStatement": null,
+                "nextStatement": null,
+                "colour": "#5C81A6",
+                "tooltip": "Switch/case control flow",
+                "mutator": "controls_switch_mutator"
+            });
+            this.caseCount_ = 1;
+            this.defaultCount_ = 0;
+        }
+    };
+
+    Blockly.Blocks['controls_switch_case'] = {
+        init: function() {
+            this.appendValueInput('VALUE')
+                .appendField('case');
+            this.appendStatementInput('DO')
+                .appendField('do');
+            this.setPreviousStatement(true, 'SwitchCase');
+            this.setNextStatement(true, 'SwitchCase');
+            this.setColour('#5C81A6');
+            this.setTooltip('Case branch for switch');
+        }
+    };
+
+    Blockly.Blocks['controls_switch_default'] = {
+        init: function() {
+            this.appendStatementInput('DO')
+                .appendField('default');
+            this.setPreviousStatement(true, 'SwitchCase');
+            this.setNextStatement(true, 'SwitchCase');
+            this.setColour('#5C81A6');
+            this.setTooltip('Default branch for switch');
+        }
+    };
+
+    Blockly.Blocks['controls_switch_mutatorcontainer'] = {
+        init: function() {
+            this.appendDummyInput().appendField('switch');
+            this.appendStatementInput('STACK');
+            this.setColour('#5C81A6');
+            this.setTooltip('Add, remove, or reorder cases');
+            this.contextMenu = false;
+        }
+    };
+
+    Blockly.Blocks['controls_switch_case_mutator'] = {
+        init: function() {
+            this.appendDummyInput().appendField('case');
+            this.setPreviousStatement(true);
+            this.setNextStatement(true);
+            this.setColour('#5C81A6');
+            this.contextMenu = false;
+        }
+    };
+
+    Blockly.Blocks['controls_switch_default_mutator'] = {
+        init: function() {
+            this.appendDummyInput().appendField('default');
+            this.setPreviousStatement(true);
+            this.setNextStatement(true);
+            this.setColour('#5C81A6');
+            this.contextMenu = false;
+        }
+    };
 };

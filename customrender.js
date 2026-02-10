@@ -38,31 +38,42 @@
     }
 
     /**
-     * Ticket shape — like the squared shape but with small semicircular
-     * notches cut into both sides at the midpoint, giving a classic
-     * "admission ticket / coupon" look.
+     * Ticket shape — a rounded rectangle with small rounded-square
+     * tabs protruding outward on both sides, giving a classic
+     * "admission ticket / tag" look.
      */
     makeTicket() {
-      var cr      = this.CORNER_RADIUS;   // corner radius (same as squared)
-      var notchR  = 3;                     // notch semicircle radius
+      var cr       = this.CORNER_RADIUS;   // corner radius (same as squared)
+      var tabOut   = 10;                    // how far the tab protrudes outward
+      var tabH     = 18;                    // total height of the tab
+      var tabR     = 4;                     // corner radius of the tab
 
       function makePath(height, up, right) {
-        var middleH     = height - 2 * cr;
-        var notchD      = notchR * 2;
-        var halfStraight = Math.max(0, (middleH - notchD) / 2);
-        var dy          = up ? -1 : 1;
-        var cornerSweep = (right === up) ? '0' : '1';
-        // Notch bulges inward: left side → right bulge (CW=1), right side → left bulge (CCW=0)
-        var notchSweep  = right ? '0' : '1';
+        var middleH      = height - 2 * cr;
+        var halfStraight = Math.max(0, (middleH - tabH) / 2);
+        var dy           = up ? -1 : 1;
+        var cornerSweep  = (right === up) ? '0' : '1';
+        // Tab protrudes outward: left side → left (-x), right side → right (+x)
+        var dx           = right ? 1 : -1;
 
         // Top corner
         var p = arc('a', '0 0,' + cornerSweep, cr,
                     point((right ? 1 : -1) * cr, dy * cr));
-        // Line down to notch
+        // Line down to tab start
         if (halfStraight > 0) p += lineV('v', dy * halfStraight);
-        // Semicircular notch (inward bulge)
-        p += arc('a', '0 0,' + notchSweep, notchR,
-                 point(0, dy * notchD));
+        // Rounded-square outward tab: out, down, back in
+        // Top-outer corner
+        p += ' l ' + (dx * tabOut - dx * tabR) + ',0';
+        p += arc('a', '0 0,1', tabR,
+                 point(dx * tabR, dy * tabR));
+        // Straight down the tab side
+        var straightTab = Math.max(0, tabH - 2 * tabR);
+        if (straightTab > 0) p += lineV('v', dy * straightTab);
+        // Bottom-outer corner
+        p += arc('a', '0 0,1', tabR,
+                 point(-dx * tabR, dy * tabR));
+        // Back inward
+        p += ' l ' + (-dx * tabOut + dx * tabR) + ',0';
         // Line down to bottom corner
         if (halfStraight > 0) p += lineV('v', dy * halfStraight);
         // Bottom corner

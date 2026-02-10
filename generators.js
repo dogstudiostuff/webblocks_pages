@@ -941,6 +941,58 @@ htmlGenerator.forBlock['http_send'] = (b) => {
   .catch(function(e){ h.err=String(e); h.failed=true; h.responded=true; if(window._httpOnError) window._httpOnError(); });
 })();</script>\n`;
 };
+
+htmlGenerator.forBlock['controls_switch'] = (b) => {
+    var val = htmlGenerator.valueToCode(b, 'SWITCH', htmlGenerator.ORDER_ATOMIC) || '0';
+    var code = 'switch (' + val + ') {\n';
+    for (var i = 0; i < (b.caseCount_ || 0); i++) {
+        code += htmlGenerator.statementToCode(b, 'CASE' + i);
+    }
+    if (b.defaultCount_) {
+        code += htmlGenerator.statementToCode(b, 'DEFAULT');
+    }
+    code += '}\n';
+    return wrapJs(b, code);
+};
+
+htmlGenerator.forBlock['controls_switch_case'] = (b) => {
+    var val = htmlGenerator.valueToCode(b, 'VALUE', htmlGenerator.ORDER_ATOMIC) || '0';
+    var body = htmlGenerator.statementToCode(b, 'DO');
+    if (body && body.slice(-1) !== '\n') body += '\n';
+    return 'case ' + val + ':\n' + body + 'break;\n';
+};
+
+htmlGenerator.forBlock['controls_switch_default'] = (b) => {
+    var body = htmlGenerator.statementToCode(b, 'DO');
+    if (body && body.slice(-1) !== '\n') body += '\n';
+    return 'default:\n' + body + 'break;\n';
+};
+
+if (Blockly.JavaScript) {
+    Blockly.JavaScript.forBlock['controls_switch'] = (b) => {
+        var val = Blockly.JavaScript.valueToCode(b, 'SWITCH', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+        var code = 'switch (' + val + ') {\n';
+        for (var i = 0; i < (b.caseCount_ || 0); i++) {
+            code += Blockly.JavaScript.statementToCode(b, 'CASE' + i);
+        }
+        if (b.defaultCount_) {
+            code += Blockly.JavaScript.statementToCode(b, 'DEFAULT');
+        }
+        code += '}\n';
+        return code;
+    };
+
+    Blockly.JavaScript.forBlock['controls_switch_case'] = (b) => {
+        var val = Blockly.JavaScript.valueToCode(b, 'VALUE', Blockly.JavaScript.ORDER_ATOMIC) || '0';
+        var body = Blockly.JavaScript.statementToCode(b, 'DO');
+        return 'case ' + val + ':\n' + body + 'break;\n';
+    };
+
+    Blockly.JavaScript.forBlock['controls_switch_default'] = (b) => {
+        var body = Blockly.JavaScript.statementToCode(b, 'DO');
+        return 'default:\n' + body + 'break;\n';
+    };
+}
 htmlGenerator.forBlock['math_number'] = function(block) {
   const code = String(block.getFieldValue('NUM'));
   return [code, htmlGenerator.ORDER_ATOMIC];
