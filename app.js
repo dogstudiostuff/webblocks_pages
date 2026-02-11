@@ -596,6 +596,85 @@ const toolbox = {
 
         {
             kind: "category",
+            name: "Svelte",
+            colour: "#FF3E00",
+            contents: [
+                {
+                    kind: "category",
+                    name: "Component",
+                    colour: "#FF3E00",
+                    contents: [
+                        { kind: "block", type: "svelte_component" },
+                        { kind: "block", type: "svelte_script" },
+                        { kind: "block", type: "svelte_style" },
+                        { kind: "block", type: "svelte_css_rule" },
+                        { kind: "block", type: "svelte_slot" },
+                        { kind: "block", type: "svelte_export_prop", inputs: { DEFAULT: { shadow: { type: "text_string", fields: { TEXT: "world" } } } } }
+                    ]
+                },
+                {
+                    kind: "category",
+                    name: "State & Reactivity",
+                    colour: "#FF3E00",
+                    contents: [
+                        { kind: "block", type: "svelte_let", inputs: { VAL: { shadow: { type: "math_number", fields: { NUM: 0 } } } } },
+                        { kind: "block", type: "svelte_reactive", inputs: { EXPR: { shadow: { type: "text_string", fields: { TEXT: "count * 2" } } } } },
+                        { kind: "block", type: "svelte_reactive_stmt" },
+                        { kind: "block", type: "svelte_expr" }
+                    ]
+                },
+                {
+                    kind: "category",
+                    name: "Events",
+                    colour: "#FF3E00",
+                    contents: [
+                        { kind: "block", type: "svelte_on_event" },
+                        { kind: "block", type: "svelte_on_click" },
+                        { kind: "block", type: "svelte_dispatch", inputs: { DETAIL: { shadow: { type: "text_string", fields: { TEXT: "hello" } } } } }
+                    ]
+                },
+                {
+                    kind: "category",
+                    name: "Control Flow",
+                    colour: "#D43900",
+                    contents: [
+                        { kind: "block", type: "svelte_if" },
+                        { kind: "block", type: "svelte_if_else" },
+                        { kind: "block", type: "svelte_each" },
+                        { kind: "block", type: "svelte_each_keyed" },
+                        { kind: "block", type: "svelte_await" },
+                        { kind: "block", type: "svelte_html_raw" }
+                    ]
+                },
+                {
+                    kind: "category",
+                    name: "Bindings",
+                    colour: "#FF6B35",
+                    contents: [
+                        { kind: "block", type: "svelte_bind_value" },
+                        { kind: "block", type: "svelte_bind_checked" },
+                        { kind: "block", type: "svelte_bind_group" },
+                        { kind: "block", type: "svelte_transition" }
+                    ]
+                },
+                {
+                    kind: "category",
+                    name: "Lifecycle & Stores",
+                    colour: "#C73000",
+                    contents: [
+                        { kind: "block", type: "svelte_on_mount" },
+                        { kind: "block", type: "svelte_on_destroy" },
+                        { kind: "block", type: "svelte_store_writable", inputs: { VAL: { shadow: { type: "math_number", fields: { NUM: 0 } } } } },
+                        { kind: "block", type: "svelte_store_get" },
+                        { kind: "block", type: "svelte_store_set", inputs: { VAL: { shadow: { type: "math_number", fields: { NUM: 0 } } } } },
+                        { kind: "block", type: "svelte_store_update" }
+                    ]
+                }
+            ]
+        },
+
+        {
+            kind: "category",
             name: "Advanced",
             colour: "#666666",
             contents: [
@@ -678,57 +757,33 @@ function generateFullHtml() {
 }
 
 function init() {
-    workspace = Blockly.inject('blocklyArea', {
+    var injectOptions = {
         toolbox: toolbox,
         renderer: 'webblocks', 
         grid: { spacing: 20, length: 3, colour: '#ccc', snap: true },
         trashcan: true,
         zoom: { controls: true, wheel: true, startScale: 1.0, maxScale: 3, minScale: 0.3, scaleSpeed: 1.2 }
-    });
+    };
 
+    // Register custom blocks BEFORE inject
     if (window.registerWebBlocks) window.registerWebBlocks();
+
+    workspace = Blockly.inject('blocklyArea', injectOptions);
+
     renderTabs();
 
-    // ─── Toolbox zoom isolation ───
-    // Prevent Blockly's native wheel-zoom from affecting the toolbox/flyout.
-    // Only Ctrl+scroll over the toolbox will resize it.
-    (function() {
-        var toolboxScale = 1.0;
-        var TOOLBOX_MIN = 0.5, TOOLBOX_MAX = 1.5;
-
-        // Wait a tick so the flyout DOM is ready
-        setTimeout(function() {
-            var flyoutSvg = document.querySelector('.blocklyFlyoutScrollbar');
-            var flyoutBg  = document.querySelector('.blocklyFlyout');
-            // Attach to the flyout's parent SVG so we catch events before Blockly
-            var flyoutContainer = flyoutBg ? flyoutBg.closest('svg') : null;
-            var toolboxDiv = document.querySelector('.blocklyToolboxDiv');
-
-            function handleToolboxWheel(e) {
-                if (e.ctrlKey) {
-                    // Ctrl+scroll → zoom the flyout
-                    e.preventDefault();
-                    e.stopPropagation();
-                    var delta = e.deltaY > 0 ? -0.05 : 0.05;
-                    toolboxScale = Math.max(TOOLBOX_MIN, Math.min(TOOLBOX_MAX, toolboxScale + delta));
-                    var flyout = workspace.getFlyout();
-                    if (flyout) {
-                        flyout.getWorkspace().setScale(toolboxScale);
-                    }
-                } else {
-                    // Plain scroll → just scroll the flyout normally (don't zoom)
-                    e.stopPropagation(); // stop Blockly zoom from firing
-                }
+    // Auto-select first category so toolbox flyout is open on startup
+    setTimeout(function() {
+        var tb = workspace.getToolbox();
+        if (tb) {
+            var items = tb.getToolboxItems();
+            if (items && items.length > 0) {
+                tb.setSelectedItem(items[0]);
             }
+        }
+    }, 100);
 
-            if (flyoutContainer) {
-                flyoutContainer.addEventListener('wheel', handleToolboxWheel, { passive: false, capture: true });
-            }
-            if (toolboxDiv) {
-                toolboxDiv.addEventListener('wheel', handleToolboxWheel, { passive: false, capture: true });
-            }
-        }, 200);
-    })();
+
 
     let renderTimeout;
     workspace.addChangeListener((e) => {

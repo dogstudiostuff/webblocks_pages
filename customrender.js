@@ -44,9 +44,9 @@
      */
     makeTicket() {
       var cr       = this.CORNER_RADIUS;   // corner radius (same as squared)
-      var tabOut   = 10;                    // how far the tab protrudes outward
-      var tabH     = 18;                    // total height of the tab
-      var tabR     = 4;                     // corner radius of the tab
+      var tabOut   = 6;                     // how far the tab protrudes outward
+      var tabH     = 12;                    // total height of the tab
+      var tabR     = 2.5;                   // corner radius of the tab
 
       function makePath(height, up, right) {
         var middleH      = height - 2 * cr;

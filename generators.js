@@ -1029,6 +1029,173 @@ standardBlocks.forEach(type => {
     };
 
 
+// ─── Svelte Generators ───
+
+htmlGenerator.forBlock['svelte_component'] = (b) => {
+    return htmlGenerator.statementToCode(b, 'CONTENT');
+};
+
+htmlGenerator.forBlock['svelte_script'] = (b) => {
+    return `<script>\n${htmlGenerator.statementToCode(b, 'CODE')}</script>\n`;
+};
+
+htmlGenerator.forBlock['svelte_let'] = (b) => {
+    const v = b.getFieldValue('VAR');
+    const val = htmlGenerator.valueToCode(b, 'VAL', htmlGenerator.ORDER_ATOMIC) || '0';
+    return `  let ${v} = ${val};\n`;
+};
+
+htmlGenerator.forBlock['svelte_reactive'] = (b) => {
+    const v = b.getFieldValue('VAR');
+    const expr = htmlGenerator.valueToCode(b, 'EXPR', htmlGenerator.ORDER_ATOMIC) || '0';
+    return `  $: ${v} = ${expr};\n`;
+};
+
+htmlGenerator.forBlock['svelte_reactive_stmt'] = (b) => {
+    return `  $: {\n${htmlGenerator.statementToCode(b, 'DO')}  }\n`;
+};
+
+htmlGenerator.forBlock['svelte_on_event'] = (b) => {
+    const evt = b.getFieldValue('EVT');
+    const code = htmlGenerator.statementToCode(b, 'DO');
+    return `<button on:${evt}={() => {\n${code}}}>\n</button>\n`;
+};
+
+htmlGenerator.forBlock['svelte_on_click'] = (b) => {
+    const code = htmlGenerator.statementToCode(b, 'DO');
+    return `<button on:click={() => {\n${code}}}>\n</button>\n`;
+};
+
+htmlGenerator.forBlock['svelte_if'] = (b) => {
+    const cond = htmlGenerator.valueToCode(b, 'COND', htmlGenerator.ORDER_ATOMIC) || 'true';
+    const body = htmlGenerator.statementToCode(b, 'DO');
+    return `{#if ${cond}}\n${body}{/if}\n`;
+};
+
+htmlGenerator.forBlock['svelte_if_else'] = (b) => {
+    const cond = htmlGenerator.valueToCode(b, 'COND', htmlGenerator.ORDER_ATOMIC) || 'true';
+    const body = htmlGenerator.statementToCode(b, 'DO');
+    const elseBody = htmlGenerator.statementToCode(b, 'ELSE');
+    return `{#if ${cond}}\n${body}{:else}\n${elseBody}{/if}\n`;
+};
+
+htmlGenerator.forBlock['svelte_each'] = (b) => {
+    const arr = htmlGenerator.valueToCode(b, 'ARR', htmlGenerator.ORDER_ATOMIC) || '[]';
+    const item = b.getFieldValue('ITEM');
+    const body = htmlGenerator.statementToCode(b, 'DO');
+    return `{#each ${arr} as ${item}}\n${body}{/each}\n`;
+};
+
+htmlGenerator.forBlock['svelte_each_keyed'] = (b) => {
+    const arr = htmlGenerator.valueToCode(b, 'ARR', htmlGenerator.ORDER_ATOMIC) || '[]';
+    const item = b.getFieldValue('ITEM');
+    const key = b.getFieldValue('KEY');
+    const body = htmlGenerator.statementToCode(b, 'DO');
+    return `{#each ${arr} as ${item} (${key})}\n${body}{/each}\n`;
+};
+
+htmlGenerator.forBlock['svelte_await'] = (b) => {
+    const promise = htmlGenerator.valueToCode(b, 'PROMISE', htmlGenerator.ORDER_ATOMIC) || 'fetch("/")';
+    const loading = htmlGenerator.statementToCode(b, 'LOADING');
+    const v = b.getFieldValue('VAR');
+    const then = htmlGenerator.statementToCode(b, 'THEN');
+    return `{#await ${promise}}\n${loading}{:then ${v}}\n${then}{/await}\n`;
+};
+
+htmlGenerator.forBlock['svelte_bind_value'] = (b) => {
+    const v = b.getFieldValue('VAR');
+    return `<input bind:value={${v}} />\n`;
+};
+
+htmlGenerator.forBlock['svelte_bind_checked'] = (b) => {
+    const v = b.getFieldValue('VAR');
+    return `<input type="checkbox" bind:checked={${v}} />\n`;
+};
+
+htmlGenerator.forBlock['svelte_bind_group'] = (b) => {
+    const v = b.getFieldValue('VAR');
+    const val = htmlGenerator.valueToCode(b, 'VAL', htmlGenerator.ORDER_ATOMIC) || "''";
+    return `<input type="radio" bind:group={${v}} value={${val}} />\n`;
+};
+
+htmlGenerator.forBlock['svelte_expr'] = (b) => {
+    const expr = b.getFieldValue('EXPR');
+    return `{${expr}}\n`;
+};
+
+htmlGenerator.forBlock['svelte_html_raw'] = (b) => {
+    const expr = htmlGenerator.valueToCode(b, 'EXPR', htmlGenerator.ORDER_ATOMIC) || "''";
+    return `{@html ${expr}}\n`;
+};
+
+htmlGenerator.forBlock['svelte_transition'] = (b) => {
+    const type = b.getFieldValue('TYPE');
+    const content = htmlGenerator.statementToCode(b, 'CONTENT');
+    return `<div transition:${type}>\n${content}</div>\n`;
+};
+
+htmlGenerator.forBlock['svelte_on_mount'] = (b) => {
+    const code = htmlGenerator.statementToCode(b, 'DO');
+    return `  onMount(() => {\n${code}  });\n`;
+};
+
+htmlGenerator.forBlock['svelte_on_destroy'] = (b) => {
+    const code = htmlGenerator.statementToCode(b, 'DO');
+    return `  onDestroy(() => {\n${code}  });\n`;
+};
+
+htmlGenerator.forBlock['svelte_store_writable'] = (b) => {
+    const name = b.getFieldValue('NAME');
+    const val = htmlGenerator.valueToCode(b, 'VAL', htmlGenerator.ORDER_ATOMIC) || '0';
+    return `  const ${name} = writable(${val});\n`;
+};
+
+htmlGenerator.forBlock['svelte_store_get'] = (b) => {
+    const name = b.getFieldValue('NAME');
+    return ['$' + name, htmlGenerator.ORDER_ATOMIC];
+};
+
+htmlGenerator.forBlock['svelte_store_set'] = (b) => {
+    const name = b.getFieldValue('NAME');
+    const val = htmlGenerator.valueToCode(b, 'VAL', htmlGenerator.ORDER_ATOMIC) || '0';
+    return `  ${name}.set(${val});\n`;
+};
+
+htmlGenerator.forBlock['svelte_store_update'] = (b) => {
+    const name = b.getFieldValue('NAME');
+    const code = htmlGenerator.statementToCode(b, 'DO');
+    return `  ${name}.update(n => {\n${code}    return n;\n  });\n`;
+};
+
+htmlGenerator.forBlock['svelte_style'] = (b) => {
+    const css = htmlGenerator.statementToCode(b, 'CSS');
+    return `<style>\n${css}</style>\n`;
+};
+
+htmlGenerator.forBlock['svelte_css_rule'] = (b) => {
+    const sel = b.getFieldValue('SEL');
+    const props = b.getFieldValue('PROPS');
+    return `  ${sel} { ${props} }\n`;
+};
+
+htmlGenerator.forBlock['svelte_slot'] = (b) => {
+    const name = b.getFieldValue('NAME');
+    if (name) return `<slot name="${name}" />\n`;
+    return `<slot />\n`;
+};
+
+htmlGenerator.forBlock['svelte_export_prop'] = (b) => {
+    const prop = b.getFieldValue('PROP');
+    const def = htmlGenerator.valueToCode(b, 'DEFAULT', htmlGenerator.ORDER_ATOMIC) || "''";
+    return `  export let ${prop} = ${def};\n`;
+};
+
+htmlGenerator.forBlock['svelte_dispatch'] = (b) => {
+    const evt = b.getFieldValue('EVT');
+    const detail = htmlGenerator.valueToCode(b, 'DETAIL', htmlGenerator.ORDER_ATOMIC) || 'null';
+    return `  dispatch('${evt}', ${detail});\n`;
+};
+
 htmlGenerator.forBlock['math_change'] = function(block) {
     const argument0 = htmlGenerator.valueToCode(block, 'DELTA', htmlGenerator.ORDER_ADDITION) || '0';
     const varName = block.getFieldValue('VAR');

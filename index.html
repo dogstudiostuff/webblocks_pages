@@ -47,12 +47,10 @@
         loadPlugin('./node_modules/@blockly/field-multilineinput/dist/index.js', function(pkg) {
             var Field = pkg.FieldMultilineInput || pkg.default;
             if (Field) {
-                // Register standard name
                 Blockly.fieldRegistry.register('field_multilinetext', Field);
-                // Also register 'field_multilineinput' just in case definitions vary
-                if (!Blockly.fieldRegistry.registry['field_multilineinput']) {
+                try {
                     Blockly.fieldRegistry.register('field_multilineinput', Field);
-                }
+                } catch(e) { /* already registered */ }
                 console.log("✅ Registered field_multilinetext");
             } else {
                 console.error("❌ Could not find Multiline class in package", pkg);
@@ -70,25 +68,27 @@
             }
         });
 
-        // Load Continuous Toolbox
-        loadPlugin('./node_modules/@blockly/continuous-toolbox/dist/index.js', function(pkg) {
-            var continuousToolbox = pkg.ContinuousToolbox || pkg.default;
-            if (continuousToolbox) {
-                // The continuous toolbox plugin typically needs to be registered
-                // with the Blockly registry for toolboxes.
-                // Standard registration name is usually 'continuousToolbox'
-                if (Blockly.registry) {
-                    Blockly.registry.register(
-                        Blockly.registry.Type.TOOLBOX,
-                        'continuousToolbox',
-                        continuousToolbox
-                    );
-                    console.log("✅ Registered Continuous Toolbox");
+        // Register Rarry-style ToolboxBubbleCategory — colored circle icon for each category
+        (function() {
+            class ToolboxBubbleCategory extends Blockly.ToolboxCategory {
+                createIconDom_() {
+                    const el = document.createElement('div');
+                    el.classList.add('categoryBubble');
+                    el.style.backgroundColor = this.colour_;
+                    return el;
                 }
-            } else {
-                console.error("❌ Could not find Continuous Toolbox class in package", pkg);
             }
-        });
+            Blockly.registry.register(
+                Blockly.registry.Type.TOOLBOX_ITEM,
+                Blockly.ToolboxCategory.registrationName,
+                ToolboxBubbleCategory,
+                true
+            );
+
+            // Lock flyout scale so canvas zoom doesn't affect block sizes in the flyout
+            Blockly.VerticalFlyout.prototype.getFlyoutScale = function() { return 0.85; };
+        })();
+
     </script>
 
 </head>
