@@ -16,6 +16,59 @@ if (!Blockly.Extensions.isRegistered('shape_ticket')) {
     });
 }
 
+// Register the Media shape — a rounded rect with small triangular notch (play icon hint)
+if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
+    WEBBLOCKS_SHAPES.register('media', function(c) {
+        var cr = c.CORNER_RADIUS;
+        var notch = 5;
+        return {
+            isDynamic: true,
+            width: function(h) { return cr + 2; },
+            height: function(h) { return h; },
+            connectionOffsetY: function(h) { return h / 2; },
+            connectionOffsetX: function(w) { return -w; },
+            pathDown: function(h) {
+                var mid = h / 2;
+                var straight = Math.max(0, mid - cr - notch);
+                // top-left corner arc, straight, triangle notch, straight, bottom-left corner arc
+                return ' a ' + cr + ',' + cr + ' 0 0,0 ' + (-cr) + ',' + cr
+                     + ' v ' + straight
+                     + ' l ' + (-notch) + ',' + notch + ' l ' + notch + ',' + notch
+                     + ' v ' + straight
+                     + ' a ' + cr + ',' + cr + ' 0 0,0 ' + cr + ',' + cr;
+            },
+            pathUp: function(h) {
+                var mid = h / 2;
+                var straight = Math.max(0, mid - cr - notch);
+                return ' a ' + cr + ',' + cr + ' 0 0,1 ' + cr + ',' + (-cr)
+                     + ' v ' + (-straight)
+                     + ' l ' + notch + ',' + (-notch) + ' l ' + (-notch) + ',' + (-notch)
+                     + ' v ' + (-straight)
+                     + ' a ' + cr + ',' + cr + ' 0 0,1 ' + (-cr) + ',' + (-cr);
+            },
+            pathRightDown: function(h) {
+                var mid = h / 2;
+                var straight = Math.max(0, mid - cr - notch);
+                return ' a ' + cr + ',' + cr + ' 0 0,1 ' + cr + ',' + cr
+                     + ' v ' + straight
+                     + ' l ' + notch + ',' + notch + ' l ' + (-notch) + ',' + notch
+                     + ' v ' + straight
+                     + ' a ' + cr + ',' + cr + ' 0 0,1 ' + (-cr) + ',' + cr;
+            },
+            pathRightUp: function(h) {
+                var mid = h / 2;
+                var straight = Math.max(0, mid - cr - notch);
+                return ' a ' + cr + ',' + cr + ' 0 0,0 ' + (-cr) + ',' + (-cr)
+                     + ' v ' + (-straight)
+                     + ' l ' + (-notch) + ',' + (-notch) + ' l ' + notch + ',' + (-notch)
+                     + ' v ' + (-straight)
+                     + ' a ' + cr + ',' + cr + ' 0 0,0 ' + cr + ',' + (-cr);
+            }
+        };
+    });
+    WEBBLOCKS_SHAPES.registerTypeCheck('Media', 'media');
+}
+
 
     defineBlocks([
    {
@@ -312,6 +365,10 @@ if (!Blockly.Extensions.isRegistered('shape_ticket')) {
         { "type": "js_form_submit", "message0": "on form", "message1": "id %1", "args1": [{ "type": "input_value", "name": "ID", "check": "String" }], "message2": "submit %1", "args2": [{ "type": "input_statement", "name": "DO" }], "colour": "#FF6680" },
 
         { "type": "html_img", "message0": "img", "message1": "src %1", "args1": [{ "type": "input_value", "name": "SRC", "check": "String" }], "message2": "alt %1", "args2": [{ "type": "input_value", "name": "ALT", "check": "String" }], "message3": "width %1", "args3": [{ "type": "input_value", "name": "W", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
+        { "type": "media_image", "message0": "image src %1 alt %2 width %3", "args0": [{ "type": "input_value", "name": "SRC", "check": "String" }, { "type": "input_value", "name": "ALT", "check": "String" }, { "type": "input_value", "name": "W", "check": "String" }], "inputsInline": true, "output": "Media", "colour": "#CF63CF", "tooltip": "Returns an image element as a Media value", "extensions": ["shape_media"] },
+        { "type": "media_video", "message0": "video src %1 controls %2", "args0": [{ "type": "input_value", "name": "SRC", "check": "String" }, { "type": "field_checkbox", "name": "CTRL", "checked": true }], "inputsInline": true, "output": "Media", "colour": "#CF63CF", "tooltip": "Returns a video element as a Media value", "extensions": ["shape_media"] },
+        { "type": "media_favicon", "message0": "favicon src %1", "args0": [{ "type": "input_value", "name": "SRC", "check": "String" }], "inputsInline": true, "output": "Media", "colour": "#CF63CF", "tooltip": "Returns a favicon link element as a Media value", "extensions": ["shape_media"] },
+        { "type": "display_media", "message0": "display %1", "args0": [{ "type": "input_value", "name": "MEDIA", "check": "Media" }], "inputsInline": true, "previousStatement": null, "nextStatement": null, "colour": "#CF63CF", "tooltip": "Renders a Media value into the page" },
         { "type": "html_video", "message0": "video", "message1": "src %1", "args1": [{ "type": "input_value", "name": "SRC", "check": "String" }], "message2": "controls %1", "args2": [{ "type": "field_checkbox", "name": "CTRL", "checked": true }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
         { "type": "html_audio", "message0": "audio", "message1": "src %1", "args1": [{ "type": "input_value", "name": "SRC", "check": "String" }], "message2": "controls %1", "args2": [{ "type": "field_checkbox", "name": "CTRL", "checked": true }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
         { "type": "html_iframe", "message0": "iframe", "message1": "src %1", "args1": [{ "type": "input_value", "name": "SRC", "check": "String" }], "message2": "width %1", "args2": [{ "type": "input_value", "name": "W", "check": "String" }], "message3": "height %1", "args3": [{ "type": "input_value", "name": "H", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },

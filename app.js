@@ -47,6 +47,7 @@ const toolbox = {
                 { kind: "block", type: "meta_charset" },
                 { kind: "block", type: "meta_viewport" },
                 { kind: "block", type: "meta_favicon", inputs: { URL: { shadow: { type: "text_string", fields: { TEXT: "favicon.ico" } } } } },
+                { kind: "block", type: "ui_page_wrapper" },
             ]
         },
 
@@ -149,7 +150,6 @@ const toolbox = {
             name: "UI Components",
             colour: "#66c2ff",
             contents: [
-                { kind: "block", type: "ui_page_wrapper" },
                 { kind: "block", type: "ui_navbar_simple" },
                 { kind: "block", type: "ui_nav_link" },
                 { 
@@ -215,6 +215,10 @@ const toolbox = {
             name: "Media",
             colour: "#CF63CF",
             contents: [
+                { kind: "block", type: "display_media" },
+                { kind: "block", type: "media_image", inputs: { SRC: { shadow: { type: "text_string", fields: { TEXT: "image.png" } } }, ALT: { shadow: { type: "text_string", fields: { TEXT: "description" } } }, W: { shadow: { type: "text_string", fields: { TEXT: "300" } } } } },
+                { kind: "block", type: "media_video", inputs: { SRC: { shadow: { type: "text_string", fields: { TEXT: "video.mp4" } } } } },
+                { kind: "block", type: "media_favicon", inputs: { SRC: { shadow: { type: "text_string", fields: { TEXT: "favicon.ico" } } } } },
                 { kind: "block", type: "html_img" },
                 { kind: "block", type: "html_video" },
                 { kind: "block", type: "html_audio" },
@@ -1076,9 +1080,16 @@ function init() {
         document.getElementById('codeArea').style.fontSize = settings.codeFontSize;
 
         // Sounds
-        if (workspace.getAudioManager) {
-            workspace.getAudioManager().setEnabled(settings.sounds);
-        }
+        try {
+            if (workspace.getAudioManager) {
+                var audioMgr = workspace.getAudioManager();
+                if (audioMgr && typeof audioMgr.setEnabled === 'function') {
+                    audioMgr.setEnabled(settings.sounds);
+                } else if (audioMgr) {
+                    audioMgr.enabled = settings.sounds;
+                }
+            }
+        } catch(e) { console.warn('Audio manager not available:', e); }
 
         // Zoom speed
         if (workspace.options && workspace.options.zoomOptions) {

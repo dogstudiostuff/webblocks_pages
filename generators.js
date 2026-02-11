@@ -567,6 +567,25 @@ htmlGenerator.forBlock["html_img"] = (b) => {
     const w = getVal(b, 'W');
     return `<img src="${src}" alt="${alt}" width="${w}">\n`;
 };
+htmlGenerator.forBlock["media_image"] = (b) => {
+    const src = getVal(b, 'SRC');
+    const alt = getVal(b, 'ALT');
+    const w = getVal(b, 'W');
+    return [`<img src="${src}" alt="${alt}" width="${w}">`, htmlGenerator.ORDER_ATOMIC];
+};
+htmlGenerator.forBlock["media_video"] = (b) => {
+    const src = getVal(b, 'SRC');
+    const ctrl = b.getFieldValue('CTRL') === 'TRUE' ? ' controls' : '';
+    return [`<video src="${src}"${ctrl}></video>`, htmlGenerator.ORDER_ATOMIC];
+};
+htmlGenerator.forBlock["media_favicon"] = (b) => {
+    const src = getVal(b, 'SRC');
+    return [`<link rel="icon" href="${src}">`, htmlGenerator.ORDER_ATOMIC];
+};
+htmlGenerator.forBlock["display_media"] = (b) => {
+    const media = htmlGenerator.valueToCode(b, 'MEDIA', htmlGenerator.ORDER_ATOMIC) || '';
+    return media + '\n';
+};
 htmlGenerator.forBlock["html_video"] = (b) => {
     const src = getVal(b, 'SRC');
     return `<video src="${src}" ${b.getFieldValue('CTRL')==='TRUE'?'controls':''}></video>\n`;
