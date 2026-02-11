@@ -5,29 +5,28 @@ WEBBLOCKS_SHAPES.register('chevron', function(c) {
   var cr = c.CORNER_RADIUS;
   return {
     isDynamic: true,
-    width: function(h) { return 0; },
+    width: function(h) { return h * 0.22 + 4; },
     height: function(h) { return h; },
     connectionOffsetY: function(h) { return h / 2; },
     connectionOffsetX: function(w) { return -w; },
-    textPadding: function(h) { return { left: h * 1.2, right: h * 1.2 }; },
     pathDown: function(h) {
-      // Left side going down — inward arrow point (mirror of right)
-      var pw = h / 3;
+      // Left side going down — inward arrow point
+      var pw = h * 0.22;
       return ' l ' + pw + ',' + (h / 2) + ' l ' + (-pw) + ',' + (h / 2);
     },
     pathUp: function(h) {
-      // Left side going up — inward arrow point (mirror of right)
-      var pw = h / 3;
+      // Left side going up — inward arrow point
+      var pw = h * 0.22;
       return ' l ' + pw + ',' + (-(h / 2)) + ' l ' + (-pw) + ',' + (-(h / 2));
     },
     pathRightDown: function(h) {
       // Right side going down — outward arrow point
-      var pw = h / 3;
+      var pw = h * 0.22;
       return ' l ' + pw + ',' + (h / 2) + ' l ' + (-pw) + ',' + (h / 2);
     },
     pathRightUp: function(h) {
       // Right side going up — outward arrow point
-      var pw = h / 3;
+      var pw = h * 0.22;
       return ' l ' + pw + ',' + (-(h / 2)) + ' l ' + (-pw) + ',' + (-(h / 2));
     }
   };

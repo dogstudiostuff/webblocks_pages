@@ -163,11 +163,12 @@
       this.width += delta;
       this.widthWithChildren += delta;
 
-      // Adjust right side padding too
-      if (this.rightSide && this.rightSide.xPos > 0) {
-        var rightDelta = pad.right - origStartX;
+      // Adjust right side padding — ensure the right output shape
+      // is positioned flush with the block's right edge
+      if (this.rightSide) {
         this.rightSide.width = pad.right;
-        this.rightSide.xPos = this.width - this.startX + pad.right - this.rightSide.width;
+        // Place the right shape so it sits at the far right of the block
+        this.rightSide.xPos = this.width - pad.right;
       }
     }
   }

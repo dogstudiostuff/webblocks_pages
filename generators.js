@@ -1029,6 +1029,19 @@ standardBlocks.forEach(type => {
     };
 
 
+// Override math_random_int to emit valid standalone JS (no helper function)
+htmlGenerator.forBlock['math_random_int'] = function(block) {
+    var from = htmlGenerator.valueToCode(block, 'FROM', htmlGenerator.ORDER_NONE) || '0';
+    var to = htmlGenerator.valueToCode(block, 'TO', htmlGenerator.ORDER_NONE) || '0';
+    return ['Math.floor(Math.random() * (' + to + ' - ' + from + ' + 1) + ' + from + ')', htmlGenerator.ORDER_FUNCTION_CALL];
+};
+
+// Override math_random_float to emit valid standalone JS
+htmlGenerator.forBlock['math_random_float'] = function(block) {
+    return ['Math.random()', htmlGenerator.ORDER_FUNCTION_CALL];
+};
+
+
 // ─── Svelte Generators ───
 
 htmlGenerator.forBlock['svelte_component'] = (b) => {

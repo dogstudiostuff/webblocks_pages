@@ -16,7 +16,8 @@ let settings = {
     minify: false,
     zoomSpeed: 1.2,
     codeFontSize: '13px',
-    autoRemind: false
+    autoRemind: false,
+    theme: 'dark'
 };
 
 function loadSettings() {
@@ -991,35 +992,99 @@ function init() {
     };
 
     // ─── Settings panel ───
-    function applySettings() {
-        if (!workspace) return;
-        // Update grid snap without triggering a full workspace re-render
-        workspace.options.gridOptions = workspace.options.gridOptions || {};
-        workspace.options.gridOptions.snap = settings.gridSnap;
-        workspace.options.gridOptions.spacing = settings.gridSpacing;
 
-        // Update the SVG grid pattern directly
-        const grid = workspace.getGrid && workspace.getGrid();
-        if (grid && grid.gridPattern_) {
-            grid.gridPattern_.setAttribute('width', settings.gridSpacing);
-            grid.gridPattern_.setAttribute('height', settings.gridSpacing);
-            var children = grid.gridPattern_.children;
-            for (var i = 0; i < children.length; i++) {
-                var line = children[i];
-                if (line.getAttribute('x1') !== '0' || line.getAttribute('x2') == settings.gridSpacing) {
-                    line.setAttribute('x2', settings.gridSpacing);
-                }
-                if (line.getAttribute('y1') !== '0' || line.getAttribute('y2') == settings.gridSpacing) {
-                    line.setAttribute('y2', settings.gridSpacing);
+    // Blockly themes for light and dark
+    var darkBlocklyTheme = Blockly.Theme.defineTheme('webblocks_dark', {
+        base: Blockly.Themes.Classic,
+        componentStyles: {
+            workspaceBackgroundColour: '#1e1e2e',
+            toolboxBackgroundColour: '#333',
+            flyoutBackgroundColour: '#252526',
+            flyoutOpacity: 0.95,
+            scrollbarColour: '#555'
+        },
+        fontStyle: { family: '"Segoe UI", Tahoma, sans-serif', weight: 'bold', size: 11 },
+        startHats: false
+    });
+    // Override the CSS injected by Blockly to set block text white
+    darkBlocklyTheme.setBlockStyle('auto_dark', {});
+
+    var lightBlocklyTheme = Blockly.Theme.defineTheme('webblocks_light', {
+        base: Blockly.Themes.Classic,
+        componentStyles: {
+            workspaceBackgroundColour: '#f9f9f9',
+            toolboxBackgroundColour: '#e8e4dc',
+            flyoutBackgroundColour: '#e0ddd5',
+            flyoutOpacity: 0.95,
+            scrollbarColour: '#bbb'
+        },
+        fontStyle: { family: '"Segoe UI", Tahoma, sans-serif', weight: 'bold', size: 11 },
+        startHats: false
+    });
+
+    function applyTheme() {
+        var isLight = settings.theme === 'light';
+        document.documentElement.classList.toggle('light-theme', isLight);
+        document.documentElement.classList.toggle('dark-theme', !isLight);
+
+        // Update Blockly block text colour via CSS override
+        var textColor = isLight ? '#000' : '#fff';
+        var styleId = 'webblocks-theme-style';
+        var el = document.getElementById(styleId);
+        if (!el) {
+            el = document.createElement('style');
+            el.id = styleId;
+            document.head.appendChild(el);
+        }
+        el.textContent =
+            '.webblocks-renderer .blocklyText { fill: ' + textColor + ' !important; }' +
+            '.webblocks-renderer .blocklyEditableField > text, .webblocks-renderer .blocklyNonEditableField > text { fill: ' + (isLight ? '#333' : '#575E75') + ' !important; }' +
+            '.webblocks-renderer .blocklyDropdownText { fill: #fff !important; }';
+
+        if (workspace) {
+            workspace.setTheme(isLight ? lightBlocklyTheme : darkBlocklyTheme);
+            // Update grid colour for visibility
+            var gridColor = isLight ? '#ccc' : '#444';
+            var grid = workspace.getGrid && workspace.getGrid();
+            if (grid && grid.gridPattern_) {
+                var lines = grid.gridPattern_.querySelectorAll('line');
+                for (var i = 0; i < lines.length; i++) {
+                    lines[i].setAttribute('stroke', gridColor);
                 }
             }
-            grid.snapToGrid = settings.gridSnap;
-            grid.spacing = settings.gridSpacing;
+        }
+    }
+
+    function applySettings() {
+        if (!workspace) return;
+
+        // Update grid using the proper Blockly Grid API
+        var grid = workspace.getGrid();
+        if (grid) {
+            grid.setSpacing(settings.gridSpacing);
+            grid.setSnapToGrid(settings.gridSnap);
+            grid.update(workspace.scale);
         }
 
-        const trashEl = workspace.trashcan && workspace.trashcan.svgGroup;
-        if (trashEl) trashEl.style.display = settings.trashcan ? '' : 'none';
+        // Show/hide trashcan
+        if (workspace.trashcan) {
+            var trashSvg = workspace.trashcan.svgGroup || workspace.trashcan.svgGroup_;
+            if (trashSvg) trashSvg.style.display = settings.trashcan ? '' : 'none';
+        }
+
+        // Code area font size
         document.getElementById('codeArea').style.fontSize = settings.codeFontSize;
+
+        // Sounds
+        if (workspace.getAudioManager) {
+            workspace.getAudioManager().setEnabled(settings.sounds);
+        }
+
+        // Zoom speed
+        if (workspace.options && workspace.options.zoomOptions) {
+            workspace.options.zoomOptions.scaleSpeed = settings.zoomSpeed;
+        }
+
         saveSettings();
     }
 
@@ -1033,6 +1098,7 @@ function init() {
         document.getElementById('setZoomSpeed').value = settings.zoomSpeed;
         document.getElementById('setCodeFontSize').value = settings.codeFontSize;
         document.getElementById('setAutoRemind').checked = settings.autoRemind;
+        document.getElementById('setTheme').value = settings.theme;
     }
 
     document.getElementById('btnSettings').onclick = () => {
@@ -1052,8 +1118,8 @@ function init() {
     document.getElementById('setTrashcan').onchange = function() { settings.trashcan = this.checked; applySettings(); };
     document.getElementById('setSounds').onchange = function() {
         settings.sounds = this.checked;
-        if (Blockly.WorkspaceAudio) {
-            workspace.getAudioManager && workspace.getAudioManager().setEnabled(this.checked);
+        if (workspace.getAudioManager) {
+            workspace.getAudioManager().setEnabled(this.checked);
         }
         saveSettings();
     };
@@ -1061,20 +1127,15 @@ function init() {
     document.getElementById('setMinify').onchange = function() { settings.minify = this.checked; saveSettings(); };
     document.getElementById('setZoomSpeed').onchange = function() {
         settings.zoomSpeed = parseFloat(this.value);
-        workspace.options.zoomOptions.scaleSpeed = settings.zoomSpeed;
-        saveSettings();
+        applySettings();
     };
     document.getElementById('setCodeFontSize').onchange = function() { settings.codeFontSize = this.value; applySettings(); };
     document.getElementById('setAutoRemind').onchange = function() { settings.autoRemind = this.checked; saveSettings(); };
+    document.getElementById('setTheme').onchange = function() { settings.theme = this.value; applyTheme(); saveSettings(); };
 
     // Apply loaded settings on startup
     applySettings();
-    if (settings.sounds === false && workspace.getAudioManager) {
-        workspace.getAudioManager().setEnabled(false);
-    }
-    if (settings.zoomSpeed !== 1.2) {
-        workspace.options.zoomOptions.scaleSpeed = settings.zoomSpeed;
-    }
+    applyTheme();
 
     // Auto-save reminder
     let _autoRemindInterval;
@@ -1329,11 +1390,10 @@ function init() {
                 "WEBBLOCKS_SHAPES.register('" + shapeName + "', function(c) {",
                 "  return {",
                 "    isDynamic: true,",
-                "    width: function(h) { return 0; },",
+                "    width: function(h) { return h * " + pointWidth + " + 4; },",
                 "    height: function(h) { return h; },",
                 "    connectionOffsetY: function(h) { return h / 2; },",
                 "    connectionOffsetX: function(w) { return -w; },",
-                "    textPadding: function(h) { return h * " + paddingFactor + "; },",
                 "    pathDown: function(h) {",
                 "      var pw = h * " + pointWidth + ";",
                 "      return ' l ' + pw + ',' + (h / 2) + ' l ' + (-pw) + ',' + (h / 2);",
