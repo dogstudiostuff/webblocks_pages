@@ -1113,6 +1113,19 @@ function init() {
         document.getElementById('setCodeFontSize').value = settings.codeFontSize;
         document.getElementById('setAutoRemind').checked = settings.autoRemind;
         document.getElementById('setTheme').value = settings.theme;
+        // update preview widget when settings UI syncs
+        applyPreview(settings.theme);
+    }
+
+    function applyPreview(theme) {
+        try {
+            var el = document.getElementById('themePreview');
+            if (!el) return;
+            el.classList.remove('dark','light','apple');
+            if (theme === 'light') el.classList.add('light');
+            else if (theme === 'apple') el.classList.add('apple');
+            else el.classList.add('dark');
+        } catch(e) { console.warn('Preview update failed', e); }
     }
 
     document.getElementById('btnSettings').onclick = () => {
@@ -1145,9 +1158,28 @@ function init() {
     document.getElementById('setCodeFontSize').onchange = function() { settings.codeFontSize = this.value; applySettings(); };
     document.getElementById('setAutoRemind').onchange = function() { settings.autoRemind = this.checked; saveSettings(); };
     document.getElementById('setTheme').onchange = function() { settings.theme = this.value; applyTheme(); saveSettings(); };
+    // update preview when theme selector changes
+    document.getElementById('setTheme').onchange = function() { settings.theme = this.value; applyTheme(); applyPreview(settings.theme); saveSettings(); };
+
+    // titlebar quick toggle cycles available themes
+    var themeToggleBtn = document.getElementById('btnThemeToggle');
+    if (themeToggleBtn) {
+        themeToggleBtn.onclick = function() {
+            var themes = ['dark','light','apple'];
+            var idx = themes.indexOf(settings.theme);
+            if (idx < 0) idx = 0;
+            idx = (idx + 1) % themes.length;
+            settings.theme = themes[idx];
+            applyTheme();
+            applyPreview(settings.theme);
+            saveSettings();
+            var sel = document.getElementById('setTheme'); if (sel) sel.value = settings.theme;
+        };
+    }
 
     applySettings();
     applyTheme();
+    applyPreview(settings.theme);
 
     let _autoRemindInterval;
     function startAutoRemind() {

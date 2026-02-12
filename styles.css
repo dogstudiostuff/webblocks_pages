@@ -127,6 +127,39 @@ html, body { height: 100%; overflow: hidden; font-family: "Segoe UI", Tahoma, sa
 
 /* Use this class on <html> or <body> to enable the theme: add `apple-theme` */
 
+/* Theme preview widget */
+.theme-preview {
+    width: 240px;
+    height: 120px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.08);
+    box-shadow: 0 4px 10px rgba(7,20,40,0.06);
+    font-size: 12px;
+}
+.theme-preview .tp-titlebar { height: 26px; display:flex; align-items:center; padding:0 8px; font-weight:700; color:#fff; }
+.theme-preview .tp-toolbar { height: 28px; display:flex; gap:6px; align-items:center; padding:6px; }
+.theme-preview .tp-btn { padding:4px 8px; border-radius:3px; background:#d0d0d0; color:#000; font-weight:600; }
+.theme-preview .tp-btn.tp-btn-primary { background:#0A64AD; color:#fff; }
+.theme-preview .tp-content { padding:8px; color:#333; background:#fff; height:48px; display:flex; align-items:center; }
+
+/* Dark preview */
+.theme-preview.dark .tp-titlebar { background: linear-gradient(180deg,#2a0845,#6441a5); color:#fff; }
+.theme-preview.dark .tp-toolbar { background:#3a2b4f; }
+.theme-preview.dark .tp-content { background:#1a1a2e; color:#7ff; }
+
+/* Light preview (Windows-like) */
+.theme-preview.light .tp-titlebar { background: linear-gradient(180deg,#3A7BD5,#0A64AD); color:#fff; }
+.theme-preview.light .tp-toolbar { background:#ece9d8; }
+.theme-preview.light .tp-content { background:#fff; color:#000; }
+
+/* Apple preview (liquid glass) */
+.theme-preview.apple { background: linear-gradient(180deg,#f6f8fb,#eef3f8); }
+.theme-preview.apple .tp-titlebar { background: linear-gradient(180deg, rgba(255,255,255,0.65), rgba(250,250,250,0.45)); color:#07203a; }
+.theme-preview.apple .tp-toolbar { background: rgba(255,255,255,0.6); }
+.theme-preview.apple .tp-btn.tp-btn-primary { background: linear-gradient(180deg,#6fb8ff,#0A84FF); }
+.theme-preview.apple .tp-content { background: rgba(255,255,255,0.85); color:#07203a; }
+
 body { background: var(--bg-desktop); }
 
 .app { height: 100%; display: flex; flex-direction: column; }

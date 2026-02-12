@@ -98,6 +98,7 @@
             <div class="titlebar-buttons">
     <button class="toolbar-btn" id="btnSave">Save (.wbk)</button>
     <button class="toolbar-btn" id="btnLoad">Load (.wbk)</button>
+            <button class="toolbar-btn" id="btnThemeToggle" title="Toggle Theme">Theme</button>
     <button class="toolbar-btn" id="btnExport">Export HTML</button>
     <button class="toolbar-btn" id="btnZip">Export All (.zip)</button>
     <button class="toolbar-btn primary" id="btnPreview">&#9654; Preview</button>
@@ -150,6 +151,18 @@
                         <option value="apple">Apple (Liquid Glass)</option>
                     </select>
                 </label>
+                <div style="margin-top:10px;">
+                    <div style="font-size:12px;color:#444;margin-bottom:6px;font-weight:600;">Theme Preview</div>
+                    <div id="themePreview" class="theme-preview dark" aria-hidden="true">
+                        <div class="tp-titlebar">Poo IDE</div>
+                        <div class="tp-toolbar">
+                            <div class="tp-btn tp-btn-primary">Preview</div>
+                            <div class="tp-btn">Save</div>
+                            <div class="tp-btn">Load</div>
+                        </div>
+                        <div class="tp-content">Sample content • Blocks</div>
+                    </div>
+                </div>
 
                 <div class="settings-section">Workspace</div>
                 <label class="settings-row">
