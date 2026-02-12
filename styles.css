@@ -64,32 +64,33 @@ html, body { height: 100%; overflow: hidden; font-family: "Segoe UI", Tahoma, sa
 
 /* ─── Apple Liquid-Glass (Skeuomorphic + Glass) Theme ─── */
 :root.apple-theme {
-    --bg-desktop: linear-gradient(180deg,#ffffff,#fbfdff);
-    --titlebar-gradient: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(250,251,255,0.96));
-    --titlebar-border: rgba(0,0,0,0.04);
-    --toolbar-bg: rgba(255,255,255,0.96);
-    --toolbar-border-light: rgba(255,255,255,1);
-    --toolbar-border-dark: rgba(0,0,0,0.04);
-    --toolbar-primary-bg: linear-gradient(180deg,#66b8ff,#0A84FF);
-    --main-bg: rgba(255,255,255,0.98);
-    --panel-bg: rgba(255,255,255,0.96);
-    --panel-titlebar-gradient: linear-gradient(90deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9));
-    --panel-content-bg: rgba(255,255,255,1);
-    --panel-tab-bg: rgba(255,255,255,0.95);
-    --panel-tab-active-bg: rgba(255,255,255,1);
-    --panel-tab-active-color: #03172a;
-    --code-bg: #ffffff;
-    --code-color: #071428;
-    --preview-bg: rgba(255,255,255,0.98);
-    --dialog-bg: rgba(255,255,255,1);
-    --dialog-header-gradient: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.92));
-    --settings-section-color: #0A84FF;
-    --text-color: #03172a;
-    --text-muted: #6b7280;
-    --resize-bg: rgba(0,0,0,0.03);
-    --page-tab-bg: rgba(255,255,255,0.98);
-    --page-tab-active-bg: rgba(255,255,255,1);
-    --blockly-text-color: #000;
+    /* Dark liquid-glass variant */
+    --bg-desktop: linear-gradient(180deg,#17171a,#0e0f12);
+    --titlebar-gradient: linear-gradient(180deg,#2a2b30,#111216);
+    --titlebar-border: rgba(255,255,255,0.04);
+    --toolbar-bg: rgba(24,24,28,0.65);
+    --toolbar-border-light: rgba(255,255,255,0.02);
+    --toolbar-border-dark: rgba(0,0,0,0.6);
+    --toolbar-primary-bg: linear-gradient(180deg,#3a7bd5,#0A64AD);
+    --main-bg: rgba(18,18,20,0.72);
+    --panel-bg: rgba(22,22,26,0.66);
+    --panel-titlebar-gradient: linear-gradient(90deg, rgba(40,40,46,0.9), rgba(18,18,22,0.7));
+    --panel-content-bg: rgba(14,14,16,0.88);
+    --panel-tab-bg: rgba(28,28,32,0.7);
+    --panel-tab-active-bg: rgba(34,34,40,0.9);
+    --panel-tab-active-color: #e8f3ff;
+    --code-bg: #0f1012;
+    --code-color: #cfe8ff;
+    --preview-bg: rgba(12,12,14,0.85);
+    --dialog-bg: rgba(16,16,18,0.9);
+    --dialog-header-gradient: linear-gradient(180deg, rgba(40,40,46,0.92), rgba(18,18,22,0.8));
+    --settings-section-color: #7fb7ff;
+    --text-color: #e8f3ff;
+    --text-muted: #98a3b3;
+    --resize-bg: rgba(255,255,255,0.03);
+    --page-tab-bg: rgba(24,24,28,0.75);
+    --page-tab-active-bg: rgba(30,30,36,0.95);
+    --blockly-text-color: #e8f3ff;
 }
 
 /* Liquid glass + skeuomorphic surfaces */
@@ -102,11 +103,11 @@ html, body { height: 100%; overflow: hidden; font-family: "Segoe UI", Tahoma, sa
 .apple-theme .wbx-maker-dialog {
     position: relative;
     background-clip: padding-box;
-    backdrop-filter: blur(12px) saturate(120%);
-    -webkit-backdrop-filter: blur(12px) saturate(120%);
+    backdrop-filter: blur(12px) saturate(110%);
+    -webkit-backdrop-filter: blur(12px) saturate(110%);
     border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.9);
-    box-shadow: 0 10px 30px rgba(7,20,40,0.08), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -6px 18px rgba(0,0,0,0.03);
+    border: 1px solid rgba(255,255,255,0.04);
+    box-shadow: 0 14px 40px rgba(2,6,12,0.6), inset 0 1px 0 rgba(255,255,255,0.02), inset 0 -8px 18px rgba(0,0,0,0.6);
     overflow: visible;
 }
 
