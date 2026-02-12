@@ -33,16 +33,17 @@ html, body { height: 100%; overflow: hidden; font-family: "Segoe UI", Tahoma, sa
 
 /* ─── Light theme overrides ─── */
 :root.light-theme {
+    /* Windows XP Luna (Blue) inspired palette */
     --bg-desktop: #d4d0c8;
-    --titlebar-gradient: linear-gradient(180deg, #4a90d9, #2060b0);
-    --titlebar-border: #1a4a80;
+    --titlebar-gradient: linear-gradient(180deg, #3A7BD5, #0A64AD);
+    --titlebar-border: #06386a;
     --toolbar-bg: #ece9d8;
     --toolbar-border-light: #fff;
-    --toolbar-border-dark: #a0a0a0;
-    --toolbar-primary-bg: #3060a0;
+    --toolbar-border-dark: #9a9a9a;
+    --toolbar-primary-bg: #0A64AD; /* XP blue */
     --main-bg: #ece9d8;
     --panel-bg: #ece9d8;
-    --panel-titlebar-gradient: linear-gradient(90deg, #2060b0, #4a90d9);
+    --panel-titlebar-gradient: linear-gradient(90deg, #0A64AD, #3A7BD5);
     --panel-content-bg: #fff;
     --panel-tab-bg: #c0c0c0;
     --panel-tab-active-bg: #fff;
@@ -51,8 +52,8 @@ html, body { height: 100%; overflow: hidden; font-family: "Segoe UI", Tahoma, sa
     --code-color: #333;
     --preview-bg: #e0e0e0;
     --dialog-bg: #f5f3ed;
-    --dialog-header-gradient: linear-gradient(180deg, #4a90d9, #2060b0);
-    --settings-section-color: #1a4a80;
+    --dialog-header-gradient: linear-gradient(180deg, #3A7BD5, #0A64AD);
+    --settings-section-color: #0A64AD;
     --text-color: #000;
     --text-muted: #999;
     --resize-bg: #c0c0c0;
@@ -60,6 +61,71 @@ html, body { height: 100%; overflow: hidden; font-family: "Segoe UI", Tahoma, sa
     --page-tab-active-bg: #f5f3ed;
     --blockly-text-color: #000;
 }
+
+/* ─── Apple Liquid-Glass Minimal Theme ─── */
+:root.apple-theme {
+    --bg-desktop: linear-gradient(180deg,#f6f8fb,#eef3f8);
+    --titlebar-gradient: linear-gradient(180deg, rgba(255,255,255,0.65), rgba(250,250,250,0.45));
+    --titlebar-border: rgba(0,0,0,0.08);
+    --toolbar-bg: rgba(255,255,255,0.6);
+    --toolbar-border-light: rgba(255,255,255,0.85);
+    --toolbar-border-dark: rgba(0,0,0,0.06);
+    --toolbar-primary-bg: linear-gradient(180deg,#6fb8ff,#0A84FF);
+    --main-bg: rgba(245,248,252,0.65);
+    --panel-bg: rgba(255,255,255,0.55);
+    --panel-titlebar-gradient: linear-gradient(90deg, rgba(255,255,255,0.7), rgba(255,255,255,0.5));
+    --panel-content-bg: rgba(255,255,255,0.85);
+    --panel-tab-bg: rgba(255,255,255,0.6);
+    --panel-tab-active-bg: rgba(255,255,255,0.9);
+    --panel-tab-active-color: #07203a;
+    --code-bg: #fbfcfd;
+    --code-color: #0b0b0b;
+    --preview-bg: rgba(250,250,250,0.8);
+    --dialog-bg: rgba(255,255,255,0.9);
+    --dialog-header-gradient: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.65));
+    --settings-section-color: #0A84FF;
+    --text-color: #0b0b0b;
+    --text-muted: #6b7280;
+    --resize-bg: rgba(0,0,0,0.05);
+    --page-tab-bg: rgba(255,255,255,0.7);
+    --page-tab-active-bg: rgba(255,255,255,0.95);
+    --blockly-text-color: #000;
+}
+
+/* Glassy surface helpers when apple theme is active */
+.apple-theme .titlebar,
+.apple-theme .panel,
+.apple-theme .block-search-dialog,
+.apple-theme .settings-dialog,
+.apple-theme .ext-dialog,
+.apple-theme .ext-editor-dialog,
+.apple-theme .wbx-maker-dialog {
+    background-clip: padding-box;
+    backdrop-filter: blur(8px) saturate(120%);
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.6);
+    box-shadow: 0 6px 18px rgba(7,20,40,0.06);
+}
+
+.apple-theme .toolbar-btn {
+    background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(240,246,253,0.75));
+    border-color: rgba(255,255,255,0.9) rgba(0,0,0,0.06) rgba(0,0,0,0.06) rgba(255,255,255,0.9);
+}
+
+.apple-theme .toolbar-btn.primary {
+    background: var(--toolbar-primary-bg);
+    color: #fff;
+}
+
+.apple-theme .panel-title { color: rgba(7,20,40,0.9); }
+
+/* subtle translucent scrollbars */
+.apple-theme ::-webkit-scrollbar { width: 10px; height: 10px; }
+.apple-theme ::-webkit-scrollbar-track { background: transparent; }
+.apple-theme ::-webkit-scrollbar-thumb { background: rgba(10,10,10,0.12); border-radius: 8px; }
+
+/* Use this class on <html> or <body> to enable the theme: add `apple-theme` */
 
 body { background: var(--bg-desktop); }
 
@@ -70,9 +136,26 @@ body { background: var(--bg-desktop); }
 .titlebar-title { color: #fff; font-weight: bold; font-size: 14px; text-shadow: 1px 1px #000; }
 .titlebar-buttons { display: flex; gap: 6px; }
 
-.toolbar-btn { padding: 4px 12px; font-family: inherit; font-weight: bold; background: var(--toolbar-bg); border: 2px solid; border-color: var(--toolbar-border-light) var(--toolbar-border-dark) var(--toolbar-border-dark) var(--toolbar-border-light); cursor: pointer; }
-.toolbar-btn:active { border-color: var(--toolbar-border-dark) var(--toolbar-border-light) var(--toolbar-border-light) var(--toolbar-border-dark); }
-.toolbar-btn.primary { background: var(--toolbar-primary-bg); color: #fff; }
+.toolbar-btn {
+    padding: 4px 12px;
+    font-family: inherit;
+    font-weight: bold;
+    background: linear-gradient(180deg,#f0f0f0,#c8c8c8);
+    border: 2px solid;
+    border-color: #ffffff #9a9a9a #9a9a9a #ffffff;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+    cursor: pointer;
+    color: #000;
+}
+.toolbar-btn:active {
+    border-color: #9a9a9a #ffffff #ffffff #9a9a9a;
+}
+.toolbar-btn.primary {
+    background: linear-gradient(180deg,#4a8ddf,#0A64AD);
+    color: #fff;
+    border-color: #6fa7e8 #064f8e #064f8e #6fa7e8;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
+}
 
 .main-area { flex: 1; display: flex; padding: 6px; background: var(--main-bg); overflow: hidden; }
 .panel { display: flex; flex-direction: column; background: var(--panel-bg); border: 2px solid; border-color: var(--toolbar-border-light) var(--toolbar-border-dark) var(--toolbar-border-dark) var(--toolbar-border-light); position: relative; }
@@ -274,8 +357,11 @@ body { background: var(--bg-desktop); }
 #btnAddPage {
     margin-left: 10px;
     margin-bottom: 4px;
-    background: #008000; 
+    background: linear-gradient(180deg,#3cbf3c,#00A000); /* Start-button green */
     color: white;
+    border: 2px solid #2b6f2b;
+    padding: 4px 10px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
 }
 
 /* Extensions dialog */

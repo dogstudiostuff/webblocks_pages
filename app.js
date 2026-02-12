@@ -1032,10 +1032,12 @@ function init() {
 
     function applyTheme() {
         var isLight = settings.theme === 'light';
+        var isApple = settings.theme === 'apple';
         document.documentElement.classList.toggle('light-theme', isLight);
-        document.documentElement.classList.toggle('dark-theme', !isLight);
+        document.documentElement.classList.toggle('dark-theme', !isLight && !isApple);
+        document.documentElement.classList.toggle('apple-theme', isApple);
 
-        var textColor = isLight ? '#000' : '#fff';
+        var textColor = isApple ? '#07203a' : (isLight ? '#000' : '#fff');
         var styleId = 'webblocks-theme-style';
         var el = document.getElementById(styleId);
         if (!el) {
@@ -1051,9 +1053,10 @@ function init() {
             '.blocklyToolboxSelected .blocklyTreeLabel { color: ' + (isLight ? '#000' : '#fff') + ' !important; }';
 
         if (workspace) {
-            workspace.setTheme(isLight ? lightBlocklyTheme : darkBlocklyTheme);
+            // For apple use the light Blockly theme as a base
+            workspace.setTheme(isApple ? lightBlocklyTheme : (isLight ? lightBlocklyTheme : darkBlocklyTheme));
 
-            var gridColor = isLight ? '#ccc' : '#444';
+            var gridColor = isApple ? '#e6edf6' : (isLight ? '#ccc' : '#444');
             var grid = workspace.getGrid && workspace.getGrid();
             if (grid && grid.gridPattern_) {
                 var lines = grid.gridPattern_.querySelectorAll('line');
