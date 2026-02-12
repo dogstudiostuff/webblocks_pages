@@ -1,37 +1,90 @@
+// old electron main: kept around, I edit this sometimes
 const { app, BrowserWindow, Menu, dialog, shell, ipcMain, session } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
+// ensure there's a small favicon available to reduce load warnings in dev
+const _tinyPngBase64 =
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII='; // 1x1 transparent PNG
+const faviconPngPath = path.join(__dirname, 'favicon.png');
+try {
+  if (!fs.existsSync(faviconPngPath)) {
+    fs.writeFileSync(faviconPngPath, Buffer.from(_tinyPngBase64, 'base64'));
+  }
+} catch (e) {
+  console.warn('Could not write favicon.png:', e && e.message);
+}
+
 let mainWindow;
 
+// try to set a local cache/userData path early to avoid disk cache permission issues
+try {
+  const _ud = path.join(__dirname, '.user_data');
+  if (!fs.existsSync(_ud)) fs.mkdirSync(_ud, { recursive: true });
+  app.commandLine.appendSwitch('disk-cache-dir', _ud);
+  app.setPath('userData', _ud);
+} catch (e) { console.warn('Could not initialize local userData/cache path:', e && e.message); }
+
 function createWindow() {
-  mainWindow = new BrowserWindow({
+  // ensure app has a writable userData directory inside the project
+  try {
+    const ud = path.join(__dirname, '.user_data');
+    if (!fs.existsSync(ud)) fs.mkdirSync(ud, { recursive: true });
+    app.setPath('userData', ud);
+  } catch (e) {
+    console.warn('Could not set userData path:', e && e.message);
+  }
+
+  // prefer a small PNG favicon (created above) or fall back to favicon.ico
+  const iconPath = path.join(__dirname, 'favicon.ico');
+  try {
+    if (fs.existsSync(iconPath)) {
+      const stats = fs.statSync(iconPath);
+      if (stats.size < 2000) {
+        try { fs.unlinkSync(iconPath); } catch (e) {}
+      }
+    }
+  } catch (e) { }
+
+  const winOpts = {
     width: 1280,
     height: 800,
     minWidth: 900,
     minHeight: 600,
-    icon: path.join(__dirname, 'favicon.ico'),
     title: 'Poo IDE',
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js')
     }
-  });
+  };
+
+  // On Windows skip setting an icon to avoid image load warnings from invalid files
+  if (process.platform !== 'win32') {
+    if (fs.existsSync(faviconPngPath)) {
+      winOpts.icon = faviconPngPath;
+    } else if (fs.existsSync(iconPath)) {
+      winOpts.icon = iconPath;
+    }
+  }
+
+  mainWindow = new BrowserWindow(winOpts);
 
   mainWindow.loadFile('index.html');
 
-  // Allow window.open for blob: URLs (Preview button)
+  mainWindow.webContents.once('did-finish-load', () => {
+    console.log('Main window loaded');
+  });
+
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith('blob:')) {
       return { action: 'allow' };
     }
-    // External URLs open in system browser
+
     shell.openExternal(url);
     return { action: 'deny' };
   });
 
-  // Handle file save requests from renderer
   ipcMain.handle('save-file', async (event, { defaultName, content, mimeType }) => {
     const filters = defaultName.endsWith('.zip')
       ? [{ name: 'ZIP Archive', extensions: ['zip'] }]
@@ -48,13 +101,11 @@ function createWindow() {
     return false;
   });
 
-  // Handle HTML preview in a new window
   ipcMain.handle('preview-html', async (event, html) => {
     const previewWin = new BrowserWindow({
       width: 1024,
       height: 768,
       title: 'Poo IDE — Preview',
-      icon: path.join(__dirname, 'favicon.ico'),
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true
@@ -64,7 +115,6 @@ function createWindow() {
     return true;
   });
 
-  // Build the application menu
   const menuTemplate = [
     {
       label: 'File',

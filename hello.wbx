@@ -1,6 +1,8 @@
-settings{ author: "You"; version: 1.0.0; name: "Hello Extension"; colour: "#00AAFF"; }
+settings{ author: "You"; version: 1.0.0; name: "Hello Extension"; colour: "#00AAFF"; } // these just define metadata and colour
 
-blockdef{
+shapes{ }
+
+blockdef{ // this defines the block, the type is important as it is used in the generator
 [
   {
     "type": "hello_block",
@@ -11,8 +13,8 @@ blockdef{
 ]
 }
 
-gen{
+gen{ // this is where you choose what your block actally outputs
 htmlGenerator.forBlock['hello_block'] = function(block) {
-  return ['<div>hello world</div>', htmlGenerator.ORDER_ATOMIC];
+  return ['<div>hello world</div>',/* simple ahh html*/ htmlGenerator.ORDER_ATOMIC];
 };
 }

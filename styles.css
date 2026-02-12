@@ -313,3 +313,7 @@ body { background: var(--bg-desktop); }
 .wbx-maker-preview { height: 150px; border: 2px inset #808080; background: #f6f0e1; display: flex; align-items: center; justify-content: center; }
 .wbx-maker-output { height: 220px; resize: vertical; background: #1a1a2e; color: #0f0; border: 2px inset #808080; padding: 8px; font-family: "Cascadia Code", "Consolas", monospace; font-size: 12px; }
 .wbx-maker-actions { display: flex; gap: 6px; justify-content: flex-end; }
+/* I sometimes leave a commented block of CSS here for quick tweaks */
+/*
+.temp-debug { outline: 1px solid red; }
+*/

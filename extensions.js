@@ -1,319 +1,252 @@
-/**
- * Poo IDE Extension System
- * 
- * Extensions use the .wbx file format:
- * 
- *   settings{ author: "John Doe"; version: 1.0.0; name: "My Extension"; colour: "#FF0000"; }
- *   shapes{ ...shape definition JavaScript code... }
- *   blockdef{ [ ...Blockly JSON block definitions... ] }
- *   gen{ ...generator JavaScript code... }
- *
- * Shape code has access to:
- *   - WEBBLOCKS_SHAPES.register(name, pathFn)  — register a custom shape
- *   - Blockly  global
- *   - The pathFn receives the ConstantProvider (has CORNER_RADIUS, GRID_UNIT, etc)
- *     and must return { isDynamic, width(h), height(h), connectionOffsetY(h),
- *     connectionOffsetX(w), pathDown(h), pathUp(h), pathRightDown(h), pathRightUp(h) }
- *   - After registering, blocks can use "extensions": ["shape_<name>"] in blockdef
- *
- * Generator code has access to:
- *   - htmlGenerator  (the Poo IDE code generator)
- *   - getVal(block, name)  helper
- *   - esc(s)  helper
- *   - wrapJs(block, code)  helper
- *   - Blockly  global
- */
+ // PooExtensions: small home-grown extension loader
+ window.PooExtensions = (function () {
 
-window.PooExtensions = (function () {
+ var lastLoaded = null; // I sometimes keep track of the last one I fiddled with
+ const loaded = [];
 
-    // All loaded extensions: { id, settings, blockTypes[], raw }
-    const loaded = [];
+ function parse(source) {
+ const result = { settings: {}, blockdef: null, gen: null, shapes: null };
 
-    // ─── Parser ──────────────────────────────────────────────────────
+ const sections = extractSections(source);
 
-    /**
-     * Parse a .wbx extension string into { settings, blockdef, gen }.
-     */
-    function parse(source) {
-        const result = { settings: {}, blockdef: null, gen: null, shapes: null };
+ if (sections.settings) {
+ result.settings = parseSettings(sections.settings);
+ }
 
-        // Extract sections: sectionName{ ... }
-        // We need to handle nested braces so we can't just regex
-        const sections = extractSections(source);
+ if (sections.blockdef) {
+ try {
 
-        // --- settings ---
-        if (sections.settings) {
-            result.settings = parseSettings(sections.settings);
-        }
+let bd = sections.blockdef.trim();
 
-        // --- blockdef ---
-        if (sections.blockdef) {
-            try {
-                // The content should be a JSON array of block definitions
-                let bd = sections.blockdef.trim();
-                // Allow with or without outer brackets
-                if (!bd.startsWith('[')) bd = '[' + bd + ']';
-                result.blockdef = JSON.parse(bd);
-            } catch (e) {
-                throw new Error('blockdef parse error: ' + e.message);
-            }
-        }
+    if (!bd.startsWith('[')) bd = '[' + bd + ']';
+    result.blockdef = JSON.parse(bd);
+} catch (e) {
+    throw new Error('blockdef parse error: ' + e.message);
+}
+    }
 
-        // --- gen ---
-        if (sections.gen) {
-            result.gen = sections.gen.trim();
-        }
+    if (sections.gen) {
+        result.gen = sections.gen.trim();
+}
 
-        // --- shapes ---
         if (sections.shapes) {
-            result.shapes = sections.shapes.trim();
+result.shapes = sections.shapes.trim();
         }
 
-        return result;
-    }
+            return result;
+        }
 
-    /**
-     * Extract top-level named sections from source.
-     * Handles nested braces correctly.
-     */
-    function extractSections(source) {
-        const sections = {};
-        // Match section names followed by {
-        const sectionRegex = /\b(settings|blockdef|gen|shapes)\s*\{/g;
-        let match;
-        while ((match = sectionRegex.exec(source)) !== null) {
-            const name = match[1];
+        function extractSections(source) {
+            const sections = {};
+
+                const sectionRegex = /\b(settings|blockdef|gen|shapes)\s*\{/g;
+                let match;
+                while ((match = sectionRegex.exec(source)) !== null) {
+                const name = match[1];
             const startBrace = match.index + match[0].length;
-            let depth = 1;
-            let i = startBrace;
-            while (i < source.length && depth > 0) {
-                if (source[i] === '{') depth++;
-                else if (source[i] === '}') depth--;
-                if (depth > 0) i++;
+                let depth = 1;
+            let index = startBrace;
+        while (index < source.length && depth > 0) {
+if (source[index] === '{') depth++;
+        else if (source[index] === '}') depth--;
+        if (depth > 0) index++;
             }
-            sections[name] = source.substring(startBrace, i);
-        }
+        sections[name] = source.substring(startBrace, index);
+}
         return sections;
-    }
-
-    /**
-     * Parse settings section: semicolon-separated key: value pairs.
-     *   author: "John Doe"; version: 1.0.0; name: "Cool Blocks";
-     */
-    function parseSettings(raw) {
-        const settings = {};
-        // Split by semicolons, handle quoted values
-        const pairs = raw.split(';').map(s => s.trim()).filter(Boolean);
-        for (const pair of pairs) {
-            const colonIdx = pair.indexOf(':');
-            if (colonIdx === -1) continue;
-            const key = pair.substring(0, colonIdx).trim();
-            let val = pair.substring(colonIdx + 1).trim();
-            // Strip quotes
-            if ((val.startsWith('"') && val.endsWith('"')) ||
-                (val.startsWith("'") && val.endsWith("'"))) {
-                val = val.slice(1, -1);
-            }
-            settings[key] = val;
         }
-        return settings;
-    }
 
-    // ─── Registration ────────────────────────────────────────────────
+function parseSettings(raw) {
+        const settings = {};
 
-    /**
-     * Load and register an extension from a .wbx source string.
-     * Returns the extension info object.
-     */
-    function loadExtension(source) {
-        const ext = parse(source);
+const pairs = raw.split(';').map(s => s.trim()).filter(Boolean);
+    for (const pair of pairs) {
+     const colonIdx = pair.indexOf(':');
+     if (colonIdx === -1) continue;
+     const key = pair.substring(0, colonIdx).trim();
+    let value = pair.substring(colonIdx + 1).trim();
+
+        if ((value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))) {
+        value = value.slice(1, -1);
+        }
+            settings[key] = value;
+            }
+            return settings;
+            }
+
+            function loadExtension(source) {
+            const ext = parse(source);
 
         const info = {
-            id: (ext.settings.name || 'ext_' + Date.now()).replace(/\s+/g, '_').toLowerCase(),
-            settings: ext.settings,
-            blockTypes: [],
-            shapeNames: [],
-            raw: source
-        };
+    id: (ext.settings.name || 'ext_' + Date.now()).replace(/\s+/g, '_').toLowerCase(),
+settings: ext.settings,
+    blockTypes: [],
+     shapeNames: [],
+     raw: source
+     };
 
-        // Register custom shapes (before blocks, so blockdef can reference them)
         if (ext.shapes) {
-            try {
-                const shapeFn = new Function(
-                    'WEBBLOCKS_SHAPES', 'Blockly',
-                    ext.shapes
-                );
-                // Intercept registrations to track shape names for this extension
-                const shapeProxy = {
-                    register: function (name, pathFn) {
-                        const id = window.WEBBLOCKS_SHAPES.register(name, pathFn);
-                        info.shapeNames.push(name);
-                        return id;
-                    },
-                    getId: window.WEBBLOCKS_SHAPES.getId,
-                    getAll: window.WEBBLOCKS_SHAPES.getAll,
-                    registerTypeCheck: window.WEBBLOCKS_SHAPES.registerTypeCheck
-                };
-                shapeFn(shapeProxy, Blockly);
-            } catch (e) {
-                console.error('Extension shapes error (' + info.id + '):', e);
-                throw new Error('shapes code error: ' + e.message);
-            }
-        }
+        try {
+        const shapeFn = new Function(
+            'WEBBLOCKS_SHAPES', 'Blockly',
+            ext.shapes
+            );
 
-        // Register block definitions
-        if (ext.blockdef && ext.blockdef.length > 0) {
-            const defineBlocks = Blockly.common
-                ? Blockly.common.defineBlocksWithJsonArray
-                : Blockly.defineBlocksWithJsonArray;
+            const shapeProxy = {
+            register: function (name, pathFn) {
+                const id = window.WEBBLOCKS_SHAPES.register(name, pathFn);
+                info.shapeNames.push(name);
+            return id;
+            },
+        getId: window.WEBBLOCKS_SHAPES.getId,
+        getAll: window.WEBBLOCKS_SHAPES.getAll,
+    registerTypeCheck: window.WEBBLOCKS_SHAPES.registerTypeCheck
+};
+    shapeFn(shapeProxy, Blockly);
+} catch (e) {
+    console.error('Extension shapes error (' + info.id + '):', e);
+     throw new Error('shapes code error: ' + e.message);
+     }
+     }
+
+if (ext.blockdef && ext.blockdef.length > 0) {
+        const defineBlocks = Blockly.common
+            ? Blockly.common.defineBlocksWithJsonArray
+            : Blockly.defineBlocksWithJsonArray;
             defineBlocks(ext.blockdef);
 
             for (const def of ext.blockdef) {
-                if (def.type) info.blockTypes.push(def.type);
-            }
+        if (def.type) info.blockTypes.push(def.type);
+}
         }
 
-        // Register generators
-        if (ext.gen) {
-            try {
-                // The generator code can reference htmlGenerator, getVal, esc, wrapJs
+                if (ext.gen) {
+                    try {
+
                 const genFn = new Function(
-                    'htmlGenerator', 'getVal', 'esc', 'wrapJs', 'Blockly',
-                    ext.gen
-                );
-                genFn(
-                    window.htmlGenerator || htmlGenerator,
-                    window.getVal || getVal,
+                'htmlGenerator', 'getVal', 'esc', 'wrapJs', 'Blockly',
+                ext.gen
+                    );
+                        genFn(
+                        window.htmlGenerator || htmlGenerator,
+                        window.getVal || getVal,
                     window.esc || esc,
                     window.wrapJs || wrapJs,
                     Blockly
-                );
-            } catch (e) {
+                    );
+                } catch (e) {
                 console.error('Extension generator error (' + info.id + '):', e);
-                throw new Error('gen code error: ' + e.message);
-            }
-        }
+            throw new Error('gen code error: ' + e.message);
+                }
+                }
 
         loaded.push(info);
+        lastLoaded = info.id;
+        try { console.log('Loaded extension', info.id); } catch (e) {}
         saveToStorage();
         return info;
-    }
+        }
 
-    /**
-     * Remove an extension by id. Removes blocks from registry.
-     */
-    function removeExtension(id) {
-        const idx = loaded.findIndex(e => e.id === id);
-        if (idx === -1) return false;
-        const ext = loaded[idx];
+                function removeExtension(id) {
+            const idx = loaded.findIndex(e => e.id === id);
+if (idx === -1) return false;
+            const ext = loaded[idx];
 
-        // Unregister blocks and generators
         for (const type of ext.blockTypes) {
-            delete Blockly.Blocks[type];
-            if (window.htmlGenerator) delete window.htmlGenerator.forBlock[type];
-            else if (typeof htmlGenerator !== 'undefined') delete htmlGenerator.forBlock[type];
-        }
+delete Blockly.Blocks[type];
+        if (window.htmlGenerator) delete window.htmlGenerator.forBlock[type];
+        else if (typeof htmlGenerator !== 'undefined') delete htmlGenerator.forBlock[type];
+            }
 
-        loaded.splice(idx, 1);
-        saveToStorage();
-        return true;
-    }
+                loaded.splice(idx, 1);
+                    saveToStorage();
+                    return true;
+                }
 
-    /**
-     * Build a toolbox category for all loaded extension blocks.
-     */
-    function getToolboxCategory() {
-        if (loaded.length === 0) return null;
+                    function getToolboxCategory() {
+                    if (loaded.length === 0) return null;
 
-        const subcategories = [];
-        for (const ext of loaded) {
+                    const subcategories = [];
+                for (const ext of loaded) {
             if (ext.blockTypes.length === 0) continue;
-            const colour = ext.settings.colour || ext.settings.color || '#888888';
-            subcategories.push({
-                kind: 'category',
-                name: ext.settings.name || ext.id,
-                colour: colour,
-                contents: ext.blockTypes.map(type => ({ kind: 'block', type }))
-            });
-        }
-
-        if (subcategories.length === 0) return null;
-
-        // If only one extension, flatten
-        if (subcategories.length === 1) {
-            return {
-                kind: 'category',
-                name: (subcategories[0].name),
-                colour: subcategories[0].colour,
-                contents: subcategories[0].contents
-            };
-        }
-
-        return {
+                const colour = ext.settings.colour || ext.settings.color || '#888888';
+                subcategories.push({
             kind: 'category',
-            name: 'Extensions',
-            colour: '#888888',
-            contents: subcategories
-        };
-    }
+        name: ext.settings.name || ext.id,
+colour: colour,
+        contents: ext.blockTypes.map(type => ({ kind: 'block', type }))
+        });
+        }
 
-    /**
-     * Refresh the workspace toolbox to include extension blocks.
-     */
+if (subcategories.length === 0) return null;
+
+     if (subcategories.length === 1) {
+    return {
+        kind: 'category',
+        name: (subcategories[0].name),
+        colour: subcategories[0].colour,
+contents: subcategories[0].contents
+        };
+        }
+
+            return {
+            kind: 'category',
+        name: 'Extensions',
+colour: '#888888',
+        contents: subcategories
+        };
+        }
+
     function refreshToolbox(workspaceRef, baseToolbox) {
-        const extCat = getToolboxCategory();
-        const newToolbox = {
-            kind: baseToolbox.kind,
-            contents: [...baseToolbox.contents]
-        };
+     const extCat = getToolboxCategory();
+     const newToolbox = {
+    kind: baseToolbox.kind,
+        contents: [...baseToolbox.contents]
+};
 
-        // Remove existing extension category if present
-        const extIdx = newToolbox.contents.findIndex(c => c.name === 'Extensions');
-        if (extIdx !== -1) {
+            const extIdx = newToolbox.contents.findIndex(c => c.name === 'Extensions');
+            if (extIdx !== -1) {
             newToolbox.contents.splice(extIdx, 1);
+                }
+
+                if (extCat) {
+                newToolbox.contents.push(extCat);
+            }
+
+workspaceRef.updateToolbox(newToolbox);
         }
 
-        if (extCat) {
-            newToolbox.contents.push(extCat);
-        }
+            function saveToStorage() {
+                try {
+                const data = loaded.map(e => e.raw);
+                localStorage.setItem('pooide_extensions', JSON.stringify(data));
+                } catch (e) { }
+            }
 
-        workspaceRef.updateToolbox(newToolbox);
-    }
-
-    // ─── Persistence (localStorage) ─────────────────────────────────
-
-    function saveToStorage() {
-        try {
-            const data = loaded.map(e => e.raw);
-            localStorage.setItem('pooide_extensions', JSON.stringify(data));
-        } catch (e) { }
-    }
-
-    function loadFromStorage() {
+function loadFromStorage() {
         try {
             const raw = localStorage.getItem('pooide_extensions');
             if (!raw) return;
             const sources = JSON.parse(raw);
             for (const src of sources) {
-                try {
-                    loadExtension(src);
-                } catch (e) {
-                    console.warn('Failed to restore extension:', e.message);
-                }
-            }
-        } catch (e) { }
-    }
+        try {
+    loadExtension(src);
+} catch (e) {
+    console.warn('Failed to restore extension:', e.message);
+     }
+     }
+    } catch (e) { }
+        }
 
-    // ─── Public API ──────────────────────────────────────────────────
-
-    return {
-        parse,
+        return {
+parse,
         loadExtension,
         removeExtension,
         getToolboxCategory,
-        refreshToolbox,
+            refreshToolbox,
         loadFromStorage,
-        get loaded() { return loaded; }
-    };
+get loaded() { return loaded; }
+        };
 
-})();
+        })();

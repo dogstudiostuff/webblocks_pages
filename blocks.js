@@ -1,6 +1,9 @@
 window.registerWebBlocks = function() {
+    // meh, sometimes I change this and forget — leaving a note
     var defineBlocks = Blockly.common ? Blockly.common.defineBlocksWithJsonArray : Blockly.defineBlocksWithJsonArray;
-
+    var _tmpBlockHint = null; // silly leftover var
+    console.log && console.log('registerWebBlocks invoked');
+    var x = 0; // short local I sometimes use when testing
 
 if (!Blockly.Extensions.isRegistered('shape_square')) {
     Blockly.Extensions.register('shape_square', function() {
@@ -16,7 +19,6 @@ if (!Blockly.Extensions.isRegistered('shape_ticket')) {
     });
 }
 
-// Register the Media shape — a rounded rect with small triangular notch (play icon hint)
 if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
     WEBBLOCKS_SHAPES.register('media', function(c) {
         var cr = c.CORNER_RADIUS;
@@ -30,7 +32,7 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
             pathDown: function(h) {
                 var mid = h / 2;
                 var straight = Math.max(0, mid - cr - notch);
-                // top-left corner arc, straight, triangle notch, straight, bottom-left corner arc
+
                 return ' a ' + cr + ',' + cr + ' 0 0,0 ' + (-cr) + ',' + cr
                      + ' v ' + straight
                      + ' l ' + (-notch) + ',' + notch + ' l ' + notch + ',' + notch
@@ -69,11 +71,10 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
     WEBBLOCKS_SHAPES.registerTypeCheck('Media', 'media');
 }
 
-
     defineBlocks([
    {
     "type": "game_init",
-    "message0": "Create Stage Width %1 Height %2 Color %3", 
+    "message0": "Create Stage Width %1 Height %2 Color %3",
     "args0": [
         { "type": "field_number", "name": "W", "value": 800 },
         { "type": "field_number", "name": "H", "value": 600 },
@@ -93,7 +94,7 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
     },
     {
         "type": "game_move_sprite",
-        "message0": "Move Sprite %1 x: %2 y: %3",
+        "message0": "Move Sprite %1 input: %2 output: %3",
         "args0": [
             { "type": "field_input", "name": "NAME", "text": "player" },
             { "type": "input_value", "name": "X", "check": "Number" },
@@ -103,8 +104,7 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
         "nextStatement": null,
         "colour": "#4C97FF"
     },
-    //end of stage stuff
-    // colour thingy
+
     {
   "type": "colour_picker",
   "message0": "%1",
@@ -137,9 +137,6 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
     "colour": "#FF6666"
 },
         {
-
-
-
 
     "type": "ui_page_link",
     "message0": "Link to Page %1 Text %2",
@@ -175,65 +172,64 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
     "colour": "#38bdf8",
     "tooltip": "A div container using Tailwind classes (e.g., 'bg-blue-500 p-4')"
 },
-{ 
-    "type": "text_string", 
-    "message0": "%1", 
-    "args0": [{ 
+{
+    "type": "text_string",
+    "message0": "%1",
+    "args0": [{
         "type": "field_input",
         "name": "TEXT",
-        "text": "text" 
-    }], 
-    "output": "String", 
-    "colour": "#59C059" 
+        "text": "text"
+    }],
+    "output": "String",
+    "colour": "#59C059"
 },
         { "type": "math_num", "message0": "%1", "args0": [{ "type": "field_number", "name": "NUM", "value": 0 }], "output": "Number", "colour": "#59C059" },
         { "type": "logic_bool", "message0": "%1", "args0": [{ "type": "field_dropdown", "name": "BOOL", "options": [["true","true"],["false","false"]] }], "output": "Boolean", "colour": "#59C059" },
 
-        // TUFF BLOCKS
         { "type": "evil_block", "message0": "evil block", "previousStatement": null, "nextStatement": null, "colour": "#FF0000" },
         { "type": "hemmy_poop", "message0": "hemmy poop", "previousStatement": null, "nextStatement": null, "colour": "#c97303" },
 
-         { 
-            "type": "raw_html", 
-            "message0": "custom html", 
+         {
+            "type": "raw_html",
+            "message0": "custom html",
             "message1": "%1",
-            "args1": [{ 
-                "type": "field_multilinetext", 
-                "name": "CODE", 
+            "args1": [{
+                "type": "field_multilinetext",
+                "name": "CODE",
                 "text": "<div></div>",
-                "spellcheck": false 
-            }], 
-            "previousStatement": null, 
-            "nextStatement": null, 
-            "colour": "#555555" 
-        },
-        { 
-            "type": "raw_css", 
-            "message0": "custom css", 
-            "message1": "%1",
-            "args1": [{ 
-                "type": "field_multilinetext", 
-                "name": "CODE", 
-                "text": ".class { }",
-                "spellcheck": false 
-            }], 
-            "previousStatement": null, 
-            "nextStatement": null, 
-            "colour": "#555555" 
+                "spellcheck": false
+            }],
+            "previousStatement": null,
+            "nextStatement": null,
+            "colour": "#555555"
         },
         {
-            "type": "css_raw", 
-            "message0": "custom css", 
+            "type": "raw_css",
+            "message0": "custom css",
             "message1": "%1",
-            "args1": [{ 
-                "type": "field_multilinetext", 
-                "name": "CODE", 
+            "args1": [{
+                "type": "field_multilinetext",
+                "name": "CODE",
                 "text": ".class { }",
-                "spellcheck": false 
-            }], 
-            "previousStatement": null, 
-            "nextStatement": null, 
-            "colour": "#555555" 
+                "spellcheck": false
+            }],
+            "previousStatement": null,
+            "nextStatement": null,
+            "colour": "#555555"
+        },
+        {
+            "type": "css_raw",
+            "message0": "custom css",
+            "message1": "%1",
+            "args1": [{
+                "type": "field_multilinetext",
+                "name": "CODE",
+                "text": ".class { }",
+                "spellcheck": false
+            }],
+            "previousStatement": null,
+            "nextStatement": null,
+            "colour": "#555555"
         },
         { "type": "raw_js", "message0": "custom js", "message1": "%1", "args1": [{ "type": "field_multilinetext", "name": "CODE", "text": "console.log('hi');" }], "previousStatement": null, "nextStatement": null, "colour": "#555555" },
     {
@@ -274,7 +270,7 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
         "colour": "#4C97FF",
         "tooltip": "Wraps content in a div with a single inline style"
     },
-        { "type": "md_block", "message0": "markdown", "message1": "%1", "args1": [{ "type": "field_multilinetext", "name": "MD", "text": "# Hello\n**Bold**" }], "previousStatement": null, "nextStatement": null, "colour": "#333333" },
+        { "type": "md_block", "message0": "markdown", "message1": "%1", "args1": [{ "type": "field_multilinetext", "name": "MD", "text": "# Hello\length**Bold**" }], "previousStatement": null, "nextStatement": null, "colour": "#333333" },
         { "type": "md_code_inline", "message0": "code", "message1": "` %1 `", "args1": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#333333", "tooltip": "Inline Code" },
         { "type": "md_code_block", "message0": "code block", "message1": "%1", "args1": [{ "type": "field_multilinetext", "name": "CODE", "text": "console.log('Hello');" }], "previousStatement": null, "nextStatement": null, "colour": "#333333", "tooltip": "Code Block" },
         { "type": "md_bold", "message0": "bold text", "message1": "** %1 **", "args1": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#333333", "tooltip": "Bold Text" },
@@ -319,7 +315,7 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
             { "type": "input_statement", "name": "CONTENT" }
         ], "previousStatement": null, "nextStatement": null, "colour": "#4C97FF" },
         { "type": "layout_div", "message0": "div", "message1": "id %1", "args1": [{ "type": "input_value", "name": "ID", "check": "String" }], "message2": "class %1", "args2": [{ "type": "input_value", "name": "CLASS", "check": "String" }], "message3": "%1", "args3": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#4C97FF" },
-        
+
         { "type": "css_style_wrapper", "message0": "style", "message1": "with css %1", "args1": [{ "type": "input_value", "name": "CSS", "check": "String" }], "message2": "%1", "args2": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#4C97FF" },
 
         { "type": "html_h", "message0": "heading %1 %2", "args0": [{ "type": "field_dropdown", "name": "LVL", "options": [["H1","1"],["H2","2"],["H3","3"]] }, { "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#59C059" },
@@ -328,7 +324,7 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
         { "type": "html_a", "message0": "link url %1 text %2", "args0": [{ "type": "input_value", "name": "HREF", "check": "String" }, { "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#59C059" },
         { "type": "html_br", "message0": "line break", "previousStatement": null, "nextStatement": null, "colour": "#59C059" },
         { "type": "html_hr", "message0": "horizontal rule", "previousStatement": null, "nextStatement": null, "colour": "#59C059" },
-        { "type": "html_format", "message0": "format %1 text %2", "args0": [{ "type": "field_dropdown", "name": "TAG", "options": [["Bold","b"],["Italic","i"],["Underline","u"],["Strike","s"],["Code","code"],["Pre","pre"],["Quote","blockquote"]] }, { "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#59C059" },
+        { "type": "html_format", "message0": "format %1 text %2", "args0": [{ "type": "field_dropdown", "name": "TAG", "options": [["Bold","b"],["Italic","idx"],["Underline","u"],["Strike","s"],["Code","code"],["Pre","pre"],["Quote","blockquote"]] }, { "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#59C059" },
         { "type": "html_text", "message0": "%1", "args0": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#59C059" },
 
         { "type": "html_ul", "message0": "unordered list %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#FFAB19" },
@@ -375,13 +371,13 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
 
         { "type": "html_canvas", "message0": "canvas", "message1": "id %1", "args1": [{ "type": "input_value", "name": "ID", "check": "String" }], "message2": "w %1 h %2", "args2": [{ "type": "field_number", "name": "W", "value": 300 }, { "type": "field_number", "name": "H", "value": 200 }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
         { "type": "js_canvas_draw", "message0": "on canvas", "message1": "id %1", "args1": [{ "type": "input_value", "name": "ID", "check": "String" }], "message2": "draw %1", "args2": [{ "type": "input_statement", "name": "DO" }], "colour": "#9966FF" },
-        { "type": "js_canvas_rect", "message0": "rect x %1 y %2 w %3 h %4 color %5 filled %6", "args0": [{ "type": "field_number", "name": "X", "value": 10 }, { "type": "field_number", "name": "Y", "value": 10 }, { "type": "field_number", "name": "W", "value": 50 }, { "type": "field_number", "name": "H", "value": 50 }, { "type": "field_colour", "name": "C", "colour": "#ff0000" }, { "type": "field_checkbox", "name": "FILL", "checked": true }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
+        { "type": "js_canvas_rect", "message0": "rect input %1 output %2 w %3 h %4 color %5 filled %6", "args0": [{ "type": "field_number", "name": "X", "value": 10 }, { "type": "field_number", "name": "Y", "value": 10 }, { "type": "field_number", "name": "W", "value": 50 }, { "type": "field_number", "name": "H", "value": 50 }, { "type": "field_colour", "name": "C", "colour": "#ff0000" }, { "type": "field_checkbox", "name": "FILL", "checked": true }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
         { "type": "html_svg", "message0": "svg", "message1": "width %1", "args1": [{ "type": "field_number", "name": "W", "value": 100 }], "message2": "height %1", "args2": [{ "type": "field_number", "name": "H", "value": 100 }], "message3": "%1", "args3": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
-        { "type": "svg_rect", "message0": "svg rect x %1 y %2 w %3 h %4 fill %5", "args0": [{ "type": "field_number", "name": "X", "value": 0 }, { "type": "field_number", "name": "Y", "value": 0 }, { "type": "field_number", "name": "W", "value": 50 }, { "type": "field_number", "name": "H", "value": 50 }, { "type": "field_colour", "name": "C", "colour": "#0000ff" }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
+        { "type": "svg_rect", "message0": "svg rect input %1 output %2 w %3 h %4 fill %5", "args0": [{ "type": "field_number", "name": "X", "value": 0 }, { "type": "field_number", "name": "Y", "value": 0 }, { "type": "field_number", "name": "W", "value": 50 }, { "type": "field_number", "name": "H", "value": 50 }, { "type": "field_colour", "name": "C", "colour": "#0000ff" }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
         { "type": "svg_circle", "message0": "svg circle cx %1 cy %2 r %3 fill %4", "args0": [{ "type": "field_number", "name": "X", "value": 50 }, { "type": "field_number", "name": "Y", "value": 50 }, { "type": "field_number", "name": "R", "value": 20 }, { "type": "field_colour", "name": "C", "colour": "#00ff00" }], "previousStatement": null, "nextStatement": null, "colour": "#9966FF" },
         {
         "type": "game_draw_rect",
-        "message0": "Draw Rectangle Name %1 x %2 y %3 w %4 h %5 color %6",
+        "message0": "Draw Rectangle Name %1 input %2 output %3 w %4 h %5 color %6",
         "args0": [
         { "type": "field_input", "name": "NAME", "text": "player" },
         { "type": "input_value", "name": "X", "check": "Number" },
@@ -396,7 +392,7 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
     },
     {
         "type": "game_draw_circle",
-        "message0": "Draw Circle Name %1 x %2 y %3 radius %4 color %5",
+        "message0": "Draw Circle Name %1 input %2 output %3 radius %4 color %5",
         "args0": [
             { "type": "field_input", "name": "NAME", "text": "ball" },
             { "type": "input_value", "name": "X", "check": "Number" },
@@ -411,12 +407,12 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
     },
     {
         "type": "game_draw_text",
-        "message0": "Draw Text %1 x %2 y %3 size %4 color %5",
+        "message0": "Draw Text %1 input %2 output %3 size %4 color %5",
         "args0": [
             { "type": "input_value", "name": "TEXT", "check": "String" },
             { "type": "input_value", "name": "X", "check": "Number" },
             { "type": "input_value", "name": "Y", "check": "Number" },
-            { "type": "field_number", "name": "SIZE", "value": 24, "min": 1 },
+            { "type": "field_number", "name": "SIZE", "value": 24, "least": 1 },
             { "type": "input_value", "name": "COL", "check": "String" }
         ],
         "previousStatement": null,
@@ -433,7 +429,7 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
             { "type": "field_number", "name": "X2", "value": 100 },
             { "type": "field_number", "name": "Y2", "value": 100 },
             { "type": "field_colour", "name": "COL", "colour": "#ffffff" },
-            { "type": "field_number", "name": "WIDTH", "value": 2, "min": 1 }
+            { "type": "field_number", "name": "WIDTH", "value": 2, "least": 1 }
         ],
         "previousStatement": null,
         "nextStatement": null,
@@ -442,7 +438,7 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
     },
     {
         "type": "game_draw_image",
-        "message0": "Draw Image %1 x %2 y %3 w %4 h %5",
+        "message0": "Draw Image %1 input %2 output %3 w %4 h %5",
         "args0": [
             { "type": "input_value", "name": "URL", "check": "String" },
             { "type": "input_value", "name": "X", "check": "Number" },
@@ -468,14 +464,14 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
     },
     {
         "type": "game_mouse_x",
-        "message0": "mouse x",
+        "message0": "mouse input",
         "output": "Number",
         "colour": "#4C97FF",
         "tooltip": "X position of mouse on the canvas"
     },
     {
         "type": "game_mouse_y",
-        "message0": "mouse y",
+        "message0": "mouse output",
         "output": "Number",
         "colour": "#4C97FF",
         "tooltip": "Y position of mouse on the canvas"
@@ -538,18 +534,18 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
         "type": "game_sprite_prop",
         "message0": "%1 of sprite %2",
         "args0": [
-            { "type": "field_dropdown", "name": "PROP", "options": [["x","x"],["y","y"],["width","w"],["height","h"]] },
+            { "type": "field_dropdown", "name": "PROP", "options": [["input","input"],["output","output"],["width","w"],["height","h"]] },
             { "type": "field_input", "name": "NAME", "text": "player" }
         ],
         "output": "Number",
         "colour": "#4C97FF",
-        "tooltip": "Get a property (x, y, width, height) of a sprite"
+        "tooltip": "Get a property (input, output, width, height) of a sprite"
     },
     {
         "type": "game_set_sprite_prop",
         "message0": "set %1 of sprite %2 to %3",
         "args0": [
-            { "type": "field_dropdown", "name": "PROP", "options": [["x","x"],["y","y"],["width","w"],["height","h"]] },
+            { "type": "field_dropdown", "name": "PROP", "options": [["input","input"],["output","output"],["width","w"],["height","h"]] },
             { "type": "field_input", "name": "NAME", "text": "player" },
             { "type": "input_value", "name": "VAL", "check": "Number" }
         ],
@@ -576,7 +572,7 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
         {
             "type": "field_input",
             "name": "KEY",
-            "text": "w" 
+            "text": "w"
         }
     ],
     "output": "Boolean",
@@ -629,7 +625,6 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
         { "type": "js_fetch_json", "message0": "fetch json", "message1": "from %1", "args1": [{ "type": "input_value", "name": "URL", "check": "String" }], "message2": "store in %1", "args2": [{ "type": "field_variable", "name": "DATA", "variable": "data" }], "message3": "%1", "args3": [{ "type": "input_statement", "name": "DO" }], "colour": "#FF8C1A" },
         { "type": "js_localstorage_set", "message0": "storage set %1 = %2", "args0": [{ "type": "input_value", "name": "KEY", "check": "String" }, { "type": "input_value", "name": "VAL", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#FF8C1A" },
         { "type": "js_localstorage_get", "message0": "storage get %1", "args0": [{ "type": "input_value", "name": "KEY", "check": "String" }], "output": "String", "colour": "#FF8C1A" },
-        // More CSS Stuff
 
          {
             "type": "html_styled_div",
@@ -649,7 +644,7 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
             "message0": "Text color %1 size %2 align %3 weight %4",
             "args0": [
                 { "type": "field_colour", "name": "COLOR", "colour": "#000000" },
-                { "type": "field_number", "name": "SIZE", "value": 16, "min": 0 },
+                { "type": "field_number", "name": "SIZE", "value": 16, "least": 0 },
                 { "type": "field_dropdown", "name": "ALIGN", "options": [["Left","left"],["Center","center"],["Right","right"],["Justify","justify"]] },
                 { "type": "field_dropdown", "name": "WEIGHT", "options": [["Normal","normal"],["Bold","bold"],["Thin","lighter"]] }
             ],
@@ -671,10 +666,10 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
             "type": "css_prop_border",
             "message0": "Border width %1 color %2 style %3 radius %4",
             "args0": [
-                { "type": "field_number", "name": "WIDTH", "value": 1, "min": 0 },
+                { "type": "field_number", "name": "WIDTH", "value": 1, "least": 0 },
                 { "type": "field_colour", "name": "COLOR", "colour": "#000000" },
                 { "type": "field_dropdown", "name": "STYLE", "options": [["Solid","solid"],["Dashed","dashed"],["Dotted","dotted"],["None","none"]] },
-                { "type": "field_number", "name": "RADIUS", "value": 0, "min": 0 }
+                { "type": "field_number", "name": "RADIUS", "value": 0, "least": 0 }
             ],
             "previousStatement": "CSS_PROP",
             "nextStatement": "CSS_PROP",
@@ -695,8 +690,8 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
             "type": "css_prop_margin_padding",
             "message0": "Spacing margin %1 padding %2",
             "args0": [
-                { "type": "field_number", "name": "MARGIN", "value": 5, "min": 0 },
-                { "type": "field_number", "name": "PADDING", "value": 10, "min": 0 }
+                { "type": "field_number", "name": "MARGIN", "value": 5, "least": 0 },
+                { "type": "field_number", "name": "PADDING", "value": 10, "least": 0 }
             ],
             "previousStatement": "CSS_PROP",
             "nextStatement": "CSS_PROP",
@@ -715,7 +710,6 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
             "colour": "#9966FF"
         },
 
-        // more reporters
         {
     "type": "js_get_form_data",
     "message0": "form data from %1",
@@ -754,7 +748,6 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
     "tooltip": "Window width in pixels"
 },
 
-//more ui blocks
   {
         "type": "ui_page_wrapper",
         "message0": "Modern Page %1 Theme %2 %3 Content %4",
@@ -764,7 +757,7 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
             { "type": "input_dummy" },
             { "type": "input_statement", "name": "CONTENT" }
         ],
-        "colour": "#333333",
+        "colour": "#575757",
         "tooltip": "Sets up the page body with font and colors"
     },
     {
@@ -843,13 +836,11 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
     "tooltip": "A modern pricing table card"
 },
 
-    // array stuff
-
      { "type": "arr_new_empty", "message0": "blank array", "output": "Array", "colour": "#FF6666", "extensions": ["shape_square"] },
         { "type": "arr_new_length", "message0": "blank array of length %1", "args0": [{ "type": "input_value", "name": "LEN", "check": "Number" }], "output": "Array", "colour": "#FF6666", "extensions": ["shape_square"] },
         { "type": "arr_parse", "message0": "parse %1 as array", "args0": [{ "type": "input_value", "name": "TXT", "check": "String" }], "output": "Array", "colour": "#FF6666", "extensions": ["shape_square"] },
         { "type": "arr_split", "message0": "split %1 by %2", "args0": [{ "type": "input_value", "name": "TXT", 	"check":"String"}, {	"type":"input_value","name":"DELIM","check":"String"}], 	"output":"Array","colour":"#FF6666","extensions":["shape_square"]},
-        
+
         { "type": "arr_builder", "message0": "array builder %1  %2 ", "args0": [ { "type": "input_dummy" }, { "type": "input_statement", "name": "DO" }], "output": "Array", "colour": "#FF6666", "extensions": ["shape_square"] },
         { "type": "arr_builder_add", "message0": "append %1 to builder", "args0": [{ "type": "input_value", "name": "ITEM" }], "previousStatement": null, "nextStatement": null, 	"colour": "#FF6666", "extensions": ["shape_square"] },
         { "type": "arr_builder_set", 	"message0":"set builder to %1","args0":[{"type":"input_value","name":"ARR","check":"Array"}],"previousStatement":null,"nextStatement":null,"colour":"#FF6666","extensions":["shape_square"]},
@@ -884,13 +875,9 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
         { "type": "obj_set", "message0": "set %1 in %2 to %3", "args0": [{ "type": "input_value", "name": "KEY", "check": "String" }, { "type": "input_value", "name": "OBJ", "check": "Object" }, { "type": "input_value", "name": "VAL" }], "previousStatement": null, "nextStatement": null, "colour": "#FFCC33", "extensions": ["shape_ticket"] },
         { "type": "obj_delete", "message0": "delete key %1 from %2", "args0": [{ "type": "input_value", "name": "KEY", "check": "String" }, { "type": "input_value", "name": "OBJ", "check": "Object" }], "previousStatement": null, "nextStatement": null, "colour": "#FFCC33", "extensions": ["shape_ticket"] },
         { "type": "obj_merge", "message0": "merge %1 into %2", "args0": [{ "type": "input_value", "name": "SRC", "check": "Object" }, { "type": "input_value", "name": "DEST", "check": "Object" }], "previousStatement": null, "nextStatement": null, "colour": "#FFCC33", "extensions": ["shape_ticket"] },
-// ill add more later haha
 
-        // ─── HTTP Request Blocks ───
-        // State
         { "type": "http_clear", "message0": "clear current data", "previousStatement": null, "nextStatement": null, "colour": "#2196F3" },
 
-        // Response reporters
         { "type": "http_response", "message0": "response", "output": "String", "colour": "#2196F3" },
         { "type": "http_error", "message0": "error", "output": "String", "colour": "#2196F3" },
         { "type": "http_status", "message0": "status", "output": "Number", "colour": "#2196F3" },
@@ -898,31 +885,25 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
         { "type": "http_response_headers", "message0": "response headers as json", "output": "String", "colour": "#2196F3" },
         { "type": "http_get_header", "message0": "%1 from response headers", "args0": [{ "type": "input_value", "name": "NAME" }], "output": "String", "colour": "#2196F3" },
 
-        // Response booleans
         { "type": "http_responded", "message0": "site responded?", "output": "Boolean", "colour": "#2196F3" },
         { "type": "http_failed", "message0": "request failed?", "output": "Boolean", "colour": "#2196F3" },
         { "type": "http_succeeded", "message0": "request succeeded?", "output": "Boolean", "colour": "#2196F3" },
 
-        // Event hat blocks
         { "type": "http_on_response", "message0": "when a site responds %1 %2", "args0": [{ "type": "input_dummy" }, { "type": "input_statement", "name": "DO" }], "previousStatement": null, "nextStatement": null, "colour": "#2196F3" },
         { "type": "http_on_error", "message0": "when a request fails %1 %2", "args0": [{ "type": "input_dummy" }, { "type": "input_statement", "name": "DO" }], "previousStatement": null, "nextStatement": null, "colour": "#2196F3" },
 
-        // Request configuration
-        { "type": "http_set_content_type", "message0": "set request content type to %1", "args0": [{ "type": "field_dropdown", "name": "TYPE", "options": [["text/plain", "text/plain"], ["application/json", "application/json"], ["application/x-www-form-urlencoded", "application/x-www-form-urlencoded"], ["multipart/form-data", "multipart/form-data"]] }], "previousStatement": null, "nextStatement": null, "colour": "#2196F3" },
+        { "type": "http_set_content_type", "message0": "set request content type to %1", "args0": [{ "type": "field_dropdown", "name": "TYPE", "options": [["text/plain", "text/plain"], ["application/json", "application/json"], ["application/input-www-form-urlencoded", "application/input-www-form-urlencoded"], ["multipart/form-data", "multipart/form-data"]] }], "previousStatement": null, "nextStatement": null, "colour": "#2196F3" },
         { "type": "http_set_method", "message0": "set request method to %1", "args0": [{ "type": "field_dropdown", "name": "METHOD", "options": [["GET", "GET"], ["POST", "POST"], ["PUT", "PUT"], ["PATCH", "PATCH"], ["DELETE", "DELETE"], ["HEAD", "HEAD"], ["OPTIONS", "OPTIONS"]] }], "previousStatement": null, "nextStatement": null, "colour": "#2196F3" },
         { "type": "http_set_header", "message0": "in request headers set %1 to %2", "args0": [{ "type": "input_value", "name": "KEY" }, { "type": "input_value", "name": "VAL" }], "previousStatement": null, "nextStatement": null, "colour": "#2196F3" },
         { "type": "http_set_headers_json", "message0": "set request headers to json %1", "args0": [{ "type": "input_value", "name": "JSON" }], "previousStatement": null, "nextStatement": null, "colour": "#2196F3" },
         { "type": "http_set_body", "message0": "set request body to %1", "args0": [{ "type": "input_value", "name": "BODY" }], "previousStatement": null, "nextStatement": null, "colour": "#2196F3" },
 
-        // Multipart form
         { "type": "http_set_body_form", "message0": "set request body to multipart form", "previousStatement": null, "nextStatement": null, "colour": "#2196F3" },
         { "type": "http_form_get", "message0": "%1 in multipart form", "args0": [{ "type": "input_value", "name": "NAME" }], "output": "String", "colour": "#2196F3" },
         { "type": "http_form_set", "message0": "set %1 to %2 in multipart form", "args0": [{ "type": "input_value", "name": "NAME" }, { "type": "input_value", "name": "VAL" }], "previousStatement": null, "nextStatement": null, "colour": "#2196F3" },
         { "type": "http_form_delete", "message0": "delete %1 from multipart form", "args0": [{ "type": "input_value", "name": "NAME" }], "previousStatement": null, "nextStatement": null, "colour": "#2196F3" },
 
-        // Send
         { "type": "http_send", "message0": "send request to %1", "args0": [{ "type": "input_value", "name": "URL" }], "previousStatement": null, "nextStatement": null, "colour": "#2196F3" },
-
 
         { "type": "text_trim", "message0": "trim %1", "args0": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "output": "String", "colour": "#59C059" },
         { "type": "text_replace", "message0": "replace %1 with %2 in %3", "args0": [{ "type": "input_value", "name": "SEARCH", "check": "String" }, { "type": "input_value", "name": "REPL", "check": "String" }, { "type": "input_value", "name": "TEXT", "check": "String" }], "output": "String", "colour": "#59C059" },
@@ -931,12 +912,10 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
         { "type": "is_email", "message0": "is %1 an email?", "args0": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "output": "Boolean", "colour": "#59C059" },
 
         { "type": "style_gradient", "message0": "background gradient from %1 to %2 direction %3", "args0": [ { "type": "input_value", "name": "C1", "check": "String" }, { "type": "input_value", "name": "C2", "check": "String" }, { "type": "field_dropdown", "name": "DIR", "options": [["to right","to right"],["to bottom","to bottom"],["to top","to top"],["to left","to left"]] } ], "output": "String", "colour": "#9966FF", "tooltip": "CSS gradient value" },
-        { "type": "style_box_shadow", "message0": "box-shadow x %1 y %2 blur %3 spread %4 color %5 inset %6", "args0": [ { "type": "input_value", "name": "X", "check": "String" }, { "type": "input_value", "name": "Y", "check": "String" }, { "type": "input_value", "name": "B", "check": "String" }, { "type": "input_value", "name": "S", "check": "String" }, { "type": "input_value", "name": "C", "check": "String" }, { "type": "field_checkbox", "name": "IN", "checked": false } ], "output": "String", "colour": "#9966FF", "tooltip": "CSS box-shadow value" },
+        { "type": "style_box_shadow", "message0": "box-shadow input %1 output %2 blur %3 spread %4 color %5 inset %6", "args0": [ { "type": "input_value", "name": "X", "check": "String" }, { "type": "input_value", "name": "Y", "check": "String" }, { "type": "input_value", "name": "B", "check": "String" }, { "type": "input_value", "name": "S", "check": "String" }, { "type": "input_value", "name": "C", "check": "String" }, { "type": "field_checkbox", "name": "IN", "checked": false } ], "output": "String", "colour": "#9966FF", "tooltip": "CSS box-shadow value" },
         { "type": "style_border_radius", "message0": "border-radius %1", "args0": [ { "type": "input_value", "name": "R", "check": "String" } ], "output": "String", "colour": "#9966FF", "tooltip": "CSS border-radius value (e.g., 8px or 50%)" },
-        { "type": "style_spacing_shorthand", "message0": "spacing m/p %1 %2 %3 %4", "args0": [ { "type": "field_dropdown", "name": "TYPE", "options": [["margin","margin"],["padding","padding"]] }, { "type": "input_value", "name": "A", "check": "String" }, { "type": "input_value", "name": "B", "check": "String" }, { "type": "input_value", "name": "C", "check": "String" } ], "previousStatement": "CSS_PROP", "nextStatement": "CSS_PROP", "colour": "#9966FF", "tooltip": "Adds shorthand margin/padding rules (A B C optional)" },
+        { "type": "style_spacing_shorthand", "message0": "spacing largest/p %1 %2 %3 %4", "args0": [ { "type": "field_dropdown", "name": "TYPE", "options": [["margin","margin"],["padding","padding"]] }, { "type": "input_value", "name": "A", "check": "String" }, { "type": "input_value", "name": "B", "check": "String" }, { "type": "input_value", "name": "C", "check": "String" } ], "previousStatement": "CSS_PROP", "nextStatement": "CSS_PROP", "colour": "#9966FF", "tooltip": "Adds shorthand margin/padding rules (A B C optional)" },
         { "type": "style_font_size", "message0": "font-size %1 unit %2", "args0": [ { "type": "input_value", "name": "SIZE", "check": "Number" }, { "type": "field_dropdown", "name": "UNIT", "options": [["px","px"],["em","em"],["rem","rem"],["%","%"]] } ], "output": "String", "colour": "#9966FF", "tooltip": "Produces a font-size value" },
-
-    // ─── Svelte Blocks ───
 
     { "type": "svelte_component", "message0": "Svelte Component %1 %2", "args0": [{ "type": "input_dummy" }, { "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#FF3E00", "tooltip": "A Svelte component wrapper" },
     { "type": "svelte_script", "message0": "<script> %1 %2", "args0": [{ "type": "input_dummy" }, { "type": "input_statement", "name": "CODE" }], "previousStatement": null, "nextStatement": null, "colour": "#FF3E00", "tooltip": "Svelte script block" },
@@ -970,7 +949,6 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
 
     ]);
 
-    // ─── Switch/Case mutator mixin (Blockly v10+ API) ───
     var CONTROLS_SWITCH_MUTATOR_MIXIN = {
         caseCount_: 1,
         defaultCount_: 0,
@@ -998,7 +976,7 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
             var containerBlock = workspace.newBlock('controls_switch_mutatorcontainer');
             containerBlock.initSvg();
             var connection = containerBlock.getInput('STACK').connection;
-            for (var i = 0; i < this.caseCount_; i++) {
+            for (var idx = 0; idx < this.caseCount_; idx++) {
                 var caseBlock = workspace.newBlock('controls_switch_case_mutator');
                 caseBlock.initSvg();
                 connection.connect(caseBlock.previousConnection);
@@ -1032,11 +1010,10 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
             this.defaultCount_ = hasDefault ? 1 : 0;
             this.updateShape_();
 
-            // Reconnect child blocks
-            for (var i = 0; i < caseConnections.length; i++) {
-                var inputConn = this.getInput('CASE' + i);
-                if (inputConn && caseConnections[i]) {
-                    inputConn.connection.connect(caseConnections[i]);
+            for (var idx = 0; idx < caseConnections.length; idx++) {
+                var inputConn = this.getInput('CASE' + idx);
+                if (inputConn && caseConnections[idx]) {
+                    inputConn.connection.connect(caseConnections[idx]);
                 }
             }
             if (defaultConnection) {
@@ -1044,9 +1021,8 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
                 if (defInput) defInput.connection.connect(defaultConnection);
             }
 
-            // Auto-fill empty CASE slots with a controls_switch_case block
-            for (var j = 0; j < this.caseCount_; j++) {
-                var caseInput = this.getInput('CASE' + j);
+            for (var secondary = 0; secondary < this.caseCount_; secondary++) {
+                var caseInput = this.getInput('CASE' + secondary);
                 if (caseInput && !caseInput.connection.targetConnection) {
                     var newCase = this.workspace.newBlock('controls_switch_case');
                     newCase.initSvg();
@@ -1054,7 +1030,7 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
                     caseInput.connection.connect(newCase.previousConnection);
                 }
             }
-            // Auto-fill empty DEFAULT slot with a controls_switch_default block
+
             if (this.defaultCount_) {
                 var defSlot = this.getInput('DEFAULT');
                 if (defSlot && !defSlot.connection.targetConnection) {
@@ -1067,12 +1043,12 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
         },
         saveConnections: function(containerBlock) {
             var clauseBlock = containerBlock.getInputTargetBlock('STACK');
-            var i = 0;
+            var idx = 0;
             while (clauseBlock) {
                 if (clauseBlock.type === 'controls_switch_case_mutator') {
-                    var input = this.getInput('CASE' + i);
+                    var input = this.getInput('CASE' + idx);
                     clauseBlock.statementConnection_ = input && input.connection.targetConnection;
-                    i++;
+                    idx++;
                 } else if (clauseBlock.type === 'controls_switch_default_mutator') {
                     var defaultInput = this.getInput('DEFAULT');
                     clauseBlock.statementConnection_ = defaultInput && defaultInput.connection.targetConnection;
@@ -1081,19 +1057,19 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
             }
         },
         updateShape_: function() {
-            var i = 0;
-            while (this.getInput('CASE' + i)) {
-                this.removeInput('CASE' + i);
-                i++;
+            var idx = 0;
+            while (this.getInput('CASE' + idx)) {
+                this.removeInput('CASE' + idx);
+                idx++;
             }
             if (this.getInput('DEFAULT')) {
                 this.removeInput('DEFAULT');
             }
 
-            for (i = 0; i < this.caseCount_; i++) {
-                var input = this.appendStatementInput('CASE' + i)
+            for (idx = 0; idx < this.caseCount_; idx++) {
+                var input = this.appendStatementInput('CASE' + idx)
                     .setCheck('SwitchCase');
-                if (i === 0) input.appendField('cases');
+                if (idx === 0) input.appendField('cases');
             }
             if (this.defaultCount_) {
                 this.appendStatementInput('DEFAULT')
@@ -1113,7 +1089,6 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
         ['controls_switch_case_mutator', 'controls_switch_default_mutator']
     );
 
-    // Define switch block with mutator via jsonInit
     Blockly.Blocks['controls_switch'] = {
         init: function() {
             this.jsonInit({
