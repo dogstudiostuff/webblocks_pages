@@ -1003,7 +1003,9 @@ function init() {
         componentStyles: {
             workspaceBackgroundColour: '#1e1e2e',
             toolboxBackgroundColour: '#333',
+            toolboxForegroundColour: '#fff',
             flyoutBackgroundColour: '#252526',
+            flyoutForegroundColour: '#fff',
             flyoutOpacity: 0.95,
             scrollbarColour: '#555'
         },
@@ -1043,7 +1045,9 @@ function init() {
         el.textContent =
             '.webblocks-renderer .blocklyText { fill: ' + textColor + ' !important; }' +
             '.webblocks-renderer .blocklyEditableField > text, .webblocks-renderer .blocklyNonEditableField > text { fill: ' + (isLight ? '#333' : '#575E75') + ' !important; }' +
-            '.webblocks-renderer .blocklyDropdownText { fill: #fff !important; }';
+            '.webblocks-renderer .blocklyDropdownText { fill: #fff !important; }' +
+            '.blocklyTreeLabel { color: ' + (isLight ? '#333' : '#fff') + ' !important; }' +
+            '.blocklyToolboxSelected .blocklyTreeLabel { color: ' + (isLight ? '#000' : '#fff') + ' !important; }';
 
         if (workspace) {
             workspace.setTheme(isLight ? lightBlocklyTheme : darkBlocklyTheme);
