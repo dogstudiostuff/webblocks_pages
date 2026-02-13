@@ -25,6 +25,98 @@ function loadSettings() {
         if (saved) Object.assign(settings, JSON.parse(saved));
     } catch(e) {}
 }
+// Override Blockly.prompt because the default uses window.prompt which is
+// not available/desired in Electron. This creates a small in-page modal
+// prompt and calls the Blockly callback with the entered value (or null).
+function _inlinePrompt(message, defaultValue, callback) {
+    try {
+        var overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.inset = '0';
+        overlay.style.background = 'rgba(0,0,0,0.45)';
+        overlay.style.display = 'flex';
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+        overlay.style.zIndex = 200000;
+
+        var box = document.createElement('div');
+        box.style.background = 'var(--dialog-bg, #111)';
+        box.style.padding = '14px';
+        box.style.border = '1px solid rgba(255,255,255,0.04)';
+        box.style.borderRadius = '6px';
+        box.style.minWidth = '320px';
+        box.style.boxShadow = '0 8px 30px rgba(0,0,0,0.6)';
+        box.style.color = 'var(--text-color, #fff)';
+
+        var msg = document.createElement('div');
+        msg.style.marginBottom = '8px';
+        msg.textContent = message || '';
+
+        var input = document.createElement('input');
+        input.type = 'text';
+        input.value = (typeof defaultValue === 'string') ? defaultValue : '';
+        input.style.width = '100%';
+        input.style.padding = '8px';
+        input.style.marginBottom = '8px';
+        input.style.borderRadius = '4px';
+        input.style.border = '1px solid rgba(255,255,255,0.06)';
+        input.style.background = 'rgba(0,0,0,0.12)';
+        input.style.color = 'inherit';
+
+        var btnRow = document.createElement('div');
+        btnRow.style.display = 'flex';
+        btnRow.style.justifyContent = 'flex-end';
+        btnRow.style.gap = '8px';
+
+        var btnCancel = document.createElement('button');
+        btnCancel.textContent = 'Cancel';
+        btnCancel.className = 'toolbar-btn';
+        btnCancel.onclick = function() {
+            document.body.removeChild(overlay);
+            try { callback(null); } catch (e) {}
+        };
+
+        var btnOk = document.createElement('button');
+        btnOk.textContent = 'OK';
+        btnOk.className = 'toolbar-btn primary';
+        btnOk.onclick = function() {
+            var val = input.value;
+            document.body.removeChild(overlay);
+            try { callback(String(val)); } catch (e) {}
+        };
+
+        btnRow.appendChild(btnCancel);
+        btnRow.appendChild(btnOk);
+
+        box.appendChild(msg);
+        box.appendChild(input);
+        box.appendChild(btnRow);
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+
+        // autofocus and handle Enter/Escape
+        setTimeout(function() { input.focus(); input.select(); }, 10);
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') { btnOk.click(); }
+            else if (e.key === 'Escape') { btnCancel.click(); }
+        });
+    } catch (err) {
+        // fallback to callback with null on error
+        try { callback(null); } catch (e) {}
+    }
+}
+
+if (window.Blockly) {
+    Blockly.prompt = _inlinePrompt;
+}
+// If Blockly exposes a dialog API, register our prompt implementation there too
+try {
+    if (window.Blockly && Blockly.dialog && typeof Blockly.dialog.setPrompt === 'function') {
+        Blockly.dialog.setPrompt(function(message, defaultValue, callback) {
+            return Blockly.prompt(message, defaultValue, callback);
+        });
+    }
+} catch (e) { /* ignore if not present */ }
 function saveSettings() {
     try { localStorage.setItem('pooide_settings', JSON.stringify(settings)); } catch(e) {}
 }
@@ -796,6 +888,8 @@ function init() {
                 tb.setSelectedItem(items[0]);
             }
         }
+
+        // debugCreateVariable previously used for testing; removed.
     }, 100);
 
     let renderTimeout;
@@ -1176,6 +1270,8 @@ function init() {
             var sel = document.getElementById('setTheme'); if (sel) sel.value = settings.theme;
         };
     }
+
+    
 
     applySettings();
     applyTheme();
