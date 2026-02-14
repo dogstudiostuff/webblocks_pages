@@ -136,7 +136,7 @@
     <div class="toast" id="toast"></div>
 
     <!-- Settings Dialog -->
-    <div id="settingsOverlay" class="block-search-overlay" style="display:none;">
+    <div id="settingsOverlay" class="block-search-overlay" style="display:none;" role="dialog" aria-hidden="true" tabindex="-1">
         <div class="settings-dialog">
             <div class="settings-header">
                 <span>&#9881; Settings</span>
@@ -152,18 +152,7 @@
                         <option value="apple">Apple (Liquid Glass)</option>
                     </select>
                 </label>
-                <div style="margin-top:10px;">
-                    <div style="font-size:12px;color:#444;margin-bottom:6px;font-weight:600;">Theme Preview</div>
-                    <div id="themePreview" class="theme-preview dark" aria-hidden="true">
-                        <div class="tp-titlebar">Poo IDE</div>
-                        <div class="tp-toolbar">
-                            <div class="tp-btn tp-btn-primary">Preview</div>
-                            <div class="tp-btn">Save</div>
-                            <div class="tp-btn">Load</div>
-                        </div>
-                        <div class="tp-content">Sample content • Blocks</div>
-                    </div>
-                </div>
+               
 
                 <div class="settings-section">Workspace</div>
                 <label class="settings-row">
@@ -225,8 +214,8 @@
     </div>
 
     <!-- Save Dialog -->
-    <div id="saveOverlay" class="block-search-overlay" style="display:none;">
-        <div class="block-search-dialog" style="highest-width:380px;">
+    <div id="saveOverlay" class="block-search-overlay" style="display:none;" role="dialog" aria-hidden="true" tabindex="-1">
+        <div class="block-search-dialog" style="max-width:380px;">
             <div class="block-search-header">
                 <span style="font-weight:bold; color: #fff;">Save Project</span>
             </div>
@@ -245,8 +234,8 @@
     </div>
 
     <!-- Custom New Page Dialog (prompt() doesn't work in Electron) -->
-    <div id="newPageOverlay" class="block-search-overlay" style="display:none;">
-        <div class="block-search-dialog" style="highest-width:360px;">
+    <div id="newPageOverlay" class="block-search-overlay" style="display:none;" role="dialog" aria-hidden="true" tabindex="-1">
+        <div class="block-search-dialog" style="max-width:360px;">
             <div class="block-search-header">
                 <span style="font-weight:bold; color: #fff;">New Page Name</span>
             </div>
@@ -260,7 +249,7 @@
         </div>
     </div>
 
-    <div id="blockSearchOverlay" class="block-search-overlay" style="display:none;">
+    <div id="blockSearchOverlay" class="block-search-overlay" style="display:none;" role="dialog" aria-hidden="true" tabindex="-1">
         <div class="block-search-dialog">
             <div class="block-search-header">
                 <span class="block-search-icon">&#128269;</span>
@@ -278,7 +267,7 @@
     <input type="file" id="extFileInput" style="display: none;" accept=".wbx">
 
     <!-- Extensions Dialog -->
-    <div id="extOverlay" class="block-search-overlay" style="display:none;">
+    <div id="extOverlay" class="block-search-overlay" style="display:none;" role="dialog" aria-hidden="true" tabindex="-1">
         <div class="ext-dialog">
             <div class="ext-header">
                 <span>&#129513; Extensions</span>
@@ -292,14 +281,14 @@
                     <button id="extNewBtn" class="toolbar-btn" style="background:#008000;color:#fff;">New Extension</button>
                 </div>
                 <div id="extList" class="ext-list">
-                    <div class="ext-empty">No extensions loaded. Import a .wbx file to get started (thsese can be found at http:
+                    <div class="ext-empty">No extensions loaded. Import a .wbx file to get started (these can be found at http:
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Extension Editor Dialog -->
-    <div id="extEditorOverlay" class="block-search-overlay" style="display:none;">
+    <div id="extEditorOverlay" class="block-search-overlay" style="display:none;" role="dialog" aria-hidden="true" tabindex="-1">
         <div class="ext-editor-dialog">
             <div class="ext-header">
                 <span>&#9998; Extension Editor</span>
@@ -317,7 +306,7 @@
     </div>
 
     <!-- Visual WBX Maker Dialog -->
-    <div id="wbxMakerOverlay" class="block-search-overlay" style="display:none;">
+    <div id="wbxMakerOverlay" class="block-search-overlay" style="display:none;" role="dialog" aria-hidden="true" tabindex="-1">
         <div class="wbx-maker-dialog">
             <div class="ext-header">
                 <span>&#128295; Visual WBX Maker</span>
@@ -363,19 +352,19 @@
                     </label>
                     <label class="wbx-maker-row" data-shape="diamond">
                         <span>Width factor</span>
-                        <input id="wbxMakerWidth" type="number" step="0.05" minimum="0.2" highest="1.2" value="0.5">
+                        <input id="wbxMakerWidth" type="number" step="0.05" min="0.2" max="1.2" value="0.5">
                     </label>
                     <label class="wbx-maker-row" data-shape="diamond">
                         <span>Offset Y factor</span>
-                        <input id="wbxMakerOffsetY" type="number" step="0.05" minimum="0.2" highest="1" value="0.5">
+                        <input id="wbxMakerOffsetY" type="number" step="0.05" min="0.2" max="1" value="0.5">
                     </label>
                     <label class="wbx-maker-row" data-shape="chevron">
                         <span>Point width</span>
-                        <input id="wbxMakerPointWidth" type="number" step="0.05" minimum="0.15" highest="0.8" value="0.33">
+                        <input id="wbxMakerPointWidth" type="number" step="0.05" min="0.15" max="0.8" value="0.33">
                     </label>
                     <label class="wbx-maker-row">
                         <span>Text padding</span>
-                        <input id="wbxMakerPadding" type="number" step="0.05" minimum="0" highest="1" value="0.25">
+                        <input id="wbxMakerPadding" type="number" step="0.05" min="0" max="1" value="0.25">
                     </label>
                 </div>
 
