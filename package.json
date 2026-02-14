@@ -6,6 +6,8 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron . --enable-logging",
+    "serve": "npx http-server . -p 8080 -c-1",
+    "serve:reload": "npx live-server --port=8080 --watch=. --quiet",
     "build": "electron-builder --win",
     "build:portable": "electron-builder --win portable",
     "build:installer": "electron-builder --win nsis"

@@ -19,6 +19,24 @@ if (!Blockly.Extensions.isRegistered('shape_ticket')) {
     });
 }
 
+// Rainbow block extension — applies a hue-rotate animation to the rendered SVG path
+if (!Blockly.Extensions.isRegistered('rainbow')) {
+    Blockly.Extensions.register('rainbow', function() {
+        var block = this;
+        // Try to add class after the block has an SVG root; retry once if not present yet.
+        function attach() {
+            var root = (block.getSvgRoot && block.getSvgRoot()) || block.svgGroup;
+            if (root) {
+                root.classList.add('wb-rainbow');
+            } else {
+                // not rendered yet — try again shortly
+                setTimeout(attach, 10);
+            }
+        }
+        attach();
+    });
+}
+
 if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
     WEBBLOCKS_SHAPES.register('media', function(c) {
         var cr = c.CORNER_RADIUS;
@@ -187,6 +205,7 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
         { "type": "logic_bool", "message0": "%1", "args0": [{ "type": "field_dropdown", "name": "BOOL", "options": [["true","true"],["false","false"]] }], "output": "Boolean", "colour": "#59C059" },
 
         { "type": "evil_block", "message0": "evil block", "previousStatement": null, "nextStatement": null, "colour": "#FF0000" },
+        { "type": "gay_block", "message0": "gay block", "previousStatement": null, "nextStatement": null, "colour": "#FF4B7B", "extensions": ["rainbow"] },
         { "type": "hemmy_poop", "message0": "hemmy poop", "previousStatement": null, "nextStatement": null, "colour": "#c97303" },
 
          {
@@ -270,13 +289,13 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
         "colour": "#4C97FF",
         "tooltip": "Wraps content in a div with a single inline style"
     },
-        { "type": "md_block", "message0": "markdown", "message1": "%1", "args1": [{ "type": "field_multilinetext", "name": "MD", "text": "# Hello\length**Bold**" }], "previousStatement": null, "nextStatement": null, "colour": "#333333" },
-        { "type": "md_code_inline", "message0": "code", "message1": "` %1 `", "args1": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#333333", "tooltip": "Inline Code" },
-        { "type": "md_code_block", "message0": "code block", "message1": "%1", "args1": [{ "type": "field_multilinetext", "name": "CODE", "text": "console.log('Hello');" }], "previousStatement": null, "nextStatement": null, "colour": "#333333", "tooltip": "Code Block" },
-        { "type": "md_bold", "message0": "bold text", "message1": "** %1 **", "args1": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#333333", "tooltip": "Bold Text" },
-        { "type": "md_italic", "message0": "italic text", "message1": "* %1 *", "args1": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#333333", "tooltip": "Italic Text" },
-        { "type": "md_quote", "message0": "blockquote", "message1": "> %1", "args1": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#333333", "tooltip": "Blockquote" },
-        { "type": "md_divider", "message0": "---", "previousStatement": null, "nextStatement": null, "colour": "#333333", "tooltip": "Horizontal Rule" },
+        { "type": "md_block", "message0": "markdown", "message1": "%1", "args1": [{ "type": "field_multilinetext", "name": "MD", "text": "# Hello\length**Bold**" }], "previousStatement": null, "nextStatement": null, "colour": "#585858" },
+        { "type": "md_code_inline", "message0": "code", "message1": "` %1 `", "args1": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#585858", "tooltip": "Inline Code" },
+        { "type": "md_code_block", "message0": "code block", "message1": "%1", "args1": [{ "type": "field_multilinetext", "name": "CODE", "text": "console.log('Hello');" }], "previousStatement": null, "nextStatement": null, "colour": "#585858", "tooltip": "Code Block" },
+        { "type": "md_bold", "message0": "bold text", "message1": "** %1 **", "args1": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#585858", "tooltip": "Bold Text" },
+        { "type": "md_italic", "message0": "italic text", "message1": "* %1 *", "args1": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#585858", "tooltip": "Italic Text" },
+        { "type": "md_quote", "message0": "blockquote", "message1": "> %1", "args1": [{ "type": "input_value", "name": "TEXT", "check": "String" }], "previousStatement": null, "nextStatement": null, "colour": "#585858", "tooltip": "Blockquote" },
+        { "type": "md_divider", "message0": "---", "previousStatement": null, "nextStatement": null, "colour": "#585858", "tooltip": "Horizontal Rule" },
 
         { "type": "html_html", "message0": "html tag", "message1": "lang %1", "args1": [{ "type": "input_value", "name": "LANG", "check": "String" }], "message2": "%1", "args2": [{ "type": "input_statement", "name": "CONTENT" }], "colour": "#4C97FF" },
         { "type": "html_head", "message0": "head %1", "args0": [{ "type": "input_statement", "name": "CONTENT" }], "previousStatement": null, "nextStatement": null, "colour": "#4C97FF" },
@@ -807,7 +826,7 @@ if (window.WEBBLOCKS_SHAPES && !window.WEBBLOCKS_OUTPUT_SHAPE_MEDIA) {
         ],
         "previousStatement": null,
         "nextStatement": null,
-        "colour": "#333333"
+        "colour": "#585858"
     },
     {
         "type": "ui_nav_link",

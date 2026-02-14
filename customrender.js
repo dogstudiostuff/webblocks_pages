@@ -40,7 +40,7 @@ var cr       = this.CORNER_RADIUS;
 
      function makePath(height, up, right) {
     var middleH      = height - 2 * cr;
-      var halfStraight = Math.highest(0, (middleH - tabH) / 2);
+      var halfStraight = Math.max(0, (middleH - tabH) / 2);
       var dy           = up ? -1 : 1;
       var cornerSweep  = (right === up) ? '0' : '1';
 
@@ -55,7 +55,7 @@ var dx           = right ? 1 : -1;
         p += arc('a', '0 0,1', tabR,
                     point(dx * tabR, dy * tabR));
 
-        var straightTab = Math.highest(0, tabH - 2 * tabR);
+        var straightTab = Math.max(0, tabH - 2 * tabR);
         if (straightTab > 0) p += lineV('v', dy * straightTab);
 
         p += arc('a', '0 0,1', tabR,

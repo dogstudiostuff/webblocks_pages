@@ -791,7 +791,9 @@ const toolbox = {
             colour: "#ff0000",
             contents: [
                 { kind: "block", type: "evil_block" },
-                { kind: "block", type: "hemmy_poop" }
+                { kind: "block", type: "hemmy_poop" },
+                { kind: "block", type: "gay_block" },
+
             ]
         }
     ]
@@ -869,6 +871,7 @@ function init() {
     var injectOptions = {
         toolbox: toolbox,
         renderer: 'webblocks',
+        pathToMedia: 'node_modules/blockly/media/',
         grid: { spacing: 20, length: 3, colour: '#ccc', snap: true },
         trashcan: true,
         zoom: { controls: true, wheel: true, startScale: 1.0, maxScale: 3, minScale: 0.3, scaleSpeed: 1.2 }
@@ -1131,7 +1134,6 @@ function init() {
         document.documentElement.classList.toggle('dark-theme', !isLight && !isApple);
         document.documentElement.classList.toggle('apple-theme', isApple);
 
-        var textColor = isApple ? '#07203a' : (isLight ? '#000' : '#fff');
         var styleId = 'webblocks-theme-style';
         var el = document.getElementById(styleId);
         if (!el) {
@@ -1140,11 +1142,11 @@ function init() {
             document.head.appendChild(el);
         }
         el.textContent =
-            '.webblocks-renderer .blocklyText { fill: ' + textColor + ' !important; }' +
-            '.webblocks-renderer .blocklyEditableField > text, .webblocks-renderer .blocklyNonEditableField > text { fill: ' + (isLight ? '#333' : '#575E75') + ' !important; }' +
-            '.webblocks-renderer .blocklyDropdownText { fill: #fff !important; }' +
-            '.blocklyTreeLabel { color: ' + (isLight ? '#333' : '#fff') + ' !important; }' +
-            '.blocklyToolboxSelected .blocklyTreeLabel { color: ' + (isLight ? '#000' : '#fff') + ' !important; }';
+            '.webblocks-renderer .blocklyText, .webblocks-renderer .blocklyNonEditableField > text { fill: var(--blockly-text-color) !important; }' +
+            '.webblocks-renderer .blocklyEditableField > text { fill: ' + (isLight ? '#333' : '#575E75') + ' !important; }' +
+            '.webblocks-renderer .blocklyDropdownText { fill: var(--blockly-text-color) !important; }' +
+            '.blocklyTreeLabel { color: var(--text-color) !important; }' +
+            '.blocklyToolboxSelected .blocklyTreeLabel { color: var(--panel-tab-active-color) !important; }';
 
         if (workspace) {
             // For apple use the light Blockly theme as a base
