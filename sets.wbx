@@ -91,10 +91,12 @@ blockdef{
       "type"      : "set_to_array"
     },
     {
-      "args0"     : [{ "type": "input_statement", "name": "DO" }, { "type": "input_dummy" }],
+      "args1"     : [{ "type": "input_statement", "name": "DO" }],
       "colour"    : "#2E9E8E",
       "extensions": ["shape_chevron"],
-      "message0"  : "set builder %1 current set %2",
+      "message0"  : "set builder",
+      "message1"  : "%1",
+      "message2"  : "current set",
       "output"    : "Set",
       "type"      : "set_builder"
     },
