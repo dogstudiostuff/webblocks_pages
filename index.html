@@ -1,399 +1,408 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' blob: data: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval'"> 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Poo IDE</title>
-    <link rel="stylesheet" href="styles.css">
 
-    <script src="./node_modules/blockly/blockly_compressed.js"></script>
-    <script src="./node_modules/blockly/blocks_compressed.js"></script>
-    <script src="./node_modules/blockly/javascript_compressed.js"></script>
-    <script src="./node_modules/blockly/msg/en.js"></script>
-    <script src="./node_modules/jszip/dist/jszip.minimum.js"></script>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="Content-Security-Policy"
+            content="default-src 'self' blob: data: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Poo IDE</title>
+        <link rel="stylesheet" href="styles.css">
 
-    <script>
-
-        window.global = window;
-
-        function loadPlugin(src, registerCallback) {
-
-            window.exports = {};
-            window.module = { exports: window.exports };
-
-            window.require = function(name) {
-                if (name === 'blockly/core' || name === 'blockly') return window.Blockly;
-                return window.Blockly;
-            };
-
-            var script = document.createElement('script');
-            script.src = src;
-            script.onload = function() {
-
-                var exported = module.exports || window.exports;
-                registerCallback(exported);
-            };
-            script.onerror = function() {
-                console.error("Failed to load plugin:", src);
-            };
-            document.head.appendChild(script);
-        }
-    </script>
+        <script src="./node_modules/blockly/blockly_compressed.js"></script>
+        <script src="./node_modules/blockly/blocks_compressed.js"></script>
+        <script src="./node_modules/blockly/javascript_compressed.js"></script>
+        <script src="./node_modules/blockly/msg/en.js"></script>
+        <script src="./node_modules/jszip/dist/jszip.min.js"></script>
 
         <script>
+            window.global = window;
 
-        loadPlugin('./node_modules/@blockly/field-multilineinput/dist/index.js', function(pkg) {
-            var Field = pkg.FieldMultilineInput || pkg.default;
-            if (Field) {
-                Blockly.fieldRegistry.register('field_multilinetext', Field);
-                try {
-                    Blockly.fieldRegistry.register('field_multilineinput', Field);
-                } catch(e) {  }
-                console.log("✅ Registered field_multilinetext");
-            } else {
-                console.error("❌ Could not find Multiline class in package", pkg);
+            function loadPlugin(src, registerCallback) {
+                window.exports = {};
+                window.module = { exports: window.exports };
+                window.require = function (name) {
+                    if (name === 'blockly/core' || name === 'blockly') return window.Blockly;
+                    return window.Blockly;
+                };
+
+                var script = document.createElement('script');
+                script.src = src;
+                script.onload = function () {
+                    var exported = module.exports || window.exports;
+                    registerCallback(exported);
+                };
+                script.onerror = function () {
+                    console.error("Failed to load plugin:", src);
+                };
+                document.head.appendChild(script);
             }
-        });
+        </script>
 
-        loadPlugin('./node_modules/@blockly/field-colour/dist/index.js', function(pkg) {
-            var Field = pkg.FieldColour || pkg.default;
-            if (Field) {
-                Blockly.fieldRegistry.register('field_colour', Field);
-                console.log("✅ Registered field_colour");
-            } else {
-                console.error("❌ Could not find Colour class in package", pkg);
-            }
-        });
-
-        (function() {
-            class ToolboxBubbleCategory extends Blockly.ToolboxCategory {
-                createIconDom_() {
-                    const el = document.createElement('div');
-                    el.classList.add('categoryBubble');
-                    el.style.backgroundColor = this.colour_;
-                    return el;
+        <script>
+            loadPlugin('./node_modules/@blockly/field-multilineinput/dist/index.js', function (pkg) {
+                var Field = pkg.FieldMultilineInput || pkg.default;
+                if (Field) {
+                    Blockly.fieldRegistry.register('field_multilinetext', Field);
+                    try { Blockly.fieldRegistry.register('field_multilineinput', Field); } catch (e) { }
                 }
-            }
-            Blockly.registry.register(
-                Blockly.registry.Type.TOOLBOX_ITEM,
-                Blockly.ToolboxCategory.registrationName,
-                ToolboxBubbleCategory,
-                true
-            );
+            });
 
-            Blockly.VerticalFlyout.prototype.getFlyoutScale = function() { return 0.85; };
-        })();
+            loadPlugin('./node_modules/@blockly/field-colour/dist/index.js', function (pkg) {
+                var Field = pkg.FieldColour || pkg.default;
+                if (Field) Blockly.fieldRegistry.register('field_colour', Field);
+            });
 
-    </script>
+            (function () {
+                class ToolboxBubbleCategory extends Blockly.ToolboxCategory {
+                    createIconDom_() {
+                        const el = document.createElement('div');
+                        el.classList.add('categoryBubble');
+                        el.style.backgroundColor = this.colour_;
+                        return el;
+                    }
+                }
+                if (Blockly.registry) {
+                    Blockly.registry.register(
+                        Blockly.registry.Type.TOOLBOX_ITEM,
+                        Blockly.ToolboxCategory.registrationName,
+                        ToolboxBubbleCategory,
+                        true
+                    );
+                }
+                Blockly.VerticalFlyout.prototype.getFlyoutScale = function () { return 0.85; };
+            })();
+        </script>
+    </head>
 
-</head>
-<body>
-    <div class="app">
-        <div class="titlebar">
-            <div class="titlebar-brand">
-                <img src="pooide.svg" alt="Poo IDE" class="titlebar-logo">
-                <span class="titlebar-title">Poo IDE</span>
-            </div>
+    <body>
+        <div class="app">
+            <div class="titlebar">
+                <div class="titlebar-brand">
+                    <img src="pooide.svg" alt="Poo IDE" class="titlebar-logo">
+                    <span class="titlebar-title">Poo IDE</span>
+                </div>
                 <div class="titlebar-buttons">
-            <button class="toolbar-btn" id="btnSave">Save (.wbk)</button>
-            <button class="toolbar-btn" id="btnLoad">Load (.wbk)</button>
-                <button class="toolbar-btn" id="btnThemeToggle" title="Toggle Theme">Theme</button>
-            <button class="toolbar-btn" id="btnExport">Export HTML</button>
-            <button class="toolbar-btn" id="btnZip">Export All (.zip)</button>
-            <button class="toolbar-btn primary" id="btnPreview">&#9654; Preview</button>
-            <button class="toolbar-btn" id="btnExtensions" title="Extensions">Ext</button>
-    
-            <button class="toolbar-btn" id="btnSettings" title="Settings">&#9881;</button>
-        </div>
-        </div>
+                    <button class="toolbar-btn" id="btnSave">Save (.poo)</button>
+                    <button class="toolbar-btn" id="btnLoad">Load (.poo)</button>
+                    <button class="toolbar-btn" id="btnThemeToggle" title="Toggle Theme">Theme</button>
+                    <button class="toolbar-btn" id="btnExport">Export HTML</button>
+                    <button class="toolbar-btn" id="btnZip">Export All (.zip)</button>
+                    <button class="toolbar-btn primary" id="btnPreview">&#9654; Preview</button>
+                    <button class="toolbar-btn" id="btnExtensions" title="Extensions">Ext</button>
+                    <button class="toolbar-btn" id="btnSettings" title="Settings">&#9881;</button>
+                </div>
+            </div>
 
-        <div class="main-area">
-            <div class="panel panel-workspace" id="panelWorkspace">
-                <div class="panel-titlebar">
-                    <span class="panel-title">Workspace</span>
-                    <div class="panel-tabs">
-                        <button class="panel-tab active" id="tabBuild">Build</button>
-                        <button class="panel-tab" id="tabCode">Code</button>
+            <div class="main-area">
+                <div class="panel panel-workspace" id="panelWorkspace">
+                    <div class="panel-titlebar">
+                        <span class="panel-title">Workspace</span>
+                        <div class="panel-tabs">
+                            <button class="panel-tab active" id="tabBuild">Build</button>
+                            <button class="panel-tab" id="tabCode">Code</button>
+                        </div>
                     </div>
-                </div>
-               <div class="panel-content">
-    <div class="page-manager">
-        <div id="pageTabs" class="page-tabs">
-            </div>
-        <button id="btnAddPage" class="toolbar-btn" style="background: #008000; color: white; margin-left: 8px;">+ New Page</button>
-    </div>
-
-    <div id="blocklyArea"></div>
-    <div id="codeArea"></div>
-</div>
-                <div class="resize-handle"></div>
-            </div>
-
-        </div>
-    </div>
-
-    <div class="toast" id="toast"></div>
-
-    <!-- Settings Dialog -->
-    <div id="settingsOverlay" class="block-search-overlay" style="display:none;" role="dialog" aria-hidden="true" tabindex="-1">
-        <div class="settings-dialog">
-            <div class="settings-header">
-                <span>&#9881; Settings</span>
-                <button id="settingsClose" class="settings-close">&#10005;</button>
-            </div>
-            <div class="settings-body">
-                <div class="settings-section">Appearance</div>
-                <label class="settings-row">
-                    <span>Theme</span>
-                    <select id="setTheme">
-                        <option value="dark">Dark</option>
-                        <option value="light">Light</option>
-                        <option value="apple">Apple (Liquid Glass)</option>
-                    </select>
-                </label>
-               
-
-                <div class="settings-section">Workspace</div>
-                <label class="settings-row">
-                    <span>Grid snap</span>
-                    <input type="checkbox" id="setGridSnap" checked>
-                </label>
-                <label class="settings-row">
-                    <span>Grid spacing</span>
-                    <select id="setGridSpacing">
-                        <option value="10">10</option>
-                        <option value="20" selected>20</option>
-                        <option value="30">30</option>
-                        <option value="40">40</option>
-                    </select>
-                </label>
-                <label class="settings-row">
-                    <span>Show trashcan</span>
-                    <input type="checkbox" id="setTrashcan" checked>
-                </label>
-                <label class="settings-row">
-                    <span>Sounds</span>
-                    <input type="checkbox" id="setSounds" checked>
-                </label>
-
-                <div class="settings-section">Export</div>
-                <label class="settings-row">
-                    <span>Include watermark</span>
-                    <input type="checkbox" id="setWatermark" checked>
-                </label>
-                <label class="settings-row">
-                    <span>Minify HTML output</span>
-                    <input type="checkbox" id="setMinify">
-                </label>
-
-                <div class="settings-section">Editor</div>
-                <label class="settings-row">
-                    <span>Zoom speed</span>
-                    <select id="setZoomSpeed">
-                        <option value="1.05">Slow</option>
-                        <option value="1.2" selected>Normal</option>
-                        <option value="1.5">Fast</option>
-                    </select>
-                </label>
-                <label class="settings-row">
-                    <span>Code font size</span>
-                    <select id="setCodeFontSize">
-                        <option value="11px">Small</option>
-                        <option value="13px" selected>Medium</option>
-                        <option value="16px">Large</option>
-                        <option value="20px">X-Large</option>
-                    </select>
-                </label>
-                <label class="settings-row">
-                    <span>Auto-save reminder</span>
-                    <input type="checkbox" id="setAutoRemind">
-                </label>
-            </div>
-        </div>
-    </div>
-
-    <!-- Save Dialog -->
-    <div id="saveOverlay" class="block-search-overlay" style="display:none;" role="dialog" aria-hidden="true" tabindex="-1">
-        <div class="block-search-dialog" style="max-width:380px;">
-            <div class="block-search-header">
-                <span style="font-weight:bold; color: #fff;">Save Project</span>
-            </div>
-            <div style="padding:12px;display:flex;flex-direction:column;gap:8px;">
-                <button id="saveCurrent" class="toolbar-btn" style="width:100%;padding:8px;text-align:left;font-size:13px;">
-                     Save current page (<span id="saveCurrentName">index</span>.wbk)
-                </button>
-                <button id="saveAll" class="toolbar-btn" style="width:100%;padding:8px;text-align:left;font-size:13px;">
-                     Save entire project (all pages in one .wbk)
-                </button>
-            </div>
-            <div style="padding:0 12px 12px;display:flex;gap:8px;justify-content:flex-end;">
-                <button id="saveCancel" class="toolbar-btn" style="background:#555;">Cancel</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Custom New Page Dialog (prompt() doesn't work in Electron) -->
-    <div id="newPageOverlay" class="block-search-overlay" style="display:none;" role="dialog" aria-hidden="true" tabindex="-1">
-        <div class="block-search-dialog" style="max-width:360px;">
-            <div class="block-search-header">
-                <span style="font-weight:bold; color: #fff;">New Page Name</span>
-            </div>
-            <div style="padding:12px;">
-                <input type="text" id="newPageInput" style="width:100%;padding:8px;font-size:14px;border:1px solid #555;border-radius:4px;background:#1e1e1e;color:#fff;box-sizing:border-box;" placeholder="e.g. about" autocomplete="off" spellcheck="false">
-            </div>
-            <div style="padding:0 12px 12px;display:flex;gap:8px;justify-content:flex-end;">
-                <button id="newPageCancel" class="toolbar-btn" style="background:#555;">Cancel</button>
-                <button id="newPageOk" class="toolbar-btn" style="background:#008000;color:white;">Create</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="blockSearchOverlay" class="block-search-overlay" style="display:none;" role="dialog" aria-hidden="true" tabindex="-1">
-        <div class="block-search-dialog">
-            <div class="block-search-header">
-                <span class="block-search-icon">&#128269;</span>
-                <input type="text" id="blockSearchInput" class="block-search-input" placeholder="Search blocks... (Esc to close)" autocomplete="off" spellcheck="false">
-            </div>
-            <div id="blockSearchResults" class="block-search-results"></div>
-            <div class="block-search-footer">
-                <span><kbd>&#8593;</kbd><kbd>&#8595;</kbd> navigate</span>
-                <span><kbd>Enter</kbd> insert</span>
-                <span><kbd>Esc</kbd> close</span>
-            </div>
-        </div>
-    </div>
-    <input type="file" id="fileInput" style="display: none;" accept=".wbk ,.json">
-    <input type="file" id="extFileInput" style="display: none;" accept=".wbx">
-
-    <!-- Extensions Dialog -->
-    <div id="extOverlay" class="block-search-overlay" style="display:none;" role="dialog" aria-hidden="true" tabindex="-1">
-        <div class="ext-dialog">
-            <div class="ext-header">
-                <span>&#129513; Extensions</span>
-                <button id="extClose" class="settings-close">&#10005;</button>
-            </div>
-            <div class="ext-body">
-                <div class="ext-actions">
-                    <button id="extImportBtn" class="toolbar-btn" style="background:#3060a0;color:#fff;">Import .wbx</button>
-                    <button id="extReimportBtn" class="toolbar-btn" style="background:#8a6a2a;color:#fff;">Reimport .wbx</button>
-                    <button id="extMakerBtn" class="toolbar-btn" style="background:#6a2e8a;color:#fff;">WBX Maker</button>
-                    <button id="extNewBtn" class="toolbar-btn" style="background:#008000;color:#fff;">New Extension</button>
-                </div>
-                <div id="extList" class="ext-list">
-                    <div class="ext-empty">No extensions loaded. Import a .wbx file to get started (these can be found at http:
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Extension Editor Dialog -->
-    <div id="extEditorOverlay" class="block-search-overlay" style="display:none;" role="dialog" aria-hidden="true" tabindex="-1">
-        <div class="ext-editor-dialog">
-            <div class="ext-header">
-                <span>&#9998; Extension Editor</span>
-                <button id="extEditorClose" class="settings-close">&#10005;</button>
-            </div>
-            <div class="ext-editor-body">
-                <textarea id="extEditorCode" class="ext-editor-textarea" spellcheck="false" placeholder="settings{ author: &quot;Your Name&quot;; version: 1.0.0; name: &quot;My Extension&quot;; colour: &quot;#FF6600&quot;; }\n\nshapes{\n"></textarea>
-                <div class="ext-editor-actions">
-                    <button id="extEditorSave" class="toolbar-btn" style="background:#008000;color:#fff;">Load Extension</button>
-                    <button id="extEditorExport" class="toolbar-btn">Export .wbx</button>
-                    <button id="extEditorCancel" class="toolbar-btn" style="background:#555;color:#fff;">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Visual WBX Maker Dialog -->
-    <div id="wbxMakerOverlay" class="block-search-overlay" style="display:none;" role="dialog" aria-hidden="true" tabindex="-1">
-        <div class="wbx-maker-dialog">
-            <div class="ext-header">
-                <span>&#128295; Visual WBX Maker</span>
-                <button id="wbxMakerClose" class="settings-close">&#10005;</button>
-            </div>
-            <div class="wbx-maker-body">
-                <div class="wbx-maker-panel">
-                    <div class="wbx-maker-title">Extension</div>
-                    <label class="wbx-maker-row">
-                        <span>Name</span>
-                        <input id="wbxMakerName" type="text" value="My Extension" spellcheck="false">
-                    </label>
-                    <label class="wbx-maker-row">
-                        <span>Author</span>
-                        <input id="wbxMakerAuthor" type="text" value="" spellcheck="false">
-                    </label>
-                    <label class="wbx-maker-row">
-                        <span>Colour</span>
-                        <input id="wbxMakerColor" type="text" value="#FF6600" spellcheck="false">
-                    </label>
-
-                    <div class="wbx-maker-title">Block</div>
-                    <label class="wbx-maker-row">
-                        <span>Block type</span>
-                        <input id="wbxMakerBlockType" type="text" value="my_diamond_block" spellcheck="false">
-                    </label>
-                    <label class="wbx-maker-row">
-                        <span>Label</span>
-                        <input id="wbxMakerBlockLabel" type="text" value="Diamond" spellcheck="false">
-                    </label>
-
-                    <div class="wbx-maker-title">Shape</div>
-                    <label class="wbx-maker-row">
-                        <span>Shape type</span>
-                        <select id="wbxMakerShapeType">
-                            <option value="diamond" selected>Diamond</option>
-                            <option value="chevron">Chevron</option>
-                        </select>
-                    </label>
-                    <label class="wbx-maker-row">
-                        <span>Shape name</span>
-                        <input id="wbxMakerShapeName" type="text" value="diamond" spellcheck="false">
-                    </label>
-                    <label class="wbx-maker-row" data-shape="diamond">
-                        <span>Width factor</span>
-                        <input id="wbxMakerWidth" type="number" step="0.05" min="0.2" max="1.2" value="0.5">
-                    </label>
-                    <label class="wbx-maker-row" data-shape="diamond">
-                        <span>Offset Y factor</span>
-                        <input id="wbxMakerOffsetY" type="number" step="0.05" min="0.2" max="1" value="0.5">
-                    </label>
-                    <label class="wbx-maker-row" data-shape="chevron">
-                        <span>Point width</span>
-                        <input id="wbxMakerPointWidth" type="number" step="0.05" min="0.15" max="0.8" value="0.33">
-                    </label>
-                    <label class="wbx-maker-row">
-                        <span>Text padding</span>
-                        <input id="wbxMakerPadding" type="number" step="0.05" min="0" max="1" value="0.25">
-                    </label>
-                </div>
-
-                <div class="wbx-maker-panel">
-                    <div class="wbx-maker-title">Preview</div>
-                    <div class="wbx-maker-preview">
-                        <svg id="wbxMakerPreview" viewBox="0 0 220 90" width="100%" height="100%" aria-hidden="true">
-                            <polygon id="wbxMakerPreviewShape" points="" fill="#FF6600" stroke="#ffffff" stroke-width="2"></polygon>
-                            <text id="wbxMakerPreviewText" data="110" response="52" text-anchor="middle" font-size="18" fill="#ffffff" font-family="Segoe UI, Tahoma, sans-serif">Diamond</text>
-                        </svg>
+                    <div class="panel-content">
+                        <div class="page-manager">
+                            <div id="pageTabs" class="page-tabs"></div>
+                            <button id="btnAddPage" class="toolbar-btn"
+                                style="background: #008000; color: white; margin-left: 8px;">+ New Page</button>
+                            <button id="btnImportAssets" class="toolbar-btn"
+                                style="background: #3060a0; color: white;">Import Assets</button>
+                        </div>
+                        <div id="blocklyArea"></div>
+                        <div id="codeArea"></div>
+                        <div id="assetsArea"></div>
                     </div>
-                    <div class="wbx-maker-title">WBX Output</div>
-                    <textarea id="wbxMakerOutput" class="wbx-maker-output" spellcheck="false" readonly></textarea>
-                    <div class="wbx-maker-actions">
-                        <button id="wbxMakerDownload" class="toolbar-btn" style="background:#3060a0;color:#fff;">Download .wbx</button>
-                        <button id="wbxMakerCloseBottom" class="toolbar-btn" style="background:#555;color:#fff;">Close</button>
+                    <div class="resize-handle"></div>
+                </div>
+            </div>
+
+            <div class="toast" id="toast"></div>
+
+            <div id="settingsOverlay" class="block-search-overlay" style="display:none;" role="dialog"
+                aria-hidden="true" tabindex="-1">
+                <div class="settings-dialog">
+                    <div class="settings-header">
+                        <span>&#9881; Settings</span>
+                        <button id="settingsClose" class="settings-close">&#10005;</button>
+                    </div>
+                    <div class="settings-body">
+                        <div class="settings-section">Appearance</div>
+                        <label class="settings-row">
+                            <span>Theme</span>
+                            <select id="setTheme">
+                                <option value="dark">Dark</option>
+                                <option value="light">Light</option>
+                                <option value="apple">Apple (Liquid Glass)</option>
+                            </select>
+                        </label>
+
+                        <div class="settings-section">Workspace</div>
+                        <label class="settings-row">
+                            <span>Grid snap</span>
+                            <input type="checkbox" id="setGridSnap" checked>
+                        </label>
+                        <label class="settings-row">
+                            <span>Grid spacing</span>
+                            <select id="setGridSpacing">
+                                <option value="10">10</option>
+                                <option value="20" selected>20</option>
+                                <option value="30">30</option>
+                                <option value="40">40</option>
+                            </select>
+                        </label>
+                        <label class="settings-row">
+                            <span>Show trashcan</span>
+                            <input type="checkbox" id="setTrashcan" checked>
+                        </label>
+                        <label class="settings-row">
+                            <span>Sounds</span>
+                            <input type="checkbox" id="setSounds" checked>
+                        </label>
+
+                        <div class="settings-section">Export</div>
+                        <label class="settings-row">
+                            <span>Include watermark</span>
+                            <input type="checkbox" id="setWatermark" checked>
+                        </label>
+                        <label class="settings-row">
+                            <span>Minify HTML output</span>
+                            <input type="checkbox" id="setMinify">
+                        </label>
+
+                        <div class="settings-section">Editor</div>
+                        <label class="settings-row">
+                            <span>Zoom speed</span>
+                            <select id="setZoomSpeed">
+                                <option value="1.05">Slow</option>
+                                <option value="1.2" selected>Normal</option>
+                                <option value="1.5">Fast</option>
+                            </select>
+                        </label>
+                        <label class="settings-row">
+                            <span>Code font size</span>
+                            <select id="setCodeFontSize">
+                                <option value="11px">Small</option>
+                                <option value="13px" selected>Medium</option>
+                                <option value="16px">Large</option>
+                                <option value="20px">X-Large</option>
+                            </select>
+                        </label>
+                        <label class="settings-row">
+                            <span>Auto-save reminder</span>
+                            <input type="checkbox" id="setAutoRemind">
+                        </label>
                     </div>
                 </div>
             </div>
+
+            <div id="saveOverlay" class="block-search-overlay" style="display:none;" role="dialog" aria-hidden="true"
+                tabindex="-1">
+                <div class="block-search-dialog" style="max-width:380px;">
+                    <div class="block-search-header">
+                        <span style="font-weight:bold; color: #fff;">Save Project</span>
+                    </div>
+                    <div style="padding:12px;display:flex;flex-direction:column;gap:8px;">
+                        <button id="saveCurrent" class="toolbar-btn"
+                            style="width:100%;padding:8px;text-align:left;font-size:13px;">
+                            Save current page (<span id="saveCurrentName">index</span>.poo)
+                        </button>
+                        <button id="saveAll" class="toolbar-btn"
+                            style="width:100%;padding:8px;text-align:left;font-size:13px;">
+                            Save entire project (all pages in one .poo)
+                        </button>
+                    </div>
+                    <div style="padding:0 12px 12px;display:flex;gap:8px;justify-content:flex-end;">
+                        <button id="saveCancel" class="toolbar-btn" style="background:#555;">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="newPageOverlay" class="block-search-overlay" style="display:none;" role="dialog" aria-hidden="true"
+                tabindex="-1">
+                <div class="block-search-dialog" style="max-width:360px;">
+                    <div class="block-search-header">
+                        <span style="font-weight:bold; color: #fff;">New Page Name</span>
+                    </div>
+                    <div style="padding:12px;">
+                        <input type="text" id="newPageInput"
+                            style="width:100%;padding:8px;font-size:14px;border:1px solid #555;border-radius:4px;background:#1e1e1e;color:#fff;box-sizing:border-box;"
+                            placeholder="e.g. about" autocomplete="off" spellcheck="false">
+                    </div>
+                    <div style="padding:0 12px 12px;display:flex;gap:8px;justify-content:flex-end;">
+                        <button id="newPageCancel" class="toolbar-btn" style="background:#555;">Cancel</button>
+                        <button id="newPageOk" class="toolbar-btn"
+                            style="background:#008000;color:white;">Create</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="blockSearchOverlay" class="block-search-overlay" style="display:none;" role="dialog"
+                aria-hidden="true" tabindex="-1">
+                <div class="block-search-dialog">
+                    <div class="block-search-header">
+                        <span class="block-search-icon">&#128269;</span>
+                        <input type="text" id="blockSearchInput" class="block-search-input"
+                            placeholder="Search blocks... (Esc to close)" autocomplete="off" spellcheck="false">
+                    </div>
+                    <div id="blockSearchResults" class="block-search-results"></div>
+                    <div class="block-search-footer">
+                        <span><kbd>&#8593;</kbd><kbd>&#8595;</kbd> navigate</span>
+                        <span><kbd>Enter</kbd> insert</span>
+                        <span><kbd>Esc</kbd> close</span>
+                    </div>
+                </div>
+            </div>
+
+            <input type="file" id="fileInput" style="display: none;" accept=".poo,.wbk,.json">
+            <input type="file" id="extFileInput" style="display: none;" accept=".poox,.wbx">
+            <input type="file" id="assetFileInput" style="display: none;" multiple>
+
+            <div id="extOverlay" class="block-search-overlay" style="display:none;" role="dialog" aria-hidden="true"
+                tabindex="-1">
+                <div class="ext-dialog">
+                    <div class="ext-header">
+                        <span>&#129513; Extensions</span>
+                        <button id="extClose" class="settings-close">&#10005;</button>
+                    </div>
+                    <div class="ext-body">
+                        <div class="ext-actions">
+                            <button id="extImportBtn" class="toolbar-btn" style="background:#3060a0;color:#fff;">Import
+                                .poox</button>
+                            <button id="extReimportBtn" class="toolbar-btn"
+                                style="background:#8a6a2a;color:#fff;">Reimport .poox</button>
+                            <button id="extMakerBtn" class="toolbar-btn" style="background:#6a2e8a;color:#fff;">WBX
+                                Maker</button>
+                            <button id="extNewBtn" class="toolbar-btn" style="background:#008000;color:#fff;">New
+                                Extension</button>
+                        </div>
+                        <div id="extList" class="ext-list">
+                            <div class="ext-empty">No extensions loaded. Import a .poox file to get started.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="extEditorOverlay" class="block-search-overlay" style="display:none;" role="dialog"
+                    aria-hidden="true" tabindex="-1">
+                    <div class="ext-editor-dialog">
+                        <div class="ext-header">
+                            <span>&#9998; Extension Editor</span>
+                            <button id="extEditorClose" class="settings-close">&#10005;</button>
+                        </div>
+                        <div class="ext-editor-body">
+                            <textarea id="extEditorCode" class="ext-editor-textarea" spellcheck="false"
+                                placeholder="settings{ author: &quot;Your Name&quot;; version: 1.0.0; name: &quot;My Extension&quot;; colour: &quot;#FF6600&quot;; }\n\nshapes{\n"></textarea>
+                            <div class="ext-editor-actions">
+                                <button id="extEditorSave" class="toolbar-btn"
+                                    style="background:#008000;color:#fff;">Load Extension</button>
+                                <button id="extEditorExport" class="toolbar-btn">Export .poox</button>
+                                <button id="extEditorCancel" class="toolbar-btn"
+                                    style="background:#555;color:#fff;">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="wbxMakerOverlay" class="block-search-overlay" style="display:none;" role="dialog"
+                    aria-hidden="true" tabindex="-1">
+                    <div class="wbx-maker-dialog">
+                        <div class="ext-header">
+                            <span>&#128295; Visual WBX Maker</span>
+                            <button id="wbxMakerClose" class="settings-close">&#10005;</button>
+                        </div>
+                        <div class="wbx-maker-body">
+                            <div class="wbx-maker-panel">
+                                <div class="wbx-maker-title">Extension</div>
+                                <label class="wbx-maker-row">
+                                    <span>Name</span>
+                                    <input id="wbxMakerName" type="text" value="My Extension" spellcheck="false">
+                                </label>
+                                <label class="wbx-maker-row">
+                                    <span>Author</span>
+                                    <input id="wbxMakerAuthor" type="text" value="" spellcheck="false">
+                                </label>
+                                <label class="wbx-maker-row">
+                                    <span>Colour</span>
+                                    <input id="wbxMakerColor" type="text" value="#FF6600" spellcheck="false">
+                                </label>
+
+                                <div class="wbx-maker-title">Block</div>
+                                <label class="wbx-maker-row">
+                                    <span>Block type</span>
+                                    <input id="wbxMakerBlockType" type="text" value="my_diamond_block"
+                                        spellcheck="false">
+                                </label>
+                                <label class="wbx-maker-row">
+                                    <span>Label</span>
+                                    <input id="wbxMakerBlockLabel" type="text" value="Diamond" spellcheck="false">
+                                </label>
+
+                                <div class="wbx-maker-title">Shape</div>
+                                <label class="wbx-maker-row">
+                                    <span>Shape type</span>
+                                    <select id="wbxMakerShapeType">
+                                        <option value="diamond" selected>Diamond</option>
+                                        <option value="chevron">Chevron</option>
+                                    </select>
+                                </label>
+                                <label class="wbx-maker-row">
+                                    <span>Shape name</span>
+                                    <input id="wbxMakerShapeName" type="text" value="diamond" spellcheck="false">
+                                </label>
+                                <label class="wbx-maker-row" data-shape="diamond">
+                                    <span>Width factor</span>
+                                    <input id="wbxMakerWidth" type="number" step="0.05" min="0.2" max="1.2" value="0.5">
+                                </label>
+                                <label class="wbx-maker-row" data-shape="diamond">
+                                    <span>Offset Y factor</span>
+                                    <input id="wbxMakerOffsetY" type="number" step="0.05" min="0.2" max="1" value="0.5">
+                                </label>
+                                <label class="wbx-maker-row" data-shape="chevron">
+                                    <span>Point width</span>
+                                    <input id="wbxMakerPointWidth" type="number" step="0.05" min="0.15" max="0.8"
+                                        value="0.33">
+                                </label>
+                                <label class="wbx-maker-row">
+                                    <span>Text padding</span>
+                                    <input id="wbxMakerPadding" type="number" step="0.05" min="0" max="1" value="0.25">
+                                </label>
+                            </div>
+
+                            <div class="wbx-maker-panel">
+                                <div class="wbx-maker-title">Preview</div>
+                                <div class="wbx-maker-preview">
+                                    <svg id="wbxMakerPreview" viewBox="0 0 220 90" width="100%" height="100%"
+                                        aria-hidden="true">
+                                        <polygon id="wbxMakerPreviewShape" points="" fill="#FF6600" stroke="#ffffff"
+                                            stroke-width="2"></polygon>
+                                        <text id="wbxMakerPreviewText" data="110" response="52" text-anchor="middle"
+                                            font-size="18" fill="#ffffff"
+                                            font-family="Segoe UI, Tahoma, sans-serif">Diamond</text>
+                                    </svg>
+                                </div>
+                                <div class="wbx-maker-title">WBX Output</div>
+                                <textarea id="wbxMakerOutput" class="wbx-maker-output" spellcheck="false"
+                                    readonly></textarea>
+                                <div class="wbx-maker-actions">
+                                    <button id="wbxMakerDownload" class="toolbar-btn"
+                                        style="background:#3060a0;color:#fff;">Download .poox</button>
+                                    <button id="wbxMakerCloseBottom" class="toolbar-btn"
+                                        style="background:#555;color:#fff;">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script src="renderer.js"></script>
+                <script src="generators.js"></script>
+                <script src="blocks.js"></script>
+                <script src="extensions.js"></script>
+                <script src="app.js"></script>
+            </div>
         </div>
-    </div>
-    <script src="customrender.js"></script>
-    <script src="generators.js"></script>
-    <script src="blocks.js"></script>
-    <script src="extensions.js"></script>
-    <script src="app.js"></script>
-    <script>
-        // quick dev ping — remove me later
-        console.log && console.log('Poo IDE boot scripts loaded');
-    </script>
-</body>
+    </body>
+
 </html>

@@ -1,0 +1,96 @@
+settings{ name: "Sets"; author: "WebBlocks"; version: 1.0; colour: "#2E9E8E"; }
+
+shapes{
+WEBBLOCKS_SHAPES.register('chevron', function(c) {
+  var cr = c.CORNER_RADIUS;
+  return {
+    isDynamic: true,
+    width: function(h) { return h * 0.22 + 4; },
+    height: function(h) { return h; },
+    connectionOffsetY: function(h) { return h / 2; },
+    connectionOffsetX: function(w) { return -w; },
+    pathDown: function(h) {
+      
+      var pw = h * 0.22;
+      return ' l ' + pw + ',' + (h / 2) + ' l ' + (-pw) + ',' + (h / 2);
+    },
+    pathUp: function(h) {
+      
+      var pw = h * 0.22;
+      return ' l ' + pw + ',' + (-(h / 2)) + ' l ' + (-pw) + ',' + (-(h / 2));
+    },
+    pathRightDown: function(h) {
+      
+      var pw = h * 0.22;
+      return ' l ' + pw + ',' + (h / 2) + ' l ' + (-pw) + ',' + (h / 2);
+    },
+    pathRightUp: function(h) {
+      
+      var pw = h * 0.22;
+      return ' l ' + pw + ',' + (-(h / 2)) + ' l ' + (-pw) + ',' + (-(h / 2));
+    }
+  };
+});
+
+WEBBLOCKS_SHAPES.registerTypeCheck('Set', 'chevron');
+}
+
+blockdef{
+[
+  { "type": "set_new", "message0": "new set", "output": "Set", "colour": "#2E9E8E", "extensions": ["shape_chevron"] },
+  { "type": "set_from_array", "message0": "set from %1", "args0": [{ "type": "input_value", "name": "ARR", "check": "Array" }], "output": "Set", "colour": "#2E9E8E", "extensions": ["shape_chevron"] },
+  { "type": "set_add", "message0": "add %1 to %2", "args0": [{ "type": "input_value", "name": "ITEM" }, { "type": "input_value", "name": "SET", "check": "Set" }], "previousStatement": null, "nextStatement": null, "colour": "#2E9E8E" },
+  { "type": "set_remove", "message0": "remove %1 from %2", "args0": [{ "type": "input_value", "name": "ITEM" }, { "type": "input_value", "name": "SET", "check": "Set" }], "previousStatement": null, "nextStatement": null, "colour": "#2E9E8E" },
+  { "type": "set_has", "message0": "%1 has %2 ?", "args0": [{ "type": "input_value", "name": "SET", "check": "Set" }, { "type": "input_value", "name": "ITEM" }], "output": "Boolean", "colour": "#2E9E8E" },
+  { "type": "set_size", "message0": "size of %1", "args0": [{ "type": "input_value", "name": "SET", "check": "Set" }], "output": "Number", "colour": "#2E9E8E" },
+  { "type": "set_to_array", "message0": "%1 as array", "args0": [{ "type": "input_value", "name": "SET", "check": "Set" }], "output": "Array", "colour": "#2E9E8E", "extensions": ["shape_square"] },
+  { "type": "set_builder", "message0": "set builder %1 current set %2", "args0": [{ "type": "input_statement", "name": "DO" }, { "type": "input_dummy" }], "output": "Set", "colour": "#2E9E8E", "extensions": ["shape_chevron"] },
+  { "type": "set_builder_set", "message0": "set builder to %1", "args0": [{ "type": "input_value", "name": "SET", "check": "Set" }], "previousStatement": null, "nextStatement": null, "colour": "#2E9E8E" },
+  { "type": "set_builder_add", "message0": "append %1 to builder", "args0": [{ "type": "input_value", "name": "ITEM" }], "previousStatement": null, "nextStatement": null, "colour": "#2E9E8E" }
+]
+}
+
+gen{
+htmlGenerator.forBlock['set_new'] = function(b) {
+  return ['new Set()', htmlGenerator.ORDER_ATOMIC];
+};
+htmlGenerator.forBlock['set_from_array'] = function(b) {
+  var arr = getVal(b, 'ARR') || '[]';
+  return ['new Set(' + arr + ')', htmlGenerator.ORDER_ATOMIC];
+};
+htmlGenerator.forBlock['set_add'] = function(b) {
+  var item = getVal(b, 'ITEM') || 'null';
+  var set = getVal(b, 'SET') || 'new Set()';
+  return set + '.add(' + item + ');\n';
+};
+htmlGenerator.forBlock['set_remove'] = function(b) {
+  var item = getVal(b, 'ITEM') || 'null';
+  var set = getVal(b, 'SET') || 'new Set()';
+  return set + '.delete(' + item + ');\n';
+};
+htmlGenerator.forBlock['set_has'] = function(b) {
+  var set = getVal(b, 'SET') || 'new Set()';
+  var item = getVal(b, 'ITEM') || 'null';
+  return [set + '.has(' + item + ')', htmlGenerator.ORDER_FUNCTION_CALL];
+};
+htmlGenerator.forBlock['set_size'] = function(b) {
+  var set = getVal(b, 'SET') || 'new Set()';
+  return [set + '.size', htmlGenerator.ORDER_MEMBER];
+};
+htmlGenerator.forBlock['set_to_array'] = function(b) {
+  var set = getVal(b, 'SET') || 'new Set()';
+  return ['Array.from(' + set + ')', htmlGenerator.ORDER_FUNCTION_CALL];
+};
+htmlGenerator.forBlock['set_builder'] = function(b) {
+  var stmts = htmlGenerator.statementToCode(b, 'DO');
+  return ['(function(){ var _set = new Set();\n' + stmts + 'return _set; })()', htmlGenerator.ORDER_ATOMIC];
+};
+htmlGenerator.forBlock['set_builder_set'] = function(b) {
+  var set = getVal(b, 'SET') || 'new Set()';
+  return '_set = ' + set + ';\n';
+};
+htmlGenerator.forBlock['set_builder_add'] = function(b) {
+  var item = getVal(b, 'ITEM') || 'null';
+  return '_set.add(' + item + ');\n';
+};
+}

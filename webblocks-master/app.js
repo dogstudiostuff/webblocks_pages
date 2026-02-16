@@ -3,11 +3,8 @@ let project = {
     activePage: "index",
     pages: {
         "index": null
-    },
-    assets: []
+    }
 };
-const ASSETS_PAGE_ID = "__assets__";
-let lastWorkspacePage = "index";
 
 let settings = {
     gridSnap: true,
@@ -811,170 +808,6 @@ function showToast(message) {
     }
 }
 
-function ensureProjectAssets() {
-    if (!Array.isArray(project.assets)) project.assets = [];
-}
-
-function makeUniqueAssetName(name) {
-    ensureProjectAssets();
-    const raw = String(name || "asset.bin").trim() || "asset.bin";
-    const clean = raw.replace(/[\\/:*?"<>|]/g, "_");
-    const dot = clean.lastIndexOf(".");
-    const base = dot > 0 ? clean.slice(0, dot) : clean;
-    const ext = dot > 0 ? clean.slice(dot) : "";
-    let candidate = clean;
-    let i = 1;
-    const used = new Set(project.assets.map(img => img && img.name).filter(Boolean));
-    while (used.has(candidate)) {
-        candidate = base + "_" + i + ext;
-        i++;
-    }
-    return candidate;
-}
-
-function getCurrentWorkspacePageName() {
-    if (project.activePage !== ASSETS_PAGE_ID) return project.activePage;
-    return lastWorkspacePage || Object.keys(project.pages)[0] || "index";
-}
-
-function renderAssetsArea() {
-    const area = document.getElementById("assetsArea");
-    if (!area) return;
-    ensureProjectAssets();
-
-    if (!project.assets.length) {
-        area.innerHTML = '<div class="assets-empty">No assets imported yet. Use "Import Assets" to add files.</div>';
-        return;
-    }
-
-    const grid = document.createElement("div");
-    grid.className = "assets-grid";
-
-    project.assets.forEach((asset, idx) => {
-        const card = document.createElement("div");
-        card.className = "asset-card";
-
-        if (asset.type && asset.type.startsWith("image/")) {
-            const preview = document.createElement("img");
-            preview.src = asset.dataUrl;
-            preview.alt = asset.name;
-            card.appendChild(preview);
-        } else if (asset.type && asset.type.startsWith("video/")) {
-            const preview = document.createElement("video");
-            preview.src = asset.dataUrl;
-            preview.controls = true;
-            preview.preload = "metadata";
-            card.appendChild(preview);
-        } else {
-            const preview = document.createElement("div");
-            preview.style.height = "110px";
-            preview.style.display = "flex";
-            preview.style.alignItems = "center";
-            preview.style.justifyContent = "center";
-            preview.style.background = "rgba(0,0,0,0.08)";
-            preview.style.border = "1px solid rgba(0,0,0,0.2)";
-            preview.style.fontSize = "12px";
-            preview.style.opacity = "0.9";
-            const ext = (asset.name && asset.name.includes(".")) ? asset.name.split(".").pop().toUpperCase() : "FILE";
-            preview.textContent = ext + " file";
-            card.appendChild(preview);
-        }
-
-        const name = document.createElement("div");
-        name.className = "asset-card-name";
-        name.textContent = asset.name;
-        card.appendChild(name);
-
-        const path = document.createElement("div");
-        path.className = "asset-card-path";
-        path.textContent = "Use path: assets/" + asset.name;
-        card.appendChild(path);
-
-        const actions = document.createElement("div");
-        actions.className = "asset-card-actions";
-
-        const copyBtn = document.createElement("button");
-        copyBtn.className = "toolbar-btn";
-        copyBtn.textContent = "Copy Path";
-        copyBtn.onclick = async () => {
-            const text = "assets/" + asset.name;
-            try {
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    await navigator.clipboard.writeText(text);
-                }
-                showToast("Copied " + text);
-            } catch (e) {
-                showToast("Path: " + text);
-            }
-        };
-        actions.appendChild(copyBtn);
-
-        const downloadBtn = document.createElement("button");
-        downloadBtn.className = "toolbar-btn";
-        downloadBtn.textContent = "Download";
-        downloadBtn.onclick = () => {
-            const link = document.createElement("a");
-            link.href = asset.dataUrl;
-            link.download = asset.name || "asset.bin";
-            link.click();
-        };
-        actions.appendChild(downloadBtn);
-
-        const removeBtn = document.createElement("button");
-        removeBtn.className = "toolbar-btn";
-        removeBtn.style.background = "#8a2a2a";
-        removeBtn.style.color = "#fff";
-        removeBtn.textContent = "Remove";
-        removeBtn.onclick = () => {
-            project.assets.splice(idx, 1);
-            renderAssetsArea();
-            showToast("Removed asset");
-        };
-        actions.appendChild(removeBtn);
-
-        card.appendChild(actions);
-        grid.appendChild(card);
-    });
-
-    area.innerHTML = "";
-    area.appendChild(grid);
-}
-
-function setWorkspaceView(mode) {
-    const blocklyArea = document.getElementById("blocklyArea");
-    const codeArea = document.getElementById("codeArea");
-    const assetsArea = document.getElementById("assetsArea");
-    const tabBuild = document.getElementById("tabBuild");
-    const tabCode = document.getElementById("tabCode");
-
-    if (!blocklyArea || !codeArea || !assetsArea) return;
-
-    if (mode === "assets") {
-        tabBuild.classList.add("active");
-        tabCode.classList.remove("active");
-        blocklyArea.style.display = "none";
-        codeArea.classList.remove("active");
-        assetsArea.classList.add("active");
-        renderAssetsArea();
-        return;
-    }
-
-    assetsArea.classList.remove("active");
-    if (mode === "code") {
-        tabCode.classList.add("active");
-        tabBuild.classList.remove("active");
-        blocklyArea.style.display = "none";
-        codeArea.classList.add("active");
-        codeArea.innerText = generateFullHtml();
-    } else {
-        tabBuild.classList.add("active");
-        tabCode.classList.remove("active");
-        blocklyArea.style.display = "";
-        codeArea.classList.remove("active");
-        if (workspace) Blockly.svgResize(workspace);
-    }
-}
-
 function renderTabs() {
     const container = document.getElementById("pageTabs");
     if (!container) return;
@@ -982,79 +815,49 @@ function renderTabs() {
 
     Object.keys(project.pages).forEach(name => {
         const btn = document.createElement("button");
-        btn.innerText = name + ".poo";
+        btn.innerText = name + ".wbk";
         btn.className = (name === project.activePage) ? "tab active" : "tab";
         btn.onclick = () => switchPage(name);
         container.appendChild(btn);
     });
 
-    const assetsBtn = document.createElement("button");
-    assetsBtn.innerText = "assets";
-    assetsBtn.className = (project.activePage === ASSETS_PAGE_ID) ? "tab active" : "tab";
-    assetsBtn.onclick = () => switchPage(ASSETS_PAGE_ID);
-    container.appendChild(assetsBtn);
 }
 
 function switchPage(pageName) {
     if (!workspace) return;
 
-    if (project.activePage !== ASSETS_PAGE_ID) {
-        const state = Blockly.serialization.workspaces.save(workspace);
-        project.pages[project.activePage] = state;
-    }
+    const state = Blockly.serialization.workspaces.save(workspace);
+    project.pages[project.activePage] = state;
 
     project.activePage = pageName;
-    if (pageName === ASSETS_PAGE_ID) {
-        renderTabs();
-        setWorkspaceView("assets");
-        showToast("Switched to assets");
-        return;
-    }
-
-    lastWorkspacePage = pageName;
     workspace.clear();
+
     if (project.pages[pageName]) {
         Blockly.serialization.workspaces.load(project.pages[pageName], workspace);
     }
 
     renderTabs();
-    const isCodeView = document.getElementById("tabCode").classList.contains("active");
-    setWorkspaceView(isCodeView ? "code" : "build");
-    showToast("Switched to " + pageName + ".poo");
-}
-
-function appendAssetMapToHtml(html) {
-    ensureProjectAssets();
-    if (!project.assets.length) return html;
-
-    const map = {};
-    project.assets.forEach((asset) => {
-        if (!asset || !asset.name || !asset.dataUrl) return;
-        map[asset.name] = asset.dataUrl;
-        map["assets/" + asset.name] = asset.dataUrl;
-    });
-    const payload = JSON.stringify(map).replace(/</g, "\\u003c");
-    const script = `<script>(function(){var m=${payload};window.WEBBLOCKS_ASSETS=m;function p(sel,attr){document.querySelectorAll(sel).forEach(function(el){var v=el.getAttribute(attr);if(v&&m[v])el.setAttribute(attr,m[v]);});}p('img[src]','src');p('source[src]','src');p('video[src]','src');p('audio[src]','src');p('track[src]','src');p('a[href]','href');p('link[href]','href');document.querySelectorAll('object[data]').forEach(function(el){var v=el.getAttribute('data');if(v&&m[v])el.setAttribute('data',m[v]);});})();</script>`;
-    return html + script;
+    showToast("Switched to " + pageName + ".wbk");
 }
 
 function generateFullHtml() {
     let html = "";
     if (workspace) {
         const variables = workspace.getVariableMap().getAllVariables();
+        
         var _first = workspace.getTopBlocks(true)[0];
         workspace.getTopBlocks(true).forEach(b => html += htmlGenerator.blockToCode(b));
     }
-
-    html = appendAssetMapToHtml(html);
 
     if (settings.watermark) {
         const watermark = `<div style="position:fixed;bottom:10px;right:10px;background:#fff;padding:5px 10px;border:1px solid #000;font-family:sans-serif;font-size:12px;final-index:9999;box-shadow:2px 2px 0 #000;">Made with Poo IDE</div>`;
         html += watermark;
     }
     if (settings.minify) {
+        
         html = html.replace(/\length\s*/g, '').replace(/\s{2,}/g, ' ');
     }
+    
     try {
         _debugCounter = (_debugCounter || 0) + 1;
         if (_debugCounter % 50 === 0) console.log('generateFullHtml called', _debugCounter);
@@ -1063,11 +866,12 @@ function generateFullHtml() {
 }
 
 function init() {
+    
     console.log && console.log('init() starting...');
     var injectOptions = {
         toolbox: toolbox,
         renderer: 'webblocks',
-        media: './node_modules/blockly/media/',
+        pathToMedia: 'node_modules/blockly/media/',
         grid: { spacing: 20, length: 3, colour: '#ccc', snap: true },
         trashcan: true,
         zoom: { controls: true, wheel: true, startScale: 1.0, maxScale: 3, minScale: 0.3, scaleSpeed: 1.2 }
@@ -1078,7 +882,6 @@ function init() {
     workspace = Blockly.inject('blocklyArea', injectOptions);
 
     renderTabs();
-    renderAssetsArea();
 
     setTimeout(function() {
         var tb = workspace.getToolbox();
@@ -1089,6 +892,7 @@ function init() {
             }
         }
 
+        
     }, 100);
 
     let renderTimeout;
@@ -1104,22 +908,23 @@ function init() {
     });
 
     document.getElementById('tabBuild').onclick = () => {
-        if (project.activePage === ASSETS_PAGE_ID) {
-            setWorkspaceView("assets");
-            return;
-        }
-        setWorkspaceView("build");
+        document.getElementById('tabBuild').classList.add('active');
+        document.getElementById('tabCode').classList.remove('active');
+        document.getElementById('blocklyArea').style.display = '';
+        document.getElementById('codeArea').classList.remove('active');
+        Blockly.svgResize(workspace);
     };
     document.getElementById('tabCode').onclick = () => {
-        if (project.activePage === ASSETS_PAGE_ID) {
-            setWorkspaceView("assets");
-            return;
-        }
-        setWorkspaceView("code");
+        document.getElementById('tabCode').classList.add('active');
+        document.getElementById('tabBuild').classList.remove('active');
+        document.getElementById('blocklyArea').style.display = 'none';
+        const codeArea = document.getElementById('codeArea');
+        codeArea.classList.add('active');
+        codeArea.innerText = generateFullHtml();
     };
 
     document.getElementById("btnSave").onclick = () => {
-        document.getElementById("saveCurrentName").textContent = getCurrentWorkspacePageName();
+        document.getElementById("saveCurrentName").textContent = project.activePage;
         document.getElementById("saveOverlay").style.display = "flex";
     };
 
@@ -1134,38 +939,31 @@ function init() {
 
     document.getElementById("saveCurrent").onclick = () => {
         closeSaveDialog();
-        if (project.activePage === ASSETS_PAGE_ID) {
-            showToast("Switch to a page tab to save page blocks");
-            return;
-        }
         const state = Blockly.serialization.workspaces.save(workspace);
-        const fileContent = { app: "Poo IDE", version: "1.0", type: "page", blocks: state, assets: project.assets || [] };
+        const fileContent = { app: "Poo IDE", version: "1.0", type: "page", blocks: state };
         const blob = new Blob([JSON.stringify(fileContent, null, 2)], { type: "application/json" });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = project.activePage + ".poo";
+        link.download = project.activePage + ".wbk";
         link.click();
-        showToast("Saved " + project.activePage + ".poo");
+        showToast("Saved " + project.activePage + ".wbk");
     };
 
     document.getElementById("saveAll").onclick = () => {
         closeSaveDialog();
 
-        if (project.activePage !== ASSETS_PAGE_ID) {
-            project.pages[project.activePage] = Blockly.serialization.workspaces.save(workspace);
-        }
+        project.pages[project.activePage] = Blockly.serialization.workspaces.save(workspace);
         const fileContent = {
             app: "Poo IDE",
             version: "1.0",
             type: "project",
-            activePage: getCurrentWorkspacePageName(),
-            pages: project.pages,
-            assets: project.assets || []
+            activePage: project.activePage,
+
         };
         const blob = new Blob([JSON.stringify(fileContent, null, 2)], { type: "application/json" });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = "project.poo";
+        link.download = "project.wbk";
         link.click();
         showToast("Saved full project (" + Object.keys(project.pages).length + " pages)");
     };
@@ -1182,57 +980,21 @@ function init() {
             if (data.type === "project" && data.pages) {
                 project.pages = data.pages;
                 project.activePage = data.activePage || Object.keys(data.pages)[0];
-                lastWorkspacePage = project.activePage;
-                project.assets = Array.isArray(data.assets) ? data.assets : (Array.isArray(data.images) ? data.images : []);
                 workspace.clear();
                 if (project.pages[project.activePage]) {
                     Blockly.serialization.workspaces.load(project.pages[project.activePage], workspace);
                 }
                 renderTabs();
-                renderAssetsArea();
                 showToast("Loaded project (" + Object.keys(project.pages).length + " pages)");
             } else {
 
                 const blocks = (data.app === "Poo IDE" || data.app === "Poo Ider" || data.app === "WebBlocks") ? data.blocks : data;
-                if (Array.isArray(data.assets)) project.assets = data.assets;
-                else if (Array.isArray(data.images)) project.assets = data.images;
                 workspace.clear();
                 Blockly.serialization.workspaces.load(blocks, workspace);
-                lastWorkspacePage = project.activePage;
-                renderAssetsArea();
                 showToast("Loaded " + file.name);
             }
         };
         reader.readAsText(file);
-    };
-
-    document.getElementById("btnImportAssets").onclick = () => {
-        document.getElementById("assetFileInput").click();
-    };
-    document.getElementById("assetFileInput").onchange = async (e) => {
-        const files = Array.from(e.target.files || []);
-        if (!files.length) return;
-        ensureProjectAssets();
-        let added = 0;
-        for (const file of files) {
-            const dataUrl = await new Promise((resolve, reject) => {
-                const r = new FileReader();
-                r.onload = () => resolve(r.result);
-                r.onerror = reject;
-                r.readAsDataURL(file);
-            });
-            project.assets.push({
-                name: makeUniqueAssetName(file.name),
-                type: file.type || "",
-                dataUrl: String(dataUrl || "")
-            });
-            added++;
-        }
-        e.target.value = "";
-        renderAssetsArea();
-        if (added > 0) {
-            showToast("Imported " + added + " asset" + (added === 1 ? "" : "s"));
-        }
     };
 
     document.getElementById("btnAddPage").onclick = () => {
@@ -1274,12 +1036,8 @@ function init() {
     };
 
     document.getElementById("btnExport").onclick = async () => {
-        if (project.activePage === ASSETS_PAGE_ID) {
-            showToast("Switch to a page tab to export HTML");
-            return;
-        }
         const html = generateFullHtml();
-        const fileName = getCurrentWorkspacePageName() + ".html";
+        const fileName = project.activePage + ".html";
         if (window.electronAPI) {
             const saved = await window.electronAPI.saveFile({ defaultName: fileName, content: html, mimeType: 'text/html' });
             if (saved) showToast("Exported " + fileName);
@@ -1295,10 +1053,8 @@ function init() {
 
     document.getElementById("btnZip").onclick = async () => {
         const zip = new JSZip();
-        const currentPage = getCurrentWorkspacePageName();
-        if (project.activePage !== ASSETS_PAGE_ID) {
-            project.pages[project.activePage] = Blockly.serialization.workspaces.save(workspace);
-        }
+        project.pages[project.activePage] = Blockly.serialization.workspaces.save(workspace);
+        const currentPage = project.activePage;
 
         for (const [name, state] of Object.entries(project.pages)) {
             workspace.clear();
@@ -1326,10 +1082,6 @@ function init() {
     };
 
     document.getElementById("btnPreview").onclick = async () => {
-        if (project.activePage === ASSETS_PAGE_ID) {
-            showToast("Switch to a page tab to preview");
-            return;
-        }
         const html = generateFullHtml();
         const notice = `<div id="wb-preview-notice" style="position:fixed;top:0;left:0;right:0;background:#1a1a2e;color:#fff;font-family:system-ui,sans-serif;font-size:13px;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;final-index:99999;box-shadow:0 2px 8px rgba(0,0,0,0.3);">
             <span>&#9888; <strong>Poo IDE Preview</strong> &mdash; This URL is local to your browser and won't work for anyone else. Use <em>Export HTML</em> to share.</span>
@@ -1397,6 +1149,7 @@ function init() {
             '.blocklyToolboxSelected .blocklyTreeLabel { color: var(--panel-tab-active-color) !important; }';
 
         if (workspace) {
+            
             workspace.setTheme(isApple ? lightBlocklyTheme : (isLight ? lightBlocklyTheme : darkBlocklyTheme));
 
             var gridColor = isApple ? '#e6edf6' : (isLight ? '#ccc' : '#444');
@@ -1456,6 +1209,7 @@ function init() {
         document.getElementById('setCodeFontSize').value = settings.codeFontSize;
         document.getElementById('setAutoRemind').checked = settings.autoRemind;
         document.getElementById('setTheme').value = settings.theme;
+        
         applyPreview(settings.theme);
     }
 
@@ -1500,8 +1254,10 @@ function init() {
     document.getElementById('setCodeFontSize').onchange = function() { settings.codeFontSize = this.value; applySettings(); };
     document.getElementById('setAutoRemind').onchange = function() { settings.autoRemind = this.checked; saveSettings(); };
     document.getElementById('setTheme').onchange = function() { settings.theme = this.value; applyTheme(); saveSettings(); };
+    
     document.getElementById('setTheme').onchange = function() { settings.theme = this.value; applyTheme(); applyPreview(settings.theme); saveSettings(); };
 
+    
     var themeToggleBtn = document.getElementById('btnThemeToggle');
     if (themeToggleBtn) {
         themeToggleBtn.onclick = function() {
@@ -1549,7 +1305,7 @@ function init() {
         const list = document.getElementById('extList');
         const exts = PooExtensions.loaded;
         if (exts.length === 0) {
-            list.innerHTML = '<div class="ext-empty">No extensions loaded. Import a .poox file to get started.</div>';
+            list.innerHTML = '<div class="ext-empty">No extensions loaded. Import a .wbx file to get started.</div>';
             return;
         }
         list.innerHTML = '';
@@ -1592,7 +1348,7 @@ function init() {
                 const blob = new Blob([ext.raw], { type: 'text/plain' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
-                link.download = (ext.settings.name || ext.id).replace(/\s+/g, '_') + '.poox';
+                link.download = (ext.settings.name || ext.id).replace(/\s+/g, '_') + '.wbx';
                 link.click();
                 showToast('Exported ' + link.download);
             };
@@ -1700,7 +1456,7 @@ function init() {
             const blob = new Blob([code], { type: 'text/plain' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = name + '.poox';
+            link.download = name + '.wbx';
             link.click();
             showToast('Exported ' + link.download);
         } catch (err) {
@@ -1960,7 +1716,7 @@ function init() {
     document.getElementById('wbxMakerDownload').onclick = () => {
         const text = buildWbxOutput();
         const name = (wbxMakerInputs.name.value || 'extension').trim();
-        const fileName = name.replace(/\s+/g, '_') + '.poox';
+        const fileName = name.replace(/\s+/g, '_') + '.wbx';
         const blob = new Blob([text], { type: 'text/plain' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);

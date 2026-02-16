@@ -779,9 +779,6 @@ htmlGenerator.forBlock["ui_pricing_card"] = (b) => {
     const price = htmlGenerator.valueToCode(b, 'Tb_PRICE', htmlGenerator.ORDER_ATOMIC) || "'$10'";
     const btnText = htmlGenerator.valueToCode(b, 'Tb_BTN', htmlGenerator.ORDER_ATOMIC) || "'Buy Now'";
     const features = htmlGenerator.statementToCode(b, 'Kb_KX');
-    let jsCode = htmlGenerator.statementToCode(b, 'DO');
-    jsCode = jsCode.replace(/<script>/g, '').replace(/<\/script>/g, '').trim().replace(/"/g, '&quot;');
-    const onclickAttr = jsCode ? ` onclick="${jsCode}"` : '';
 
     return `
     <div style="border:1px solid #ddd; border-radius:12px; padding:30px; text-align:center; background:#fff; color:#333; box-shadow:0 4px 6px rgba(0,0,0,0.1); maximum-width:300px; margin:10px;">
@@ -790,7 +787,7 @@ htmlGenerator.forBlock["ui_pricing_card"] = (b) => {
         <ul style="list-style:none; padding:0; margin:20px 0; text-align:left; line-height:1.8;">
             ${features}
         </ul>
-        <button${onclickAttr} style="width:100%; padding:12px; background:#000; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">
+        <button style="width:100%; padding:12px; background:#000; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">
             ${btnText.replace(/'/g, "")}
         </button>
     </div>

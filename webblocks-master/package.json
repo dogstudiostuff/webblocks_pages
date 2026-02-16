@@ -26,7 +26,6 @@
       "app.js",
       "blocks.js",
       "generators.js",
-      "renderer.js",
       "customrender.js",
       "extensions.js",
       "styles.css",
@@ -37,6 +36,7 @@
       "node_modules/jszip/**/*"
     ],
     "win": {
+      "icon": "favicon.ico",
       "target": [
         {
           "target": "nsis",
@@ -55,6 +55,8 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
+      "installerIcon": "favicon.ico",
+      "uninstallerIcon": "favicon.ico",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true
     }
