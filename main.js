@@ -111,7 +111,16 @@ function createWindow() {
         contextIsolation: true
       }
     });
-    previewWin.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html));
+    const previewDir = path.join(app.getPath('temp'), 'poo-ide-preview');
+    if (!fs.existsSync(previewDir)) fs.mkdirSync(previewDir, { recursive: true });
+    const previewPath = path.join(previewDir, `preview-${Date.now()}-${Math.random().toString(36).slice(2)}.html`);
+    fs.writeFileSync(previewPath, html, 'utf8');
+    previewWin.loadFile(previewPath);
+    previewWin.on('closed', () => {
+      try {
+        if (fs.existsSync(previewPath)) fs.unlinkSync(previewPath);
+      } catch (e) {}
+    });
     return true;
   });
 

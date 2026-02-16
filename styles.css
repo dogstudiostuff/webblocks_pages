@@ -44,7 +44,7 @@ body {
 
 
 :root.light-theme {
-    
+
     --bg-desktop: #d4d0c8;
     --titlebar-gradient: linear-gradient(180deg, #3A7BD5, #0A64AD);
     --titlebar-border: #06386a;
@@ -52,7 +52,7 @@ body {
     --toolbar-border-light: #fff;
     --toolbar-border-dark: #9a9a9a;
     --toolbar-primary-bg: #0A64AD;
-    
+
     --main-bg: #ece9d8;
     --panel-bg: #ece9d8;
     --panel-titlebar-gradient: linear-gradient(90deg, #0A64AD, #3A7BD5);
@@ -76,7 +76,7 @@ body {
 
 
 :root.apple-theme {
-    
+
     --bg-desktop: linear-gradient(180deg, #0b0c0e, #08080a);
     --titlebar-gradient: linear-gradient(180deg, #111217, #0b0c0e);
     --titlebar-border: rgba(255, 255, 255, 0.03);
@@ -752,17 +752,6 @@ body {
     border-color: #fff #808080 #808080 #fff;
 }
 
-fart {
-    background: linear-gradient(90deg, red, yellow, green, blue);
-    -webkit-text-fill-color: transparent;
-    -webkit-background-clip: text;
-    background-clip: text;
-    font-size: 17vw;
-    font-weight: bold;
-    text-align: center;
-}
-
-
 .settings-dialog {
     width: 380px;
     background: var(--dialog-bg);
@@ -878,7 +867,7 @@ fart {
 
 .wb-rainbow .blocklyPath {
     animation: wb-rainbow-hue 3.2s linear infinite;
-    
+
     filter: hue-rotate(0deg);
 }
 
@@ -969,7 +958,7 @@ fart {
 }
 
 .blocklyToolboxCategory.blocklyToolboxSelected .categoryBubble circle {
-    
+
     fill: inherit !important;
     stroke: rgba(0, 0, 0, 0.3) !important;
 }
@@ -1106,7 +1095,7 @@ fart {
     margin-left: 10px;
     margin-bottom: 4px;
     background: linear-gradient(180deg, #3cbf3c, #00A000);
-    
+
     color: white;
     border: 2px solid #2b6f2b;
     padding: 4px 10px;
@@ -1361,8 +1350,3 @@ fart {
     gap: 6px;
     justify-content: flex-end;
 }
-
-
-
-
-

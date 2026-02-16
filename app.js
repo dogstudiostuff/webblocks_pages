@@ -316,6 +316,7 @@ const toolbox = {
                 { kind: "block", type: "display_media" },
                 { kind: "block", type: "media_image", inputs: { SRC: { shadow: { type: "text_string", fields: { TEXT: "image.png" } } }, ALT: { shadow: { type: "text_string", fields: { TEXT: "description" } } }, W: { shadow: { type: "text_string", fields: { TEXT: "300" } } } } },
                 { kind: "block", type: "media_video", inputs: { SRC: { shadow: { type: "text_string", fields: { TEXT: "video.mp4" } } } } },
+                { kind: "block", type: "media_sound", inputs: { SRC: { shadow: { type: "text_string", fields: { TEXT: "sound.mp3" } } } } },
                 { kind: "block", type: "media_favicon", inputs: { SRC: { shadow: { type: "text_string", fields: { TEXT: "favicon.ico" } } } } },
                 { kind: "block", type: "html_img" },
                 { kind: "block", type: "html_video" },

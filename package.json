@@ -27,7 +27,6 @@
       "blocks.js",
       "generators.js",
       "renderer.js",
-      "customrender.js",
       "extensions.js",
       "styles.css",
       "favicon.ico",

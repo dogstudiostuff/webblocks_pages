@@ -42,7 +42,7 @@ function wrapJs(block, code) {
     }
 
     if (parentIsJs) return code + "\t";
-    
+
     console.log && console.log('wrapJs: parentIsJs=', parentIsJs);
     return `<script>\t${code}\t</script>\t`;
 }
@@ -50,13 +50,21 @@ function wrapJs(block, code) {
 function esc(s) { return String(s).replace(/"/g, '&quot;'); }
 
 htmlGenerator.statementToCode = (block, name) => {
-  let target = block.getInputTargetBlock(name);
-  return htmlGenerator.blockToCode(target);
+    let target = block.getInputTargetBlock(name);
+    return htmlGenerator.blockToCode(target);
 };
 
 htmlGenerator.forBlock['evil_block'] = (b) => `<h1 style="color: red;">Eeeevilllll</h1>\t`;
 htmlGenerator.forBlock['gay_block'] = (b) => `
-<fart>Hello World</fart>\t`;
+<style>fart {
+    background: linear-gradient(90deg, red, yellow, green, blue);
+    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    font-size: 17vw;
+    font-weight: bold;
+    text-align: center;
+}</style> <fart>Good amazing yes man</fart>\t`;
 htmlGenerator.forBlock['hemmy_poop'] = (b) => `<h1 style="color: brown;">Hemmy Poop</h1>\t`;
 
 htmlGenerator.forBlock['raw_html'] = (b) => b.getFieldValue('CODE') + "\t";
@@ -76,7 +84,7 @@ htmlGenerator.forBlock["math_num"] = (b) => [b.getFieldValue('NUM'), htmlGenerat
 htmlGenerator.forBlock["logic_bool"] = (b) => [b.getFieldValue('BOOL'), htmlGenerator.ORDER_ATOMIC];
 
 htmlGenerator.forBlock['meta_doctype'] = () => `<!DOCTYPE html>\t`;
-htmlGenerator.forBlock['meta_head_wrapper'] = (b) => `<head>${htmlGenerator.statementToCode(b,'CONTENT')}</head>`;
+htmlGenerator.forBlock['meta_head_wrapper'] = (b) => `<head>${htmlGenerator.statementToCode(b, 'CONTENT')}</head>`;
 htmlGenerator.forBlock['meta_title'] = (b) => {
     const data = getVal(b, 'VAL');
     return `<title>${data}</title>\t`;
@@ -112,7 +120,7 @@ htmlGenerator.forBlock["css_style_wrapper"] = (b) => {
 
 htmlGenerator.forBlock['html_canvas'] = (b) => `<canvas id="${b.getFieldValue('ID')}" width="${b.getFieldValue('W')}" height="${b.getFieldValue('H')}" style="border:1px solid #000"></canvas>\t`;
 htmlGenerator.forBlock['js_canvas_draw'] = (b) => `<script>(function(){var c=document.getElementById('${b.getFieldValue('ID')}');var ctx=c.getContext('2d');${htmlGenerator.statementToCode(b, 'DO')}})();</script>\t`;
-htmlGenerator.forBlock['js_canvas_rect'] = (b) => `ctx.fillStyle='${b.getFieldValue('C')}';ctx.strokeStyle='${b.getFieldValue('C')}';ctx.${b.getFieldValue('FILL')=='TRUE'?'fillRect':'strokeRect'}(${b.getFieldValue('X')},${b.getFieldValue('Y')},${b.getFieldValue('W')},${b.getFieldValue('H')});\t`;
+htmlGenerator.forBlock['js_canvas_rect'] = (b) => `ctx.fillStyle='${b.getFieldValue('C')}';ctx.strokeStyle='${b.getFieldValue('C')}';ctx.${b.getFieldValue('FILL') == 'TRUE' ? 'fillRect' : 'strokeRect'}(${b.getFieldValue('X')},${b.getFieldValue('Y')},${b.getFieldValue('W')},${b.getFieldValue('H')});\t`;
 
 htmlGenerator.forBlock['html_svg'] = (b) => `<svg width="${b.getFieldValue('W')}" height="${b.getFieldValue('H')}">${htmlGenerator.statementToCode(b, 'CONTENT')}</svg>\t`;
 htmlGenerator.forBlock['svg_rect'] = (b) => `<rect item="${b.getFieldValue('X')}" response="${b.getFieldValue('Y')}" width="${b.getFieldValue('W')}" height="${b.getFieldValue('H')}" fill="${b.getFieldValue('C')}" />\t`;
@@ -151,7 +159,7 @@ htmlGenerator.forBlock['html_form_adv'] = (b) => {
 };
 htmlGenerator.forBlock['html_input_req'] = (b) => {
     const name = getVal(b, 'NAME');
-    return `<input type="${b.getFieldValue('TYPE')}" name="${name}" ${b.getFieldValue('REQ')=='TRUE'?'required':''}><br>\t`;
+    return `<input type="${b.getFieldValue('TYPE')}" name="${name}" ${b.getFieldValue('REQ') == 'TRUE' ? 'required' : ''}><br>\t`;
 };
 htmlGenerator.forBlock['js_form_submit'] = (b) => {
     const id = getVal(b, 'ID');
@@ -165,7 +173,7 @@ htmlGenerator.forBlock['html_text'] = (b) => {
 htmlGenerator.forBlock['html_h'] = (b) => `<h${b.getFieldValue('LVL')}>${getVal(b, 'TEXT')}</h${b.getFieldValue('LVL')}>\t`;
 htmlGenerator.forBlock['html_raw'] = (b) => b.getFieldValue('CODE') + "\t";
 
-htmlGenerator.forBlock['game_init'] = function(block) {
+htmlGenerator.forBlock['game_init'] = function (block) {
     const w = block.getFieldValue('W');
     const h = block.getFieldValue('H');
     const col = getVal(block, 'COL') || "#000000";
@@ -203,12 +211,12 @@ htmlGenerator.forBlock['game_init'] = function(block) {
 </script>\t`;
 };
 
-htmlGenerator.forBlock['colour_picker'] = function(block) {
-  const code = block.getFieldValue('COLOUR');
-  return ["'" + code + "'", htmlGenerator.ORDER_ATOMIC];
+htmlGenerator.forBlock['colour_picker'] = function (block) {
+    const code = block.getFieldValue('COLOUR');
+    return ["'" + code + "'", htmlGenerator.ORDER_ATOMIC];
 };
 
-htmlGenerator.forBlock['game_move_sprite'] = function(block) {
+htmlGenerator.forBlock['game_move_sprite'] = function (block) {
     const name = block.getFieldValue('NAME');
     const dx = htmlGenerator.valueToCode(block, 'X', htmlGenerator.ORDER_ATOMIC) || '0';
     const dy = htmlGenerator.valueToCode(block, 'Y', htmlGenerator.ORDER_ATOMIC) || '0';
@@ -216,12 +224,12 @@ htmlGenerator.forBlock['game_move_sprite'] = function(block) {
 `;
 };
 if (Blockly.JavaScript) {
-    Blockly.JavaScript.forBlock['game_move_sprite'] = function(block) {
+    Blockly.JavaScript.forBlock['game_move_sprite'] = function (block) {
         return htmlGenerator.forBlock['game_move_sprite'](block);
     };
 }
 
-htmlGenerator.forBlock['game_draw_rect'] = function(block) {
+htmlGenerator.forBlock['game_draw_rect'] = function (block) {
     const name = block.getFieldValue('NAME');
     const item = htmlGenerator.valueToCode(block, 'X', htmlGenerator.ORDER_ATOMIC) || '0';
     const response = htmlGenerator.valueToCode(block, 'Y', htmlGenerator.ORDER_ATOMIC) || '0';
@@ -239,23 +247,23 @@ htmlGenerator.forBlock['game_draw_rect'] = function(block) {
 };
 
 if (Blockly.JavaScript) {
-    Blockly.JavaScript.forBlock['game_draw_rect'] = function(block) {
+    Blockly.JavaScript.forBlock['game_draw_rect'] = function (block) {
         return htmlGenerator.forBlock['game_draw_rect'](block);
     };
 }
 
-htmlGenerator.forBlock['js_key_pressed'] = function(block) {
+htmlGenerator.forBlock['js_key_pressed'] = function (block) {
     const key = block.getFieldValue('KEY');
     return [`(window.keys && window.keys["${key}"])`, htmlGenerator.ORDER_ATOMIC];
 };
 
 if (Blockly.JavaScript) {
-    Blockly.JavaScript.forBlock['js_key_pressed'] = function(block) {
+    Blockly.JavaScript.forBlock['js_key_pressed'] = function (block) {
         const key = block.getFieldValue('KEY');
         return [`(window.keys && window.keys["${key}"])`, Blockly.JavaScript.ORDER_ATOMIC];
     };
 }
-htmlGenerator.forBlock['game_loop'] = function(block) {
+htmlGenerator.forBlock['game_loop'] = function (block) {
     let branch = htmlGenerator.statementToCode(block, 'DO');
     branch = branch.replace(/<\/?script>/g, '').trim();
 
@@ -274,12 +282,12 @@ htmlGenerator.forBlock['game_loop'] = function(block) {
 </script>\t`;
 };
 if (Blockly.JavaScript) {
-    Blockly.JavaScript.forBlock['game_loop'] = function(block) {
+    Blockly.JavaScript.forBlock['game_loop'] = function (block) {
         return htmlGenerator.forBlock['game_loop'](block);
     };
 }
 
-htmlGenerator.forBlock['game_draw_circle'] = function(block) {
+htmlGenerator.forBlock['game_draw_circle'] = function (block) {
     const name = block.getFieldValue('NAME');
     const item = htmlGenerator.valueToCode(block, 'X', htmlGenerator.ORDER_ATOMIC) || '0';
     const response = htmlGenerator.valueToCode(block, 'Y', htmlGenerator.ORDER_ATOMIC) || '0';
@@ -295,12 +303,12 @@ htmlGenerator.forBlock['game_draw_circle'] = function(block) {
 `;
 };
 if (Blockly.JavaScript) {
-    Blockly.JavaScript.forBlock['game_draw_circle'] = function(block) {
+    Blockly.JavaScript.forBlock['game_draw_circle'] = function (block) {
         return htmlGenerator.forBlock['game_draw_circle'](block);
     };
 }
 
-htmlGenerator.forBlock['game_draw_text'] = function(block) {
+htmlGenerator.forBlock['game_draw_text'] = function (block) {
     const text = htmlGenerator.valueToCode(block, 'TEXT', htmlGenerator.ORDER_ATOMIC) || "''";
     const item = htmlGenerator.valueToCode(block, 'X', htmlGenerator.ORDER_ATOMIC) || '0';
     const response = htmlGenerator.valueToCode(block, 'Y', htmlGenerator.ORDER_ATOMIC) || '0';
@@ -309,12 +317,12 @@ htmlGenerator.forBlock['game_draw_text'] = function(block) {
     return `ctx.fillStyle=${col}; ctx.font='${size}px sans-serif'; ctx.fillText(${text},${item},${response});\t`;
 };
 if (Blockly.JavaScript) {
-    Blockly.JavaScript.forBlock['game_draw_text'] = function(block) {
+    Blockly.JavaScript.forBlock['game_draw_text'] = function (block) {
         return htmlGenerator.forBlock['game_draw_text'](block);
     };
 }
 
-htmlGenerator.forBlock['game_draw_line'] = function(block) {
+htmlGenerator.forBlock['game_draw_line'] = function (block) {
     const x1 = block.getFieldValue('X1');
     const y1 = block.getFieldValue('Y1');
     const x2 = block.getFieldValue('X2');
@@ -324,12 +332,12 @@ htmlGenerator.forBlock['game_draw_line'] = function(block) {
     return `ctx.beginPath();ctx.moveTo(${x1},${y1});ctx.lineTo(${x2},${y2});ctx.strokeStyle='${col}';ctx.lineWidth=${width};ctx.stroke();ctx.closePath();\t`;
 };
 if (Blockly.JavaScript) {
-    Blockly.JavaScript.forBlock['game_draw_line'] = function(block) {
+    Blockly.JavaScript.forBlock['game_draw_line'] = function (block) {
         return htmlGenerator.forBlock['game_draw_line'](block);
     };
 }
 
-htmlGenerator.forBlock['game_draw_image'] = function(block) {
+htmlGenerator.forBlock['game_draw_image'] = function (block) {
     const url = htmlGenerator.valueToCode(block, 'URL', htmlGenerator.ORDER_ATOMIC) || "''";
     const item = htmlGenerator.valueToCode(block, 'X', htmlGenerator.ORDER_ATOMIC) || '0';
     const response = htmlGenerator.valueToCode(block, 'Y', htmlGenerator.ORDER_ATOMIC) || '0';
@@ -344,17 +352,17 @@ htmlGenerator.forBlock['game_draw_image'] = function(block) {
 `;
 };
 if (Blockly.JavaScript) {
-    Blockly.JavaScript.forBlock['game_draw_image'] = function(block) {
+    Blockly.JavaScript.forBlock['game_draw_image'] = function (block) {
         return htmlGenerator.forBlock['game_draw_image'](block);
     };
 }
 
-htmlGenerator.forBlock['game_set_background'] = function(block) {
+htmlGenerator.forBlock['game_set_background'] = function (block) {
     const col = htmlGenerator.valueToCode(block, 'COL', htmlGenerator.ORDER_ATOMIC) || "'#000000'";
     return `ctx.fillStyle=${col};ctx.fillRect(0,0,canvas.width,canvas.height);\t`;
 };
 if (Blockly.JavaScript) {
-    Blockly.JavaScript.forBlock['game_set_background'] = function(block) {
+    Blockly.JavaScript.forBlock['game_set_background'] = function (block) {
         return htmlGenerator.forBlock['game_set_background'](block);
     };
 }
@@ -378,85 +386,85 @@ if (Blockly.JavaScript) {
     Blockly.JavaScript.forBlock['game_timer'] = () => ['((Date.now()-window.gameStartTime)/1000)', Blockly.JavaScript.ORDER_ATOMIC];
 }
 
-htmlGenerator.forBlock['game_set_var'] = function(block) {
+htmlGenerator.forBlock['game_set_var'] = function (block) {
     const name = block.getFieldValue('VAR');
     const data = htmlGenerator.valueToCode(block, 'VAL', htmlGenerator.ORDER_ATOMIC) || '0';
     return `window.gameVars['${name}']=${data};\t`;
 };
-htmlGenerator.forBlock['game_get_var'] = function(block) {
+htmlGenerator.forBlock['game_get_var'] = function (block) {
     const name = block.getFieldValue('VAR');
     return [`(window.gameVars['${name}']||0)`, htmlGenerator.ORDER_ATOMIC];
 };
 if (Blockly.JavaScript) {
-    Blockly.JavaScript.forBlock['game_set_var'] = function(block) {
+    Blockly.JavaScript.forBlock['game_set_var'] = function (block) {
         return htmlGenerator.forBlock['game_set_var'](block);
     };
-    Blockly.JavaScript.forBlock['game_get_var'] = function(block) {
+    Blockly.JavaScript.forBlock['game_get_var'] = function (block) {
         return htmlGenerator.forBlock['game_get_var'](block);
     };
 }
 
-htmlGenerator.forBlock['game_collision_rect'] = function(block) {
+htmlGenerator.forBlock['game_collision_rect'] = function (block) {
     const a = block.getFieldValue('A');
     const b_name = block.getFieldValue('B');
     return [`(function(){var a=window.sprites['${a}'],b=window.sprites['${b_name}'];if(!a||!b)return false;return a.item<b.item+b.w&&a.item+a.w>b.item&&a.response<b.response+b.h&&a.response+a.h>b.response;})()`, htmlGenerator.ORDER_ATOMIC];
 };
 if (Blockly.JavaScript) {
-    Blockly.JavaScript.forBlock['game_collision_rect'] = function(block) {
+    Blockly.JavaScript.forBlock['game_collision_rect'] = function (block) {
         return htmlGenerator.forBlock['game_collision_rect'](block);
     };
 }
 
-htmlGenerator.forBlock['game_sprite_prop'] = function(block) {
+htmlGenerator.forBlock['game_sprite_prop'] = function (block) {
     const name = block.getFieldValue('NAME');
     const prop = block.getFieldValue('PROP');
     return [`(window.sprites['${name}']&&window.sprites['${name}'].${prop}||0)`, htmlGenerator.ORDER_ATOMIC];
 };
 if (Blockly.JavaScript) {
-    Blockly.JavaScript.forBlock['game_sprite_prop'] = function(block) {
+    Blockly.JavaScript.forBlock['game_sprite_prop'] = function (block) {
         return htmlGenerator.forBlock['game_sprite_prop'](block);
     };
 }
 
-htmlGenerator.forBlock['game_set_sprite_prop'] = function(block) {
+htmlGenerator.forBlock['game_set_sprite_prop'] = function (block) {
     const name = block.getFieldValue('NAME');
     const prop = block.getFieldValue('PROP');
     const data = htmlGenerator.valueToCode(block, 'VAL', htmlGenerator.ORDER_ATOMIC) || '0';
     return `if(window.sprites['${name}'])window.sprites['${name}'].${prop}=${data};\t`;
 };
 if (Blockly.JavaScript) {
-    Blockly.JavaScript.forBlock['game_set_sprite_prop'] = function(block) {
+    Blockly.JavaScript.forBlock['game_set_sprite_prop'] = function (block) {
         return htmlGenerator.forBlock['game_set_sprite_prop'](block);
     };
 }
 
-htmlGenerator.forBlock['game_distance'] = function(block) {
+htmlGenerator.forBlock['game_distance'] = function (block) {
     const a = block.getFieldValue('A');
     const b_name = block.getFieldValue('B');
     return [`(function(){var a=window.sprites['${a}'],b=window.sprites['${b_name}'];if(!a||!b)return 9999;var dx=a.item-b.item,dy=a.response-b.response;return Math.sqrt(dx*dx+dy*dy);})()`, htmlGenerator.ORDER_ATOMIC];
 };
 if (Blockly.JavaScript) {
-    Blockly.JavaScript.forBlock['game_distance'] = function(block) {
+    Blockly.JavaScript.forBlock['game_distance'] = function (block) {
         return htmlGenerator.forBlock['game_distance'](block);
     };
 }
 
 htmlGenerator.forBlock['md_block'] = (b) => {
-  let md = b.getFieldValue('MD');
-  md = md.replace(/&/g, "&amp;").replace(/<(?!blockquote|strong|em|h1|h2|h3|code|a|hr|br|\/blockquote|\/strong|\/em|\/h1|\/h2|\/h3|\/code|\/a)/g, "&lt;");
-  md = md.replace(/^###### (.*$)/gim, '<h6>$1</h6>');
-  md = md.replace(/^##### (.*$)/gim, '<h5>$1</h5>');
-  md = md.replace(/^#### (.*$)/gim, '<h4>$1</h4>');
-  md = md.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-  md = md.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-  md = md.replace(/^# (.*$)/gim, '<h1>$1</h1>');
-  md = md.replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>');
-  md = md.replace(/\*(.*)\*/gim, '<em>$1</em>');
-  md = md.replace(/^>(.*$)/gim, '<blockquote>$1</blockquote>');
-  md = md.replace(/`(.*?)`/gim, '<code style="background:#eee;padding:2px 4px;border-radius:3px;font-family:monospace">$1</code>');
-  md = md.replace(/\[(.*?)\]\((.*?)\)/gim, "<a href='$2'>$1</a>");
-  md = md.replace(/^--evilmd(.*$)/gim, '<h1 style="color: red;">$1</h1>');
-  return `<div class="markdown-body" style="line-height: 1.6;">\t${md}\t</div>\t`;
+    let md = b.getFieldValue('MD');
+    md = md.replace(/&/g, "&amp;").replace(/<(?!blockquote|strong|em|h1|h2|h3|code|a|hr|br|\/blockquote|\/strong|\/em|\/h1|\/h2|\/h3|\/code|\/a)/g, "&lt;");
+    md = md.replace(/^###### (.*$)/gim, '<h6>$1</h6>');
+    md = md.replace(/^##### (.*$)/gim, '<h5>$1</h5>');
+    md = md.replace(/^#### (.*$)/gim, '<h4>$1</h4>');
+    md = md.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+    md = md.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+    md = md.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+    md = md.replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>');
+    md = md.replace(/\*(.*)\*/gim, '<em>$1</em>');
+    md = md.replace(/^>(.*$)/gim, '<blockquote>$1</blockquote>');
+    md = md.replace(/`(.*?)`/gim, '<code style="background:#eee;padding:2px 4px;border-radius:3px;font-family:monospace">$1</code>');
+    md = md.replace(/\[(.*?)\]\((.*?)\)/gim, "<a href='$2'>$1</a>");
+    md = md.replace(/^--evilmd(.*$)/gim, '<h1 style="color: red;">$1</h1>');
+    return `<div class="markdown-body" style="line-height: 1.6;">\t${md}\t</div>\t`;
 };
 
 htmlGenerator.forBlock['md_code_inline'] = (b) => {
@@ -583,6 +591,10 @@ htmlGenerator.forBlock["media_video"] = (b) => {
     const ctrl = b.getFieldValue('CTRL') === 'TRUE' ? ' controls' : '';
     return [`<video src="${src}"${ctrl}></video>`, htmlGenerator.ORDER_ATOMIC];
 };
+htmlGenerator.forBlock["media_sound"] = (b) => {
+    const src = getVal(b, 'SRC');
+    return [`<audio src="${src}"></audio>`, htmlGenerator.ORDER_ATOMIC];
+};
 htmlGenerator.forBlock["media_favicon"] = (b) => {
     const src = getVal(b, 'SRC');
     return [`<link rel="icon" href="${src}">`, htmlGenerator.ORDER_ATOMIC];
@@ -593,11 +605,11 @@ htmlGenerator.forBlock["display_media"] = (b) => {
 };
 htmlGenerator.forBlock["html_video"] = (b) => {
     const src = getVal(b, 'SRC');
-    return `<video src="${src}" ${b.getFieldValue('CTRL')==='TRUE'?'controls':''}></video>\t`;
+    return `<video src="${src}" ${b.getFieldValue('CTRL') === 'TRUE' ? 'controls' : ''}></video>\t`;
 };
 htmlGenerator.forBlock["html_audio"] = (b) => {
     const src = getVal(b, 'SRC');
-    return `<audio src="${src}" ${b.getFieldValue('CTRL')==='TRUE'?'controls':''}></audio>\t`;
+    return `<audio src="${src}" ${b.getFieldValue('CTRL') === 'TRUE' ? 'controls' : ''}></audio>\t`;
 };
 htmlGenerator.forBlock["html_iframe"] = (b) => {
     const src = getVal(b, 'SRC');
@@ -677,7 +689,7 @@ htmlGenerator.forBlock["css_prop_flex_layout"] = (b) =>
 htmlGenerator.forBlock['css_id_class'] = (b) => {
     const id = getVal(b, 'ID');
     const cls = getVal(b, 'CLASS');
-    return `<style>${id?'.'+id:''} { ${cls} }</style>\t`;
+    return `<style>${id ? '.' + id : ''} { ${cls} }</style>\t`;
 };
 htmlGenerator.forBlock['css_inline_style'] = (b) => {
     const prop = getVal(b, 'PROP');
@@ -797,11 +809,11 @@ htmlGenerator.forBlock["ui_pricing_card"] = (b) => {
     `;
 };
 
-htmlGenerator.forBlock['meta_tailwind_cdn'] = function(block) {
-  return '<script src="https://cdn.tailwindcss.com"></script>\t';
+htmlGenerator.forBlock['meta_tailwind_cdn'] = function (block) {
+    return '<script src="https://cdn.tailwindcss.com"></script>\t';
 };
 
-htmlGenerator.forBlock['ui_tailwind_box'] = function(block) {
+htmlGenerator.forBlock['ui_tailwind_box'] = function (block) {
     var classes = htmlGenerator.valueToCode(block, 'CLASSES', htmlGenerator.ORDER_ATOMIC) || "''";
     var content = htmlGenerator.statementToCode(block, 'CONTENT');
 
@@ -810,7 +822,7 @@ htmlGenerator.forBlock['ui_tailwind_box'] = function(block) {
     return `<div class="${classes}">\t${content}\t</div>\t`;
 };
 
-htmlGenerator.forBlock['ui_page_link'] = function(block) {
+htmlGenerator.forBlock['ui_page_link'] = function (block) {
     const page = block.getFieldValue('PAGE');
     const text = htmlGenerator.valueToCode(block, 'TEXT', htmlGenerator.ORDER_ATOMIC) || "'Link'";
     const cleanText = text.replace(/'/g, "");
@@ -1015,18 +1027,18 @@ if (Blockly.JavaScript) {
         return 'default:\t' + body + 'break;\t';
     };
 }
-htmlGenerator.forBlock['math_number'] = function(block) {
-  const code = String(block.getFieldValue('NUM'));
-  return [code, htmlGenerator.ORDER_ATOMIC];
+htmlGenerator.forBlock['math_number'] = function (block) {
+    const code = String(block.getFieldValue('NUM'));
+    return [code, htmlGenerator.ORDER_ATOMIC];
 };
 
-htmlGenerator.forBlock['colour_picker'] = function(block) {
-  const code = block.getFieldValue('COLOUR');
-  return ["'" + code + "'", htmlGenerator.ORDER_ATOMIC];
+htmlGenerator.forBlock['colour_picker'] = function (block) {
+    const code = block.getFieldValue('COLOUR');
+    return ["'" + code + "'", htmlGenerator.ORDER_ATOMIC];
 };
 
 if (Blockly.JavaScript) {
-    Blockly.JavaScript.forBlock['colour_picker'] = function(block) {
+    Blockly.JavaScript.forBlock['colour_picker'] = function (block) {
         const code = block.getFieldValue('COLOUR');
         return ["'" + code + "'", Blockly.JavaScript.ORDER_ATOMIC];
     };
@@ -1035,7 +1047,7 @@ if (Blockly.JavaScript) {
 const standardBlocks = [
     'controls_if', 'controls_repeat_ext', 'controls_whileUntil', 'controls_for', 'controls_forEach', 'controls_flow_statements',
     'logic_compare', 'logic_operation', 'logic_negate', 'logic_boolean', 'logic_null', 'logic_ternary',
-     'math_arithmetic', 'math_single', 'math_trig', 'math_constant', 'math_number_property', 'math_round', 'math_on_list', 'math_modulo', 'math_constrain', 'math_random_int', 'math_random_float',
+    'math_arithmetic', 'math_single', 'math_trig', 'math_constant', 'math_number_property', 'math_round', 'math_on_list', 'math_modulo', 'math_constrain', 'math_random_int', 'math_random_float',
     'text', 'text_join', 'text_append', 'text_length', 'text_isEmpty', 'text_indexOf', 'text_charAt', 'text_getSubstring', 'text_changeCase', 'text_trim', 'text_print', 'text_prompt_ext',
     'lists_create_with', 'lists_repeat', 'lists_length', 'lists_isEmpty', 'lists_indexOf', 'lists_getIndex', 'lists_setIndex', 'lists_getSublist', 'lists_split', 'lists_sort', 'colour_random', 'colour_rgb', 'colour_blend',
     'variables_get', 'variables_set',
@@ -1043,209 +1055,209 @@ const standardBlocks = [
 ];
 
 standardBlocks.forEach(type => {
-    htmlGenerator.forBlock[type] = function(block) {
+    htmlGenerator.forBlock[type] = function (block) {
         const jsGen = Blockly.JavaScript || window.Blockly.JavaScript;
         if (!jsGen) return "";
-        if(!jsGen.nameDB_) jsGen.init(block.workspace);
+        if (!jsGen.nameDB_) jsGen.init(block.workspace);
         return jsGen.blockToCode(block);
     };
 
-htmlGenerator.forBlock['math_random_int'] = function(block) {
-    var from = htmlGenerator.valueToCode(block, 'FROM', htmlGenerator.ORDER_NONE) || '0';
-    var to = htmlGenerator.valueToCode(block, 'TO', htmlGenerator.ORDER_NONE) || '0';
-    return ['Math.floor(Math.random() * (' + to + ' - ' + from + ' + 1) + ' + from + ')', htmlGenerator.ORDER_FUNCTION_CALL];
-};
+    htmlGenerator.forBlock['math_random_int'] = function (block) {
+        var from = htmlGenerator.valueToCode(block, 'FROM', htmlGenerator.ORDER_NONE) || '0';
+        var to = htmlGenerator.valueToCode(block, 'TO', htmlGenerator.ORDER_NONE) || '0';
+        return ['Math.floor(Math.random() * (' + to + ' - ' + from + ' + 1) + ' + from + ')', htmlGenerator.ORDER_FUNCTION_CALL];
+    };
 
-htmlGenerator.forBlock['math_random_float'] = function(block) {
-    return ['Math.random()', htmlGenerator.ORDER_FUNCTION_CALL];
-};
+    htmlGenerator.forBlock['math_random_float'] = function (block) {
+        return ['Math.random()', htmlGenerator.ORDER_FUNCTION_CALL];
+    };
 
-htmlGenerator.forBlock['svelte_component'] = (b) => {
-    return htmlGenerator.statementToCode(b, 'CONTENT');
-};
+    htmlGenerator.forBlock['svelte_component'] = (b) => {
+        return htmlGenerator.statementToCode(b, 'CONTENT');
+    };
 
-htmlGenerator.forBlock['svelte_script'] = (b) => {
-    return `<script>\t${htmlGenerator.statementToCode(b, 'CODE')}</script>\t`;
-};
+    htmlGenerator.forBlock['svelte_script'] = (b) => {
+        return `<script>\t${htmlGenerator.statementToCode(b, 'CODE')}</script>\t`;
+    };
 
-htmlGenerator.forBlock['svelte_let'] = (b) => {
-    const v = b.getFieldValue('VAR');
-    const data = htmlGenerator.valueToCode(b, 'VAL', htmlGenerator.ORDER_ATOMIC) || '0';
-    return `  let ${v} = ${data};\t`;
-};
+    htmlGenerator.forBlock['svelte_let'] = (b) => {
+        const v = b.getFieldValue('VAR');
+        const data = htmlGenerator.valueToCode(b, 'VAL', htmlGenerator.ORDER_ATOMIC) || '0';
+        return `  let ${v} = ${data};\t`;
+    };
 
-htmlGenerator.forBlock['svelte_reactive'] = (b) => {
-    const v = b.getFieldValue('VAR');
-    const expr = htmlGenerator.valueToCode(b, 'EXPR', htmlGenerator.ORDER_ATOMIC) || '0';
-    return `  $: ${v} = ${expr};\t`;
-};
+    htmlGenerator.forBlock['svelte_reactive'] = (b) => {
+        const v = b.getFieldValue('VAR');
+        const expr = htmlGenerator.valueToCode(b, 'EXPR', htmlGenerator.ORDER_ATOMIC) || '0';
+        return `  $: ${v} = ${expr};\t`;
+    };
 
-htmlGenerator.forBlock['svelte_reactive_stmt'] = (b) => {
-    return `  $: {\t${htmlGenerator.statementToCode(b, 'DO')}  }\t`;
-};
+    htmlGenerator.forBlock['svelte_reactive_stmt'] = (b) => {
+        return `  $: {\t${htmlGenerator.statementToCode(b, 'DO')}  }\t`;
+    };
 
-htmlGenerator.forBlock['svelte_on_event'] = (b) => {
-    const evt = b.getFieldValue('EVT');
-    const code = htmlGenerator.statementToCode(b, 'DO');
-    return `<button on:${evt}={() => {\t${code}}}>\t</button>\t`;
-};
+    htmlGenerator.forBlock['svelte_on_event'] = (b) => {
+        const evt = b.getFieldValue('EVT');
+        const code = htmlGenerator.statementToCode(b, 'DO');
+        return `<button on:${evt}={() => {\t${code}}}>\t</button>\t`;
+    };
 
-htmlGenerator.forBlock['svelte_on_click'] = (b) => {
-    const code = htmlGenerator.statementToCode(b, 'DO');
-    return `<button on:click={() => {\t${code}}}>\t</button>\t`;
-};
+    htmlGenerator.forBlock['svelte_on_click'] = (b) => {
+        const code = htmlGenerator.statementToCode(b, 'DO');
+        return `<button on:click={() => {\t${code}}}>\t</button>\t`;
+    };
 
-htmlGenerator.forBlock['svelte_if'] = (b) => {
-    const cond = htmlGenerator.valueToCode(b, 'COND', htmlGenerator.ORDER_ATOMIC) || 'true';
-    const body = htmlGenerator.statementToCode(b, 'DO');
-    return `{#if ${cond}}\t${body}{/if}\t`;
-};
+    htmlGenerator.forBlock['svelte_if'] = (b) => {
+        const cond = htmlGenerator.valueToCode(b, 'COND', htmlGenerator.ORDER_ATOMIC) || 'true';
+        const body = htmlGenerator.statementToCode(b, 'DO');
+        return `{#if ${cond}}\t${body}{/if}\t`;
+    };
 
-htmlGenerator.forBlock['svelte_if_else'] = (b) => {
-    const cond = htmlGenerator.valueToCode(b, 'COND', htmlGenerator.ORDER_ATOMIC) || 'true';
-    const body = htmlGenerator.statementToCode(b, 'DO');
-    const elseBody = htmlGenerator.statementToCode(b, 'ELSE');
-    return `{#if ${cond}}\t${body}{:else}\t${elseBody}{/if}\t`;
-};
+    htmlGenerator.forBlock['svelte_if_else'] = (b) => {
+        const cond = htmlGenerator.valueToCode(b, 'COND', htmlGenerator.ORDER_ATOMIC) || 'true';
+        const body = htmlGenerator.statementToCode(b, 'DO');
+        const elseBody = htmlGenerator.statementToCode(b, 'ELSE');
+        return `{#if ${cond}}\t${body}{:else}\t${elseBody}{/if}\t`;
+    };
 
-htmlGenerator.forBlock['svelte_each'] = (b) => {
-    const data_list = htmlGenerator.valueToCode(b, 'ARR', htmlGenerator.ORDER_ATOMIC) || '[]';
-    const item = b.getFieldValue('ITEM');
-    const body = htmlGenerator.statementToCode(b, 'DO');
-    return `{#each ${data_list} as ${item}}\t${body}{/each}\t`;
-};
+    htmlGenerator.forBlock['svelte_each'] = (b) => {
+        const data_list = htmlGenerator.valueToCode(b, 'ARR', htmlGenerator.ORDER_ATOMIC) || '[]';
+        const item = b.getFieldValue('ITEM');
+        const body = htmlGenerator.statementToCode(b, 'DO');
+        return `{#each ${data_list} as ${item}}\t${body}{/each}\t`;
+    };
 
-htmlGenerator.forBlock['svelte_each_keyed'] = (b) => {
-    const data_list = htmlGenerator.valueToCode(b, 'ARR', htmlGenerator.ORDER_ATOMIC) || '[]';
-    const item = b.getFieldValue('ITEM');
-    const key = b.getFieldValue('KEY');
-    const body = htmlGenerator.statementToCode(b, 'DO');
-    return `{#each ${data_list} as ${item} (${key})}\t${body}{/each}\t`;
-};
+    htmlGenerator.forBlock['svelte_each_keyed'] = (b) => {
+        const data_list = htmlGenerator.valueToCode(b, 'ARR', htmlGenerator.ORDER_ATOMIC) || '[]';
+        const item = b.getFieldValue('ITEM');
+        const key = b.getFieldValue('KEY');
+        const body = htmlGenerator.statementToCode(b, 'DO');
+        return `{#each ${data_list} as ${item} (${key})}\t${body}{/each}\t`;
+    };
 
-htmlGenerator.forBlock['svelte_await'] = (b) => {
-    const promise = htmlGenerator.valueToCode(b, 'PROMISE', htmlGenerator.ORDER_ATOMIC) || 'fetch("/")';
-    const loading = htmlGenerator.statementToCode(b, 'LOADING');
-    const v = b.getFieldValue('VAR');
-    const then = htmlGenerator.statementToCode(b, 'THEN');
-    return `{#await ${promise}}\t${loading}{:then ${v}}\t${then}{/await}\t`;
-};
+    htmlGenerator.forBlock['svelte_await'] = (b) => {
+        const promise = htmlGenerator.valueToCode(b, 'PROMISE', htmlGenerator.ORDER_ATOMIC) || 'fetch("/")';
+        const loading = htmlGenerator.statementToCode(b, 'LOADING');
+        const v = b.getFieldValue('VAR');
+        const then = htmlGenerator.statementToCode(b, 'THEN');
+        return `{#await ${promise}}\t${loading}{:then ${v}}\t${then}{/await}\t`;
+    };
 
-htmlGenerator.forBlock['svelte_bind_value'] = (b) => {
-    const v = b.getFieldValue('VAR');
-    return `<input bind:value={${v}} />\t`;
-};
+    htmlGenerator.forBlock['svelte_bind_value'] = (b) => {
+        const v = b.getFieldValue('VAR');
+        return `<input bind:value={${v}} />\t`;
+    };
 
-htmlGenerator.forBlock['svelte_bind_checked'] = (b) => {
-    const v = b.getFieldValue('VAR');
-    return `<input type="checkbox" bind:checked={${v}} />\t`;
-};
+    htmlGenerator.forBlock['svelte_bind_checked'] = (b) => {
+        const v = b.getFieldValue('VAR');
+        return `<input type="checkbox" bind:checked={${v}} />\t`;
+    };
 
-htmlGenerator.forBlock['svelte_bind_group'] = (b) => {
-    const v = b.getFieldValue('VAR');
-    const data = htmlGenerator.valueToCode(b, 'VAL', htmlGenerator.ORDER_ATOMIC) || "''";
-    return `<input type="radio" bind:group={${v}} value={${data}} />\t`;
-};
+    htmlGenerator.forBlock['svelte_bind_group'] = (b) => {
+        const v = b.getFieldValue('VAR');
+        const data = htmlGenerator.valueToCode(b, 'VAL', htmlGenerator.ORDER_ATOMIC) || "''";
+        return `<input type="radio" bind:group={${v}} value={${data}} />\t`;
+    };
 
-htmlGenerator.forBlock['svelte_expr'] = (b) => {
-    const expr = b.getFieldValue('EXPR');
-    return `{${expr}}\t`;
-};
+    htmlGenerator.forBlock['svelte_expr'] = (b) => {
+        const expr = b.getFieldValue('EXPR');
+        return `{${expr}}\t`;
+    };
 
-htmlGenerator.forBlock['svelte_html_raw'] = (b) => {
-    const expr = htmlGenerator.valueToCode(b, 'EXPR', htmlGenerator.ORDER_ATOMIC) || "''";
-    return `{@html ${expr}}\t`;
-};
+    htmlGenerator.forBlock['svelte_html_raw'] = (b) => {
+        const expr = htmlGenerator.valueToCode(b, 'EXPR', htmlGenerator.ORDER_ATOMIC) || "''";
+        return `{@html ${expr}}\t`;
+    };
 
-htmlGenerator.forBlock['svelte_transition'] = (b) => {
-    const type = b.getFieldValue('TYPE');
-    const content = htmlGenerator.statementToCode(b, 'CONTENT');
-    return `<div transition:${type}>\t${content}</div>\t`;
-};
+    htmlGenerator.forBlock['svelte_transition'] = (b) => {
+        const type = b.getFieldValue('TYPE');
+        const content = htmlGenerator.statementToCode(b, 'CONTENT');
+        return `<div transition:${type}>\t${content}</div>\t`;
+    };
 
-htmlGenerator.forBlock['svelte_on_mount'] = (b) => {
-    const code = htmlGenerator.statementToCode(b, 'DO');
-    return `  onMount(() => {\t${code}  });\t`;
-};
+    htmlGenerator.forBlock['svelte_on_mount'] = (b) => {
+        const code = htmlGenerator.statementToCode(b, 'DO');
+        return `  onMount(() => {\t${code}  });\t`;
+    };
 
-htmlGenerator.forBlock['svelte_on_destroy'] = (b) => {
-    const code = htmlGenerator.statementToCode(b, 'DO');
-    return `  onDestroy(() => {\t${code}  });\t`;
-};
+    htmlGenerator.forBlock['svelte_on_destroy'] = (b) => {
+        const code = htmlGenerator.statementToCode(b, 'DO');
+        return `  onDestroy(() => {\t${code}  });\t`;
+    };
 
-htmlGenerator.forBlock['svelte_store_writable'] = (b) => {
-    const name = b.getFieldValue('NAME');
-    const data = htmlGenerator.valueToCode(b, 'VAL', htmlGenerator.ORDER_ATOMIC) || '0';
-    return `  const ${name} = writable(${data});\t`;
-};
+    htmlGenerator.forBlock['svelte_store_writable'] = (b) => {
+        const name = b.getFieldValue('NAME');
+        const data = htmlGenerator.valueToCode(b, 'VAL', htmlGenerator.ORDER_ATOMIC) || '0';
+        return `  const ${name} = writable(${data});\t`;
+    };
 
-htmlGenerator.forBlock['svelte_store_get'] = (b) => {
-    const name = b.getFieldValue('NAME');
-    return ['$' + name, htmlGenerator.ORDER_ATOMIC];
-};
+    htmlGenerator.forBlock['svelte_store_get'] = (b) => {
+        const name = b.getFieldValue('NAME');
+        return ['$' + name, htmlGenerator.ORDER_ATOMIC];
+    };
 
-htmlGenerator.forBlock['svelte_store_set'] = (b) => {
-    const name = b.getFieldValue('NAME');
-    const data = htmlGenerator.valueToCode(b, 'VAL', htmlGenerator.ORDER_ATOMIC) || '0';
-    return `  ${name}.set(${data});\t`;
-};
+    htmlGenerator.forBlock['svelte_store_set'] = (b) => {
+        const name = b.getFieldValue('NAME');
+        const data = htmlGenerator.valueToCode(b, 'VAL', htmlGenerator.ORDER_ATOMIC) || '0';
+        return `  ${name}.set(${data});\t`;
+    };
 
-htmlGenerator.forBlock['svelte_store_update'] = (b) => {
-    const name = b.getFieldValue('NAME');
-    const code = htmlGenerator.statementToCode(b, 'DO');
-    return `  ${name}.update(t => {\t${code}    return t;\t  });\t`;
-};
+    htmlGenerator.forBlock['svelte_store_update'] = (b) => {
+        const name = b.getFieldValue('NAME');
+        const code = htmlGenerator.statementToCode(b, 'DO');
+        return `  ${name}.update(t => {\t${code}    return t;\t  });\t`;
+    };
 
-htmlGenerator.forBlock['svelte_style'] = (b) => {
-    const css = htmlGenerator.statementToCode(b, 'CSS');
-    return `<style>\t${css}</style>\t`;
-};
+    htmlGenerator.forBlock['svelte_style'] = (b) => {
+        const css = htmlGenerator.statementToCode(b, 'CSS');
+        return `<style>\t${css}</style>\t`;
+    };
 
-htmlGenerator.forBlock['svelte_css_rule'] = (b) => {
-    const sel = b.getFieldValue('SEL');
-    const props = b.getFieldValue('PROPS');
-    return `  ${sel} { ${props} }\t`;
-};
+    htmlGenerator.forBlock['svelte_css_rule'] = (b) => {
+        const sel = b.getFieldValue('SEL');
+        const props = b.getFieldValue('PROPS');
+        return `  ${sel} { ${props} }\t`;
+    };
 
-htmlGenerator.forBlock['svelte_slot'] = (b) => {
-    const name = b.getFieldValue('NAME');
-    if (name) return `<slot name="${name}" />\t`;
-    return `<slot />\t`;
-};
+    htmlGenerator.forBlock['svelte_slot'] = (b) => {
+        const name = b.getFieldValue('NAME');
+        if (name) return `<slot name="${name}" />\t`;
+        return `<slot />\t`;
+    };
 
-htmlGenerator.forBlock['svelte_export_prop'] = (b) => {
-    const prop = b.getFieldValue('PROP');
-    const def = htmlGenerator.valueToCode(b, 'DEFAULT', htmlGenerator.ORDER_ATOMIC) || "''";
-    return `  export let ${prop} = ${def};\t`;
-};
+    htmlGenerator.forBlock['svelte_export_prop'] = (b) => {
+        const prop = b.getFieldValue('PROP');
+        const def = htmlGenerator.valueToCode(b, 'DEFAULT', htmlGenerator.ORDER_ATOMIC) || "''";
+        return `  export let ${prop} = ${def};\t`;
+    };
 
-htmlGenerator.forBlock['svelte_dispatch'] = (b) => {
-    const evt = b.getFieldValue('EVT');
-    const detail = htmlGenerator.valueToCode(b, 'DETAIL', htmlGenerator.ORDER_ATOMIC) || 'null';
-    return `  dispatch('${evt}', ${detail});\t`;
-};
+    htmlGenerator.forBlock['svelte_dispatch'] = (b) => {
+        const evt = b.getFieldValue('EVT');
+        const detail = htmlGenerator.valueToCode(b, 'DETAIL', htmlGenerator.ORDER_ATOMIC) || 'null';
+        return `  dispatch('${evt}', ${detail});\t`;
+    };
 
-htmlGenerator.forBlock['math_change'] = function(block) {
-    const argument0 = htmlGenerator.valueToCode(block, 'DELTA', htmlGenerator.ORDER_ADDITION) || '0';
-    const varName = block.getFieldValue('VAR');
+    htmlGenerator.forBlock['math_change'] = function (block) {
+        const argument0 = htmlGenerator.valueToCode(block, 'DELTA', htmlGenerator.ORDER_ADDITION) || '0';
+        const varName = block.getFieldValue('VAR');
 
-    return varName + ' = (typeof ' + varName + ' === "number" ? ' + varName + ' : 0) + ' + argument0 + ';\t';
-};
+        return varName + ' = (typeof ' + varName + ' === "number" ? ' + varName + ' : 0) + ' + argument0 + ';\t';
+    };
 
     const standardBlocks = [
-    'math_number',
-    'math_change',
-    'variables_set',
-    'variables_get',
-    'logic_boolean',
-    'controls_if'
-];
+        'math_number',
+        'math_change',
+        'variables_set',
+        'variables_get',
+        'logic_boolean',
+        'controls_if'
+    ];
 
-const bridgeBlock = (name) => {
-    htmlGenerator.forBlock[name] = function(block) {
-        return Blockly.JavaScript.forBlock[name].call(Blockly.JavaScript, block);
+    const bridgeBlock = (name) => {
+        htmlGenerator.forBlock[name] = function (block) {
+            return Blockly.JavaScript.forBlock[name].call(Blockly.JavaScript, block);
+        };
     };
-};
 
-['variables_get', 'variables_set', 'math_change', 'math_number', 'logic_boolean', 'controls_if'].forEach(bridgeBlock);
+    ['variables_get', 'variables_set', 'math_change', 'math_number', 'logic_boolean', 'controls_if'].forEach(bridgeBlock);
 });
