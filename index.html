@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta http-equiv="Content-Security-Policy"
-            content="default-src 'self' blob: data: 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+            content="default-src 'self' https: blob: data: 'unsafe-inline' 'unsafe-eval'; script-src 'self' https: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: blob: data:; media-src 'self' https: blob: data:;">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Poo IDE</title>
         <link rel="stylesheet" href="styles.css">
@@ -16,9 +16,22 @@
         <script src="./node_modules/jszip/dist/jszip.min.js"></script>
 
         <script>
+            var usedCdnDeps = false;
+            if (!window.Blockly) {
+                document.write('<script src="https://unpkg.com/blockly/blockly_compressed.js"><\\/script>');
+                document.write('<script src="https://unpkg.com/blockly/blocks_compressed.js"><\\/script>');
+                document.write('<script src="https://unpkg.com/blockly/javascript_compressed.js"><\\/script>');
+                document.write('<script src="https://unpkg.com/blockly/msg/en.js"><\\/script>');
+                usedCdnDeps = true;
+            }
+            if (!window.JSZip) {
+                document.write('<script src="https://unpkg.com/jszip/dist/jszip.min.js"><\\/script>');
+                usedCdnDeps = true;
+            }
+            window.__pooDepsSource = usedCdnDeps ? "cdn" : "local";
             window.global = window;
 
-            function loadPlugin(src, registerCallback) {
+            function loadPlugin(sources, registerCallback) {
                 window.exports = {};
                 window.module = { exports: window.exports };
                 window.require = function (name) {
@@ -26,21 +39,33 @@
                     return window.Blockly;
                 };
 
-                var script = document.createElement('script');
-                script.src = src;
-                script.onload = function () {
-                    var exported = module.exports || window.exports;
-                    registerCallback(exported);
-                };
-                script.onerror = function () {
-                    console.error("Failed to load plugin:", src);
-                };
-                document.head.appendChild(script);
+                var i = 0;
+                function tryLoad() {
+                    if (i >= sources.length) {
+                        console.error("Failed to load plugin from all sources:", sources);
+                        return;
+                    }
+                    var src = sources[i++];
+                    var script = document.createElement('script');
+                    script.src = src;
+                    script.onload = function () {
+                        var exported = module.exports || window.exports;
+                        registerCallback(exported);
+                    };
+                    script.onerror = function () {
+                        tryLoad();
+                    };
+                    document.head.appendChild(script);
+                }
+                tryLoad();
             }
         </script>
 
         <script>
-            loadPlugin('./node_modules/@blockly/field-multilineinput/dist/index.js', function (pkg) {
+            loadPlugin([
+                './node_modules/@blockly/field-multilineinput/dist/index.js',
+                'https://unpkg.com/@blockly/field-multilineinput/dist/index.js'
+            ], function (pkg) {
                 var Field = pkg.FieldMultilineInput || pkg.default;
                 if (Field) {
                     Blockly.fieldRegistry.register('field_multilinetext', Field);
@@ -48,7 +73,10 @@
                 }
             });
 
-            loadPlugin('./node_modules/@blockly/field-colour/dist/index.js', function (pkg) {
+            loadPlugin([
+                './node_modules/@blockly/field-colour/dist/index.js',
+                'https://unpkg.com/@blockly/field-colour/dist/index.js'
+            ], function (pkg) {
                 var Field = pkg.FieldColour || pkg.default;
                 if (Field) Blockly.fieldRegistry.register('field_colour', Field);
             });

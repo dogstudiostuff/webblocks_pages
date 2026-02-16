@@ -2,6 +2,8 @@
 const { app, BrowserWindow, Menu, dialog, shell, ipcMain, session } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
+const pkg = require('./package.json');
 
 
 const _tinyPngBase64 =
@@ -16,6 +18,167 @@ try {
 }
 
 let mainWindow;
+let updateCheckInFlight = false;
+
+function getUpdateConfig() {
+  const cfg = (pkg && pkg.update) ? pkg.update : {};
+  const manifestUrl = process.env.POO_IDE_UPDATE_MANIFEST_URL || cfg.manifestUrl || '';
+  const downloadUrl = process.env.POO_IDE_UPDATE_DOWNLOAD_URL || cfg.downloadUrl || '';
+  return { manifestUrl, downloadUrl };
+}
+
+function toVersionParts(input) {
+  const text = String(input || '').trim().replace(/^v/i, '');
+  const parts = text.split('.').map((part) => {
+    const m = part.match(/\d+/);
+    return m ? parseInt(m[0], 10) : 0;
+  });
+  while (parts.length < 3) parts.push(0);
+  return parts.slice(0, 3);
+}
+
+function isVersionNewer(latest, current) {
+  const a = toVersionParts(latest);
+  const b = toVersionParts(current);
+  for (let i = 0; i < 3; i++) {
+    if (a[i] > b[i]) return true;
+    if (a[i] < b[i]) return false;
+  }
+  return false;
+}
+
+function fetchJson(url) {
+  return new Promise((resolve, reject) => {
+    const req = https.get(url, {
+      headers: {
+        'User-Agent': 'Poo-IDE-Updater',
+        'Accept': 'application/json'
+      }
+    }, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        res.resume();
+        return resolve(fetchJson(res.headers.location));
+      }
+      if (res.statusCode !== 200) {
+        res.resume();
+        return reject(new Error(`Update server responded with ${res.statusCode}`));
+      }
+      let raw = '';
+      res.setEncoding('utf8');
+      res.on('data', (chunk) => { raw += chunk; });
+      res.on('end', () => {
+        try {
+          resolve(JSON.parse(raw));
+        } catch (e) {
+          reject(new Error('Invalid JSON from update server'));
+        }
+      });
+    });
+    req.on('error', reject);
+    req.end();
+  });
+}
+
+function normalizeUpdatePayload(payload, fallbackDownloadUrl) {
+  if (!payload || typeof payload !== 'object') return null;
+  const latestVersion =
+    payload.latestVersion ||
+    payload.version ||
+    payload.tag_name ||
+    '';
+  const downloadUrl =
+    payload.downloadUrl ||
+    payload.url ||
+    payload.html_url ||
+    fallbackDownloadUrl ||
+    '';
+  const notes =
+    payload.notes ||
+    payload.body ||
+    '';
+  if (!latestVersion) return null;
+  return { latestVersion: String(latestVersion), downloadUrl: String(downloadUrl || ''), notes: String(notes || '') };
+}
+
+async function checkForUpdates(options = {}) {
+  if (updateCheckInFlight) return;
+  updateCheckInFlight = true;
+  try {
+    const { silent = true } = options;
+    const config = getUpdateConfig();
+    if (!config.manifestUrl) {
+      if (!silent) {
+        await dialog.showMessageBox(mainWindow, {
+          type: 'info',
+          title: 'Check for Updates',
+          message: 'Update URL not configured.',
+          detail: 'Set update.manifestUrl in package.json or POO_IDE_UPDATE_MANIFEST_URL.'
+        });
+      }
+      return;
+    }
+
+    const payload = await fetchJson(config.manifestUrl);
+    const updateInfo = normalizeUpdatePayload(payload, config.downloadUrl);
+    if (!updateInfo) {
+      if (!silent) {
+        await dialog.showMessageBox(mainWindow, {
+          type: 'warning',
+          title: 'Check for Updates',
+          message: 'Could not parse update metadata.'
+        });
+      }
+      return;
+    }
+
+    const currentVersion = app.getVersion();
+    const hasUpdate = isVersionNewer(updateInfo.latestVersion, currentVersion);
+    if (!hasUpdate) {
+      if (!silent) {
+        await dialog.showMessageBox(mainWindow, {
+          type: 'info',
+          title: 'Check for Updates',
+          message: `You are up to date (v${currentVersion}).`
+        });
+      }
+      return;
+    }
+
+    const detailLines = [
+      `Current version: v${currentVersion}`,
+      `Latest version: v${updateInfo.latestVersion}`,
+      '',
+      'Download the latest installer to update this app.'
+    ];
+    if (updateInfo.notes) {
+      detailLines.push('', 'Release notes:', updateInfo.notes.slice(0, 1200));
+    }
+    const result = await dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: 'Update Available',
+      message: `A new version of Poo IDE is available.`,
+      detail: detailLines.join('\n'),
+      buttons: ['Download Update', 'Later'],
+      defaultId: 0,
+      cancelId: 1
+    });
+    if (result.response === 0) {
+      const target = updateInfo.downloadUrl || config.manifestUrl;
+      if (target) shell.openExternal(target);
+    }
+  } catch (e) {
+    if (!options.silent) {
+      await dialog.showMessageBox(mainWindow, {
+        type: 'error',
+        title: 'Check for Updates',
+        message: 'Update check failed.',
+        detail: e && e.message ? e.message : String(e)
+      });
+    }
+  } finally {
+    updateCheckInFlight = false;
+  }
+}
 
 
 try {
@@ -74,6 +237,9 @@ function createWindow() {
 
   mainWindow.webContents.once('did-finish-load', () => {
     console.log('Main window loaded');
+    setTimeout(() => {
+      checkForUpdates({ silent: true });
+    }, 1800);
   });
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
@@ -217,8 +383,14 @@ function createWindow() {
               type: 'info',
               title: 'About Poo IDE',
               message: 'Poo IDE',
-              detail: 'A visual website builder powered by Blockly.\nVersion 1.0.0'
+              detail: `A visual website builder powered by Blockly.\nVersion ${app.getVersion()}`
             });
+          }
+        },
+        {
+          label: 'Check for Updates',
+          click: () => {
+            checkForUpdates({ silent: false });
           }
         }
       ]
