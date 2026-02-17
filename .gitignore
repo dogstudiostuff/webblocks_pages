@@ -3,6 +3,14 @@ package-lock.json
 npm-debug.log
 .env
 dist/
+release/
+release2/
+release3/
+release4/
+release*/
+*.exe
+*.blockmap
+latest.yml
 .DS_Store
 /.vscode/
 /.idea/
