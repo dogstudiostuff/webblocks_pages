@@ -64,7 +64,7 @@ htmlGenerator.forBlock['gay_block'] = (b) => `
     font-size: 17vw;
     font-weight: bold;
     text-align: center;
-}</style> <fart>Good amazing yes man</fart>\t`;
+}</style> <fart>Good Amazing Yes man</fart>\t`;
 htmlGenerator.forBlock['hemmy_poop'] = (b) => `<h1 style="color: brown;">Hemmy Poop</h1>\t`;
 
 htmlGenerator.forBlock['raw_html'] = (b) => b.getFieldValue('CODE') + "\t";
